@@ -1,0 +1,19 @@
+# API keys and local settings
+.claude/settings.local.json
+
+# Exports (regenerable)
+data/exports/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# MITRE ATT&CK data (large, downloaded via setup)
+mitre-attack/*.json
