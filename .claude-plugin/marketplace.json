@@ -39,8 +39,7 @@
       ],
       "category": "cybersecurity",
       "tags": ["security", "intelligence", "analysis"],
-      "skills": "./skills",
-      "agents": "./.claude/agents"
+      "skills": "./skills"
     }
   ]
 }
