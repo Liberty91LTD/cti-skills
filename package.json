@@ -1,0 +1,47 @@
+{
+  "name": "@liberty91/cti-skills",
+  "version": "1.0.0",
+  "description": "Cyber Threat Intelligence skills for Claude Code and AI agents. Threat actor profiling, IOC investigation, OSINT methodology, detection engineering (SIGMA/YARA/KQL), intelligence writing, and self-updating knowledge cells on nation-state and cybercrime threats.",
+  "license": "MIT",
+  "author": "Liberty91 Ltd <contact@liberty91.com>",
+  "homepage": "https://github.com/Liberty91LTD/cti-skills#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Liberty91LTD/cti-skills.git"
+  },
+  "bugs": "https://github.com/Liberty91LTD/cti-skills/issues",
+  "keywords": [
+    "cti",
+    "threat-intelligence",
+    "cybersecurity",
+    "osint",
+    "ioc",
+    "detection-engineering",
+    "sigma",
+    "yara",
+    "kql",
+    "mitre-attack",
+    "claude-code",
+    "agent-skills",
+    "ai-agents"
+  ],
+  "bin": {
+    "cti-skills": "bin/cti-skills.js"
+  },
+  "files": [
+    "bin/",
+    "skills/",
+    "tools/",
+    ".claude-plugin/",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "LICENSE",
+    "README.md",
+    "VERSIONS.md",
+    "validate-skills.sh"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "preferGlobal": false
+}
