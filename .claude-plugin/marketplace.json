@@ -1,0 +1,47 @@
+{
+  "$schema": "https://code.claude.com/schemas/plugin-marketplace.json",
+  "name": "cti-skills",
+  "owner": {
+    "name": "Liberty91 Ltd",
+    "email": "contact@liberty91.com"
+  },
+  "metadata": {
+    "description": "Cyber Threat Intelligence skills for Claude Code and AI agents. Threat actor profiling, IOC investigation, OSINT, detection engineering (SIGMA/YARA/KQL), intelligence writing, and self-updating knowledge cells on nation-state and cybercrime threats.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "cti-skills",
+      "source": "./",
+      "description": "Cyber Threat Intelligence skills pack — threat actor profiling, IOC investigation, detection engineering, intelligence writing, and self-updating knowledge cells.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Liberty91 Ltd",
+        "email": "contact@liberty91.com"
+      },
+      "homepage": "https://liberty91.com",
+      "repository": "https://github.com/Liberty91LTD/cti-skills",
+      "license": "MIT",
+      "keywords": [
+        "cti",
+        "threat-intelligence",
+        "cybersecurity",
+        "osint",
+        "ioc",
+        "detection-engineering",
+        "sigma",
+        "yara",
+        "kql",
+        "mitre-attack",
+        "virustotal",
+        "shodan",
+        "urlscan"
+      ],
+      "category": "cybersecurity",
+      "tags": ["security", "intelligence", "analysis"],
+      "skills": "./skills",
+      "agents": "./.claude/agents",
+      "strict": false
+    }
+  ]
+}

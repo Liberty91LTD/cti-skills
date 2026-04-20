@@ -1,144 +1,105 @@
-# CTI Agentic Skills Platform
+# cti-skills
 
-A fully agentic Cyber Threat Intelligence platform built on [Claude Code](https://claude.ai/claude-code). Clone this repo, configure your API keys, and get a complete CTI capability — from indicator enrichment to finished intelligence products.
+Cyber Threat Intelligence skills for Claude Code and AI agents. Threat actor profiling, IOC investigation, OSINT methodology, detection engineering (SIGMA/YARA/KQL), intelligence writing, and self-updating knowledge cells on nation-state and cybercrime threats.
 
-Structured around the [CTI Hyperloop](https://cloud.google.com/blog/topics/threat-intelligence/cti-process-hyperloop/) framework, operating at strategic, operational, and tactical levels simultaneously.
+Built by [Liberty91 Ltd](https://liberty91.com). MIT-licensed. Works in Claude Code, Cursor, Codex, Windsurf — any agentic IDE that supports [Agent Skills](https://agentskills.io/specification).
 
-## What's Inside
+## What's in the pack
 
-### 14 Agents
+- **52 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
+- **7 threat-intel integrations** — VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys. Each exposed as a lookup skill any other skill can chain.
+- **Local MITRE ATT&CK dataset** — TTP mapping without network calls.
+- **Tradecraft vocabularies** — TLP, NATO Admiralty Scale, MISP confidence, probability yardstick. Auto-applied by the orchestrator; also invokable directly.
+- **A single orchestrator skill** that routes requests and auto-applies rigor to every output.
 
-| Agent | Model | Role |
-|-------|-------|------|
-| **cti-orchestrator** | Opus | Central coordinator — maps all workflows to Hyperloop phases |
-| **analyst** | Opus | Core analysis — ACH, threat assessment, actor profiling |
-| **report-writer** | Opus | Intelligence production — reports, assessments, briefings |
-| **quality-reviewer** | Opus | Quality gate — peer review before dissemination |
-| **osint-researcher** | Sonnet | OSINT collection via web search/fetch |
-| **detection-engineer** | Sonnet | SIGMA, YARA, KQL rule writing |
-| **ioc-processor** | Sonnet | IOC enrichment, dedup, export, STIX bundles |
-| **virustotal-agent** | Haiku | VirusTotal API |
-| **urlscan-agent** | Haiku | URLScan.io API |
-| **shodan-agent** | Haiku | Shodan API |
-| **abuseipdb-agent** | Haiku | AbuseIPDB API |
-| **greynoise-agent** | Haiku | GreyNoise API |
-| **otx-agent** | Haiku | AlienVault OTX API |
-| **censys-agent** | Haiku | Censys API |
+## Install
 
-### 52 Skills in 7 Categories
+Pick whichever works for your stack.
 
-**Analytical Techniques** — ACH, horizon scanning, source assessment (NATO Admiralty Scale), structured analytic techniques, key assumptions check, red team analysis, threat assessment
-
-**CTI Tradecraft** — Malware analysis, indicator pivoting, OSINT methodology, dark web collection, threat actor profiling, campaign tracking, vulnerability intelligence
-
-**Production** — TLP guide, confidence levels, likelihood language, intelligence writing (with templates for flash reports, threat assessments, actor profiles, campaign reports), writing assessments, SIGMA/YARA/KQL writing, IOC export (CSV/STIX/OpenIOC/MISP), STIX 2.1 bundles, IOC enrichment workflow
-
-**Tool APIs** — VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys, MITRE ATT&CK (local dataset)
-
-**Knowledge Cells** — Self-learning intelligence knowledge bases, seeded with current public intelligence:
-- Nation-state: China, Russia, Iran, DPRK cyber espionage
-- Cybercrime: Ransomware ecosystem, carding/financial fraud, infostealers, phishing/social engineering, supply chain threats, hacktivism, initial access brokers
-
-**Management** — Stakeholder management, PIR management, quality control, SOPs, feedback loops, maturity assessment, intelligence sharing
-
-**Hyperloop** — Operational doctrine mapping the 6-phase intelligence lifecycle across strategic/operational/tactical levels
-
-## Quick Start
+### Claude Code plugin (recommended)
 
 ```bash
-# 1. Clone
-git clone git@github.com:renzejongman/cti-agentic-skills.git
-cd cti-agentic-skills
+/plugin marketplace add Liberty91LTD/cti-skills
+/plugin install cti-skills
+```
 
-# 2. Configure API keys and download MITRE ATT&CK data
-./scripts/setup.sh
+### Git clone
 
-# 3. Start Claude Code
+```bash
+git clone git@github.com:Liberty91LTD/cti-skills.git
+cd cti-skills
+./scripts/setup.sh      # prompts for optional API keys + downloads MITRE data
 claude
 ```
 
-Then try:
-- `Investigate 203.0.113.42` — full indicator enrichment across all tool agents
-- `Profile APT28` — OSINT collection + analyst profiling + finished report
-- `Write a threat assessment on ransomware targeting healthcare` — end-to-end Hyperloop workflow
-- `/ach` — run Analysis of Competing Hypotheses
-- `/iran-cyber-espionage` — load the Iran knowledge cell
-- `/pir-management` — set up Priority Intelligence Requirements
+### Git submodule (for embedding in an existing repo)
 
-## Architecture
-
-```
-User Request
-     ↓
-CTI Orchestrator (maps to Hyperloop phase)
-     ↓
-┌─────────────────────────────────────────────┐
-│ Phase 1: Planning & Direction               │
-│   PIRs, stakeholder requirements            │
-├─────────────────────────────────────────────┤
-│ Phase 2: Collection                         │
-│   OSINT researcher + tool agents (parallel) │
-├─────────────────────────────────────────────┤
-│ Phase 3: Processing                         │
-│   IOC processor (normalize, deduplicate)    │
-├─────────────────────────────────────────────┤
-│ Phase 4: Analysis                           │
-│   Analyst (SATs, ACH, profiling)            │
-├─────────────────────────────────────────────┤
-│ Phase 5: Dissemination                      │
-│   Report writer + detection engineer        │
-├─────────────────────────────────────────────┤
-│ Phase 6: Feedback                           │
-│   PIR refinement, source quality tracking   │
-└─────────────────────────────────────────────┘
+```bash
+git submodule add https://github.com/Liberty91LTD/cti-skills.git skills/cti
 ```
 
-### Permission Isolation
+### Fork
 
-Each tool agent accesses exactly one external API. Analytical agents (analyst, report-writer) have no API or Bash access — they work purely with collected data. The quality reviewer has no edit access — read-only review.
+Hit "Fork" on GitHub, then install via plugin or clone from your fork.
 
-### Self-Learning Knowledge Cells
+### Direct copy
 
-Knowledge cells grow over time. When new intelligence is processed, the orchestrator dispatches the analyst to review it against the existing cell, then updates the cell with new actors, campaigns, TTPs, and sources. Every update is logged in the cell's change log.
+Copy the `skills/` directory into your own project. Each skill is self-contained.
 
-The orchestrator can create new knowledge cells on demand as emerging threats require them.
+### Cursor, Codex, Windsurf, other Agent Skills-compatible IDEs
 
-## Data Conventions
+Clone the repo into your agent skills directory per your IDE's documentation. The orchestrator is itself a skill — no Claude-specific subagent required.
 
-All intelligence outputs follow mandatory standards:
+## Try it
 
-- **TLP**: Every output carries a Traffic Light Protocol designation
-- **Source Assessment**: Every piece of collected intelligence is rated on the NATO Admiralty Scale (source reliability A-F, information credibility 1-6)
-- **Confidence Levels**: Every analytical judgment includes a confidence level with rationale
-- **Likelihood Language**: Every forward-looking assessment uses standardised probability language (Remote → Almost Certain with percentage ranges)
-- **MITRE ATT&CK**: TTPs are mapped to ATT&CK techniques wherever applicable
-
-## Directory Structure
+Once installed:
 
 ```
-├── CLAUDE.md                    # Project manifest (agent/skill rules)
-├── .claude/
-│   ├── agents/                  # 14 agent definitions
-│   └── skills/                  # 52 skills in 7 categories
-├── data/
-│   ├── iocs/                    # IOC collections (active + archive)
-│   ├── reports/                 # Intelligence products (draft → reviewed → published)
-│   ├── assessments/             # Threat, risk, and vulnerability assessments
-│   ├── pirs/                    # Priority Intelligence Requirements
-│   ├── stix-bundles/            # STIX 2.1 exports
-│   ├── detection-rules/         # SIGMA, YARA, KQL rules
-│   ├── investigations/          # Active investigation workspaces
-│   └── exports/                 # IOC exports (CSV, STIX, OpenIOC, MISP)
-├── mitre-attack/                # Local ATT&CK Enterprise dataset
-└── scripts/                     # Setup and hook scripts
+Investigate 203.0.113.42
 ```
+The orchestrator routes this to `/ip-investigation`, which chains `/lookup-virustotal` + `/lookup-otx` + `/lookup-shodan` + `/lookup-abuseipdb` + `/lookup-greynoise`, scores sources, applies TLP, and returns a rated investigation report.
 
-## API Keys
+```
+Profile APT28
+```
+Routes to `/threat-actor-profile` — produces an actor card with aliases, targeting, TTPs, attribution confidence.
 
-Configure via `scripts/setup.sh` or set environment variables directly:
+```
+/ach
+```
+Direct-invoke Analysis of Competing Hypotheses.
 
-| Service | Env Variable | Free Tier |
-|---------|-------------|-----------|
+```
+/iran-cyber-espionage
+```
+Load the Iran knowledge cell.
+
+```
+/pir-management
+```
+Set up Priority Intelligence Requirements.
+
+## Pick a skill
+
+Skills are organized flat (in Phase C) but currently grouped. Browse:
+
+- **Investigation** — `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` *(coming in Phase C)*
+- **Analysis** — `/threat-actor-profile`, `/ach`, `/indicator-pivoting`, `/campaign-tracking`, `/malware-analysis`, `/threat-assessment`, `/horizon-scanning`, `/key-assumptions-check`, `/red-team-analysis`, `/structured-analytic-techniques`
+- **Tradecraft rigor** — `/apply-tlp`, `/score-source`, `/confidence-language` *(currently `confidence-levels`)*, `/likelihood-language`
+- **Production** — `/intelligence-writing`, `/writing-assessments`, `/quality-control`, `/ioc-export`, `/stix-bundle`, `/ioc-enrichment-workflow`
+- **Detection engineering** — `/sigma-writing`, `/yara-writing`, `/kql-writing`
+- **Knowledge cells** — `/china-cyber-espionage`, `/russia-cyber-espionage`, `/iran-cyber-espionage`, `/dprk-cyber-espionage`, `/ransomware-ecosystem`, `/infostealers`, `/initial-access-brokers`, `/phishing-social-engineering`, `/supply-chain-threats`, `/carding-financial-fraud`, `/hacktivism`
+- **OSINT + collection** — `/osint-methodology`, `/darkweb-collection`, `/vulnerability-intelligence`
+- **Lookups** — `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/mitre-attack` *(coming in Phase B)*
+- **Management** — `/pir-management`, `/stakeholder-management`, `/feedback-loops`, `/sops`, `/maturity-assessment`, `/intelligence-sharing`, `/quality-control`
+- **Methodology** — `/cti-hyperloop` (optional operating doctrine)
+
+## API keys
+
+Optional. The pack degrades gracefully — skills skip enrichments for which no key is configured.
+
+| Service | Env variable | Free tier |
+|---|---|---|
 | VirusTotal | `VIRUSTOTAL_API_KEY` | 4 req/min, 500/day |
 | URLScan.io | `URLSCAN_API_KEY` | 100 scans/day |
 | Shodan | `SHODAN_API_KEY` | 1 req/sec |
@@ -147,8 +108,22 @@ Configure via `scripts/setup.sh` or set environment variables directly:
 | AlienVault OTX | `OTX_API_KEY` | 10,000 req/hour |
 | Censys | `CENSYS_API_ID` + `CENSYS_API_SECRET` | 250 queries/month |
 
-All keys are optional — the platform degrades gracefully when a key is missing, skipping that enrichment source and noting the gap.
+`./scripts/setup.sh` walks you through configuration. Keys land in `.claude/settings.local.json` (gitignored). Environment variables work too.
+
+## Contributing
+
+Forks and PRs welcome from anyone. Merges reserved to Liberty91 Ltd maintainers. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Status
+
+Version 1.0.0 — see [VERSIONS.md](VERSIONS.md) for per-skill versions and changelog.
+
+Active restructure: this repo is transitioning from a 14-agent hierarchical architecture to a flat-skill + single-orchestrator model. Some invocations listed above (the `lookup-*` skills, investigation skills) ship in Phase B/C.
 
 ## License
 
-Private repository. All rights reserved.
+MIT — see [LICENSE](LICENSE).
+
+## About Liberty91
+
+[Liberty91 Ltd](https://liberty91.com) builds AI-native threat intelligence tooling. Contact: contact@liberty91.com.
