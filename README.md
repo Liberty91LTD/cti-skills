@@ -29,7 +29,7 @@ Pick whichever works for your stack.
 # in any project directory
 npx github:Liberty91LTD/cti-skills
 ```
-Copies all 64 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first. While the repo is private, you need to be logged into a GitHub account with access (via `gh auth login` or SSH).
+Copies all 64 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
 
 ### Git clone
 
