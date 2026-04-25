@@ -27,14 +27,31 @@ The CLI respects 429 responses and reports rate-limit hits to stderr. Back off a
 
 ## Endpoints used
 
+The **Node CLI** (`tools/clis/virustotal.js`) hits the basic object endpoints:
 - `GET /api/v3/ip_addresses/{ip}`
-- `GET /api/v3/ip_addresses/{ip}/communicating_files?limit=10` (optional pivot)
 - `GET /api/v3/domains/{domain}`
 - `GET /api/v3/files/{hash}`
-- `GET /api/v3/files/{hash}/behaviours` (optional behavior analysis)
 - `GET /api/v3/urls/{url_id}` (url_id = base64url(url) minus `=` padding)
 
+The **Python CLI** (`tools/clis/virustotal.py`) covers the broader surface:
+- All of the above, plus
+- `GET /api/v3/{type}/{id}/{relationship}?limit={n}` — relationship traversal:
+  - **file**: `contacted_ips`, `contacted_domains`, `contacted_urls`, `dropped_files`, `similar_files`, `behaviours`, `bundled_files`, `execution_parents`
+  - **ip**: `communicating_files`, `downloaded_files`, `resolutions`, `urls`, `related_threat_actors`, `historical_whois`
+  - **domain**: `subdomains`, `siblings`, `resolutions`, `communicating_files`, `downloaded_files`, `urls`, `related_threat_actors`, `historical_whois`
+  - **url**: `contacted_ips`, `contacted_domains`, `downloaded_files`, `last_serving_ip_address`
+- `POST /api/v3/urls` — submit a URL for analysis
+- `GET /api/v3/{type}/{id}/comments` — community comments
+- `GET /api/v3/intelligence/search` — VT Intel query (premium tier required)
+
 Authentication header: `x-apikey: $VIRUSTOTAL_API_KEY`.
+
+## Quota arithmetic
+
+Each `--relationships` entry on the Python CLI is a **separate** request. A single command like `python3 tools/clis/virustotal.py ip 1.2.3.4 --relationships communicating_files,resolutions,urls,downloaded_files` burns **5 requests** (1 base + 4 relationships). Free-tier users (4/min, 500/day) should:
+- Use `--dry-run` to count calls before running live
+- Pull only the relationships you need for the current pivot
+- For batch enrichment, prefer the Node CLI (single request per indicator) and only pivot deeper on confirmed hits
 
 ## Admiralty defaults (for `/score-source`)
 
@@ -64,5 +81,7 @@ curl -s "https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8" \
 ## See also
 
 - API docs: https://docs.virustotal.com/reference/overview
+- Response reference: https://gtidocs.virustotal.com/reference/api-responses
 - Lookup skill: `skills/lookup-virustotal/SKILL.md`
-- CLI source: `tools/clis/virustotal.js`
+- Node CLI source: `tools/clis/virustotal.js`
+- Python CLI source: `tools/clis/virustotal.py`

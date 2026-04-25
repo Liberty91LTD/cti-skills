@@ -21,14 +21,69 @@ Queries Shodan for host reconnaissance data on IPs. For domains, resolves DNS fi
 
 ## How to invoke
 
+Two CLIs are provided. Pick by capability needed:
+
+### Basic host lookup — Node CLI (zero deps)
+
 ```bash
 node tools/clis/shodan.js ip <ip>
 node tools/clis/shodan.js domain <domain>     # resolves DNS first, then queries IP
 ```
 
-Use `--dry-run` to preview. Respect 1 req/sec rate limit (the CLI throttles automatically).
+Hits the host endpoint only. Best for fast retrieval inside an investigation chain. Throttles at 1 req/sec.
 
-If `$SHODAN_API_KEY` is unset, the CLI exits with code 2.
+### Full search + DNS surface — Python CLI (uses official shodan-python SDK)
+
+```bash
+python3 tools/clis/shodan.py host <ip> [--history] [--minify]
+python3 tools/clis/shodan.py search "<query>" [--limit N] [--page N] [--facets F1:N,F2:N]
+python3 tools/clis/shodan.py count "<query>" [--facets F1:N,F2:N]
+python3 tools/clis/shodan.py dns resolve <hostname[,hostname]>
+python3 tools/clis/shodan.py dns reverse <ip[,ip]>
+python3 tools/clis/shodan.py dns domain <domain>
+python3 tools/clis/shodan.py info
+python3 tools/clis/shodan.py ports
+python3 tools/clis/shodan.py services
+```
+
+Self-bootstraps a private venv at `tools/clis/.venv-shodan/` on first run.
+
+Capabilities the Node CLI doesn't have, ordered by CTI value:
+
+1. **Search** — the killer pivot. Find every host on the internet matching a banner, certificate, JARM, favicon hash, HTTP title, exposed product+version, or geolocation+org combination. This is how you go from one piece of attacker infrastructure to the rest of the cluster.
+2. **Count** — get the total result count for a query without burning result credits. Use this BEFORE a search to estimate scope and avoid query-credit waste on broad queries.
+3. **Facets** — group result counts by `country`, `org`, `port`, `product`, `asn`, `tag`, `vuln`, etc. Single call gives you the breakdown.
+4. **Domain info** — subdomains + DNS records for a domain in one call.
+5. **Reverse DNS** for one or many IPs.
+6. **Account info** — see remaining query credits BEFORE a campaign.
+7. **History** — historical banner observations on a host (paid plans).
+
+Search query examples:
+```bash
+# Find all Cobalt Strike Team Servers visible to Shodan
+python3 tools/clis/shodan.py search 'product:"Cobalt Strike Team Server"'
+
+# Count C2-pattern hosts in a country before searching
+python3 tools/clis/shodan.py count 'http.title:"Login Page" country:RU'
+
+# Facet a query — what orgs / countries host this software?
+python3 tools/clis/shodan.py search 'product:"Sliver" port:443' --facets org:10,country:10
+
+# Find all hosts presenting a specific certificate CN
+python3 tools/clis/shodan.py search 'ssl.cert.subject.CN:"badcorp.example"'
+
+# Pivot by JARM fingerprint (very strong infrastructure marker)
+python3 tools/clis/shodan.py search 'ssl.jarm:1234567890abcdef...'
+
+# Vulnerable version exposed
+python3 tools/clis/shodan.py search 'vuln:CVE-2024-21887'
+```
+
+Both CLIs accept `--dry-run`. Both exit code 2 if `$SHODAN_API_KEY` is unset (when not in dry-run). Report missing key; do not fabricate.
+
+### Credit awareness
+
+Shodan plans have **query credits** (search/count/facets) and **scan credits** (active scans). Run `python3 tools/clis/shodan.py info` to check your balance before a search-heavy session. Free tier is severely limited — most CTI use needs the Membership ($49 one-time, 100 query credits/month) or a higher tier.
 
 ## Response format
 
@@ -69,4 +124,9 @@ Default rating for downstream `/score-source`: **B2** (usually reliable, probabl
 ## See also
 
 - Integration setup: `tools/integrations/shodan.md`
-- CLI source: `tools/clis/shodan.js`
+- Node CLI source: `tools/clis/shodan.js`
+- Python CLI source: `tools/clis/shodan.py`
+- Official Python SDK: https://github.com/achillean/shodan-python
+- SDK docs: https://shodan.readthedocs.io/
+- Search query syntax: https://help.shodan.io/the-basics/search-query-fundamentals
+- Filter reference: https://www.shodan.io/search/filters

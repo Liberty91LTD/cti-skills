@@ -21,24 +21,55 @@ Queries VirusTotal API v3 for reputation data on IPs, domains, file hashes, and 
 
 ## How to invoke
 
-Shell out to the zero-dep CLI:
+Two CLIs are provided. Pick by capability needed:
+
+### Basic lookup — Node CLI (zero deps)
 
 ```bash
 node tools/clis/virustotal.js <type> <value>
 # where <type> is one of: ip, domain, hash, url
 ```
 
-Examples:
+Hits the basic object endpoint only and distils to a verdict. Best for fast retrieval inside an investigation chain.
+
+### Full surface — Python CLI (stdlib only)
+
 ```bash
-node tools/clis/virustotal.js ip 203.0.113.42
-node tools/clis/virustotal.js domain example.com
-node tools/clis/virustotal.js hash 44d88612fea8a8f36de82e1278abb02f
-node tools/clis/virustotal.js url "https://example.com/path"
+python3 tools/clis/virustotal.py file <hash> [--relationships R1,R2] [--limit N]
+python3 tools/clis/virustotal.py ip <ip> [--relationships R1,R2] [--limit N]
+python3 tools/clis/virustotal.py domain <domain> [--relationships R1,R2] [--limit N]
+python3 tools/clis/virustotal.py url <url> [--relationships R1,R2] [--limit N]
+python3 tools/clis/virustotal.py submit-url <url>
+python3 tools/clis/virustotal.py comments <type> <id>
+python3 tools/clis/virustotal.py search <query>     # Intel — premium
 ```
 
-Use `--dry-run` to preview the API request without spending quota.
+Stdlib only — no install, no venv.
 
-If `$VIRUSTOTAL_API_KEY` is unset, the CLI exits with code 2 and prints a setup pointer. Report the missing key to the user or the invoking skill — do not fabricate results.
+Capabilities the Node CLI doesn't have:
+- **Relationship traversal** — the killer feature for pivoting. For an IP, fetch `communicating_files`, `downloaded_files`, `resolutions`, `urls`, `related_threat_actors`, `historical_whois`. For a file: `contacted_ips`, `contacted_domains`, `dropped_files`, `similar_files`, `behaviours`. For a domain: `subdomains`, `siblings`, `resolutions`. For a URL: `contacted_ips`, `contacted_domains`, `last_serving_ip_address`. Each `--relationships` entry is a separate API request — be deliberate about which to pull.
+- **URL submission** (`submit-url`) — push a URL into the analysis queue; returns an analysis ID.
+- **Comments** — community comments on any object.
+- **Intel search** — VT Intelligence query language (`type:peexe size:1mb+ p:5+`). Premium endpoint; will 403 on free.
+
+Examples:
+```bash
+# Pivot from a malicious IP to communicating samples and resolutions
+python3 tools/clis/virustotal.py ip 185.220.101.45 --relationships communicating_files,resolutions
+
+# Get a hash plus its sandbox behaviours and contacted infrastructure
+python3 tools/clis/virustotal.py file 5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8 \
+  --relationships behaviours,contacted_ips,contacted_domains,dropped_files
+
+# Submit a suspicious URL for fresh analysis
+python3 tools/clis/virustotal.py submit-url "http://suspicious-site.example/login"
+```
+
+Both CLIs accept `--dry-run` to preview the request(s) without spending quota. Both exit code 2 if `$VIRUSTOTAL_API_KEY` is unset (when not in dry-run). Report missing key; do not fabricate.
+
+### Quota awareness
+
+Free tier is **4 req/min, 500/day**. Each `--relationships` entry is a *separate* API call on top of the base lookup. A single `ip 1.2.3.4 --relationships a,b,c,d` burns 5 requests. Use `--dry-run` first to count calls before live runs.
 
 ## Response format
 
@@ -78,4 +109,7 @@ Default rating for downstream `/score-source`: **B2** (usually reliable, probabl
 ## See also
 
 - Integration setup: `tools/integrations/virustotal.md`
-- CLI source: `tools/clis/virustotal.js`
+- Node CLI source: `tools/clis/virustotal.js`
+- Python CLI source: `tools/clis/virustotal.py`
+- Official API reference: https://gtidocs.virustotal.com/reference/api-responses
+- Endpoint docs: https://docs.virustotal.com/reference/overview

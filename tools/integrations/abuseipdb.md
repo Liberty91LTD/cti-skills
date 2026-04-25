@@ -26,9 +26,25 @@
 
 ## Endpoints used
 
+The **Node CLI** (`tools/clis/abuseipdb.js`) hits only:
 - `GET /api/v2/check?ipAddress={ip}&maxAgeInDays=90` — IP reputation
 
+The **Python CLI** (`tools/clis/abuseipdb.py`) covers four read-only endpoints:
+- `GET /api/v2/check` — IP reputation (with optional `verbose=` flag for full report list)
+- `GET /api/v2/reports` — paginated report history for an IP
+- `GET /api/v2/check-block` — reputation summary for a CIDR network range
+- `GET /api/v2/blacklist` — bulk download of high-confidence blacklisted IPs
+
 Authentication header: `Key: $ABUSEIPDB_API_KEY`.
+
+## Write endpoints (not exposed by either CLI)
+
+Per [the official docs](https://docs.abuseipdb.com/), AbuseIPDB also offers:
+- `POST /api/v2/report` — submit a single report
+- `POST /api/v2/bulk-report` — submit a CSV of reports
+- `DELETE /api/v2/clear-address` — clear your own reports for an IP
+
+These are intentionally not wired into the lookup CLIs to prevent accidental writes. To contribute reports back, use the AbuseIPDB dashboard or write a separate, deliberately-confirmed script.
 
 ## Admiralty defaults (for `/score-source`)
 
@@ -58,4 +74,5 @@ curl -s "https://api.abuseipdb.com/api/v2/check?ipAddress=8.8.8.8" \
 
 - API docs: https://docs.abuseipdb.com/
 - Lookup skill: `skills/lookup-abuseipdb/SKILL.md`
-- CLI source: `tools/clis/abuseipdb.js`
+- Node CLI source: `tools/clis/abuseipdb.js`
+- Python CLI source: `tools/clis/abuseipdb.py`

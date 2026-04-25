@@ -5,7 +5,25 @@ External threat-intelligence integrations in the `cti-skills` pack. Each has:
 - An **integration guide** (`tools/integrations/<api>.md`) — auth setup, rate limits, Admiralty defaults
 - A **CLI** (`tools/clis/<api>.js`) — zero-dependency Node.js wrapper the skill shells out to
 
-All CLIs share the same invocation pattern: `node tools/clis/<api>.js <type> <value> [--dry-run]`. They read API keys from environment variables (set via `./scripts/setup.sh` or your shell rc).
+All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type> <value> [--dry-run]`. They read API keys from environment variables (set via `./scripts/setup.sh` or your shell rc).
+
+**Python CLIs with richer endpoint coverage** are now provided for every integration:
+
+| Integration | Python CLI | Pattern | Adds beyond Node CLI |
+|---|---|---|---|
+| AbuseIPDB | `tools/clis/abuseipdb.py` | stdlib | `reports`, `check-block`, `blacklist` endpoints |
+| AlienVault OTX | `tools/clis/otx.py` | OTXv2 SDK + venv | full-section indicator details, pulse search, pulse get, subscribed pulses |
+| Censys | `tools/clis/censys.py` | censys-sdk + venv | **free aggregations**, certificate search/view, multi-page cursor, account info |
+| GreyNoise | `tools/clis/greynoise.py` | pygreynoise SDK + venv | context, RIOT, similarity, timeline, GNQL search & stats, bulk quick |
+| Shodan | `tools/clis/shodan.py` | shodan-python SDK + venv | search, count, facets, DNS reverse/domain, account, ports/services |
+| URLScan | `tools/clis/urlscan.py` | stdlib | Lucene search, quota, screenshot/DOM download, full submit options |
+| VirusTotal | `tools/clis/virustotal.py` | stdlib | **relationship traversal** (the pivoting feature), URL submit, comments, Intel search |
+
+Patterns:
+- **stdlib** — no install, no venv, just `python3 tools/clis/<name>.py`.
+- **SDK + venv** — self-bootstrapping venv at `tools/clis/.venv-<name>/` on first invocation. Private to that CLI; no global pollution; PEP-668-safe on Homebrew Python. Venv dirs are gitignored.
+
+The Node and Python CLIs are complementary — Node for fast inline lookups in investigation chains, Python when you need the deeper API surface. Both read the same env-var keys.
 
 ## Catalog
 

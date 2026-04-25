@@ -25,11 +25,42 @@ The CLI handles polling with exponential-style retry (30s initial wait, up to 5 
 
 ## Endpoints used
 
+The **Node CLI** (`tools/clis/urlscan.js`) handles a single submit-and-poll flow plus simple domain search:
 - `POST /api/v1/scan/` — submit URL
 - `GET /api/v1/result/{uuid}/` — retrieve scan result
-- `GET /api/v1/search/?q=domain:<domain>` — search existing scans
+- `GET /api/v1/search/?q=domain:<domain>` — basic domain search
+
+The **Python CLI** (`tools/clis/urlscan.py`) covers the full public API:
+- `POST /api/v1/scan/` — submit (with country/tags/UA/referer/visibility flags, optional wait-and-poll)
+- `GET /api/v1/result/{uuid}/` — retrieve a scan
+- `GET /api/v1/search/` — full Lucene query search (the killer feature for pivoting)
+- `GET /api/v1/quotas/` — current quota across search/retrieve/scan dimensions
+- `GET https://urlscan.io/screenshots/{uuid}.png` — screenshot download
+- `GET /api/v1/dom/{uuid}/` — captured DOM/HTML download
 
 Authentication header: `API-Key: $URLSCAN_API_KEY`.
+
+## Lucene query reference (selection)
+
+Common fields against which you can search:
+
+| Field | Example | Use |
+|---|---|---|
+| `page.domain` | `page.domain:malicious.example` | Domain-level pivots |
+| `page.url` | `page.url:*login*` | Substring URL match |
+| `page.ip` | `page.ip:185.220.101.45` | All scans hitting this IP |
+| `page.country` | `page.country:RU` | Geographic filter |
+| `page.asn` | `page.asn:AS13335` | ASN-level pivots |
+| `task.tags` | `task.tags:phishing` | Tagged categories |
+| `task.url` | `task.url:*paypal*` | What was requested (pre-redirect) |
+| `verdicts.overall.malicious` | `verdicts.overall.malicious:true` | Only malicious results |
+| `hash` | `hash:<sha256>` | Resource hash (favicon, JS, etc.) — strong fingerprint |
+| `filename` | `filename:*.exe` | Downloaded filename |
+| `date` | `date:>now-7d` | Time window |
+
+Combine with `AND`, `OR`, `NOT`, parentheses, wildcards (`*`).
+
+Full search query reference: https://urlscan.io/search/
 
 ## Visibility
 
@@ -62,6 +93,8 @@ curl -s "https://urlscan.io/api/v1/search/?q=domain:example.com&size=1" \
 
 ## See also
 
-- API docs: https://urlscan.io/docs/api/
+- API docs: https://docs.urlscan.io/apis/urlscan-openapi/live-scanning
+- Search syntax: https://urlscan.io/search/
 - Lookup skill: `skills/lookup-urlscan/SKILL.md`
-- CLI source: `tools/clis/urlscan.js`
+- Node CLI source: `tools/clis/urlscan.js`
+- Python CLI source: `tools/clis/urlscan.py`

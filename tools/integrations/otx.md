@@ -25,6 +25,7 @@ Effectively unconstrained for interactive use.
 
 ## Endpoints used
 
+The **Node CLI** (`tools/clis/otx.js`) hits these directly:
 - `GET /api/v1/indicators/IPv4/{ip}/general`
 - `GET /api/v1/indicators/IPv4/{ip}/passive_dns` (optional pivot)
 - `GET /api/v1/indicators/domain/{domain}/general`
@@ -32,6 +33,23 @@ Effectively unconstrained for interactive use.
 - `GET /api/v1/indicators/url/{url}/general`
 
 Authentication header: `X-OTX-API-KEY: $OTX_API_KEY`.
+
+The **Python CLI** (`tools/clis/otx.py`) wraps the official **OTXv2 SDK** for richer operations: full indicator details across every section (reputation, geo, malware, url_list, http_scans, analysis), pulse search, pulse retrieval, and subscribed-pulse listing.
+
+## Python SDK
+
+- Repo: https://github.com/AlienVault-OTX/OTX-Python-SDK
+- PyPI: `pip install OTXv2`
+- License: Apache 2.0 (per the upstream repo)
+
+The Python CLI self-bootstraps a venv at `tools/clis/.venv-otx/` on first invocation, so users don't need to install OTXv2 globally and aren't blocked by PEP 668 on Homebrew Python. The venv directory is gitignored.
+
+Key SDK methods used:
+- `OTXv2.get_indicator_details_full(IndicatorTypes.X, value)` — pulls all sections at once
+- `OTXv2.get_indicator_details_by_section(...)` — single section
+- `OTXv2.search_pulses(query, max_results=N)` — keyword/tag search
+- `OTXv2.get_pulse_details(pulse_id)` + `get_pulse_indicators(pulse_id)` — pulse retrieval
+- `OTXv2.getall(limit=N)` — subscribed pulses
 
 ## Admiralty defaults (for `/score-source`)
 
@@ -57,4 +75,6 @@ curl -s "https://otx.alienvault.com/api/v1/indicators/IPv4/8.8.8.8/general" \
 
 - API docs: https://otx.alienvault.com/api
 - Lookup skill: `skills/lookup-otx/SKILL.md`
-- CLI source: `tools/clis/otx.js`
+- Node CLI source: `tools/clis/otx.js`
+- Python CLI source: `tools/clis/otx.py`
+- Official Python SDK repo: https://github.com/AlienVault-OTX/OTX-Python-SDK

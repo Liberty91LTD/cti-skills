@@ -21,13 +21,60 @@ Queries GreyNoise to classify whether an IP is internet background noise (opport
 
 ## How to invoke
 
+Two CLIs are provided. Pick by capability needed:
+
+### Basic noise check — Node CLI (zero deps)
+
 ```bash
 node tools/clis/greynoise.js ip <ip>
 ```
 
-Use `--dry-run` to preview. The CLI tries the community endpoint first (free, rate-limited); falls back to enterprise `/noise/context/{ip}` if the API key has enterprise access.
+Hits the `/v3/community/{ip}` endpoint (free, 50/day). Best for fast retrieval inside an investigation chain.
 
-If `$GREYNOISE_API_KEY` is unset, the CLI exits with code 2.
+### Full surface — Python CLI (uses official pygreynoise SDK)
+
+```bash
+python3 tools/clis/greynoise.py community <ip>          # FREE (50/day)
+python3 tools/clis/greynoise.py context <ip>            # Enterprise
+python3 tools/clis/greynoise.py riot <ip>               # Enterprise
+python3 tools/clis/greynoise.py quick <ip,ip,...>       # Enterprise (bulk)
+python3 tools/clis/greynoise.py similarity <ip>         # Enterprise
+python3 tools/clis/greynoise.py timeline <ip> [--days N]  # Enterprise
+python3 tools/clis/greynoise.py query "<gnql>"          # Enterprise
+python3 tools/clis/greynoise.py stats "<gnql>"          # Enterprise
+python3 tools/clis/greynoise.py metadata
+```
+
+Self-bootstraps a private venv at `tools/clis/.venv-greynoise/` on first run.
+
+Capabilities the Node CLI doesn't have (Enterprise tier required for most):
+
+1. **Context** — full per-IP telemetry: every port/protocol/payload combination GreyNoise has observed, broken down by date.
+2. **GNQL search** (`query`) — find every IP matching a query: `classification:malicious tags:Mirai metadata.country:RU`. The killer pivot — discover scanner clusters by characteristic.
+3. **GNQL stats** — bucket counts (countries, ASNs, tags, categories) for a query without pulling individual results.
+4. **Similarity** — given an IP, find behaviorally similar scanners (often used to expand a single observation into a cluster).
+5. **Timeline** — daily activity history for an IP — useful for distinguishing a brief campaign from persistent scanning.
+6. **Quick (bulk)** — classify many IPs in one call (cheaper than N individual lookups).
+7. **RIOT** — explicit known-benign check (CDNs, search engines, ISPs) without the noise classification.
+
+GNQL examples:
+```bash
+# All malicious scanners hitting port 22 from Russia in the last day
+python3 tools/clis/greynoise.py query 'classification:malicious raw_data.scan.port:22 metadata.country:RU last_seen:1d'
+
+# Stats: country distribution of Mirai-tagged IPs
+python3 tools/clis/greynoise.py stats 'tags:"Mirai" last_seen:30d'
+
+# Find IPs similar to a known scanner
+python3 tools/clis/greynoise.py similarity 185.220.101.45 --limit 50
+```
+
+Both CLIs accept `--dry-run`. Both exit code 2 if `$GREYNOISE_API_KEY` is unset (when not in dry-run). Report missing key; do not fabricate.
+
+### Tier awareness
+
+- **Community endpoint** is free (50/day) and good enough for "is this a known scanner?" — that's most investigation use.
+- **Enterprise endpoints** unlock the pivoting power but require a paid tier. The CLI returns a 402 / "upgrade required" error if your key doesn't have access — that's the signal to fall back to community.
 
 ## Response format
 
@@ -66,4 +113,8 @@ Default rating for downstream `/score-source`: **B2** (usually reliable, probabl
 ## See also
 
 - Integration setup: `tools/integrations/greynoise.md`
-- CLI source: `tools/clis/greynoise.js`
+- Node CLI source: `tools/clis/greynoise.js`
+- Python CLI source: `tools/clis/greynoise.py`
+- Official Python SDK: https://github.com/GreyNoise-Intelligence/pygreynoise
+- API docs: https://docs.greynoise.io/
+- GNQL syntax: https://docs.greynoise.io/docs/using-the-greynoise-query-language-gnql

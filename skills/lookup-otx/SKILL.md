@@ -21,22 +21,53 @@ Queries AlienVault OTX for community pulse context on IPs, domains, file hashes,
 
 ## How to invoke
 
+Two CLIs are provided. Pick by capability needed:
+
+### Basic lookup — Node CLI (zero deps)
+
 ```bash
 node tools/clis/otx.js <type> <value>
 # where <type> is one of: ip, domain, hash, url
 ```
 
-Examples:
+Hits the `/general` endpoint only. Returns pulses, related indicators, passive DNS, whois. Best for fast retrieval inside an investigation chain.
+
+### Advanced operations — Python CLI (uses official OTXv2 SDK)
+
 ```bash
-node tools/clis/otx.js ip 203.0.113.42
-node tools/clis/otx.js domain example.com
-node tools/clis/otx.js hash 44d88612fea8a8f36de82e1278abb02f
-node tools/clis/otx.js url "https://example.com/path"
+python3 tools/clis/otx.py indicator <type> <value> [--section SECTION]
+python3 tools/clis/otx.py pulse search <query> [--limit N]
+python3 tools/clis/otx.py pulse get <pulse_id>
+python3 tools/clis/otx.py pulse subscribed [--limit N]
 ```
 
-Use `--dry-run` to preview the API request.
+Self-bootstraps a private venv at `tools/clis/.venv-otx/` on first run (requires Python 3 + a working `python3 -m venv`). No global pip install.
 
-If `$OTX_API_KEY` is unset, the CLI exits with code 2. Report missing key; do not fabricate.
+Capabilities the Node CLI doesn't have:
+- **Full indicator details** across every OTX section (general, reputation, geo, malware, url_list, passive_dns, http_scans, analysis) instead of just `/general`. Pass `--section` to limit.
+- **Pulse keyword search** (`pulse search "lazarus"`) — discover pulses by topic.
+- **Pulse retrieval by ID** with full description, references, and indicator list.
+- **Subscribed pulses** — list pulses your OTX account follows.
+
+Examples:
+```bash
+# Basic — same shape as Node CLI but with all sections populated
+python3 tools/clis/otx.py indicator domain example.com
+
+# Just one section
+python3 tools/clis/otx.py indicator ip 203.0.113.42 --section malware
+
+# Hash type auto-detected from length (MD5/SHA1/SHA256)
+python3 tools/clis/otx.py indicator hash 44d88612fea8a8f36de82e1278abb02f
+
+# Discover pulses by keyword
+python3 tools/clis/otx.py pulse search "ransomware exchange"
+
+# Pull a specific pulse
+python3 tools/clis/otx.py pulse get 5f8f3e6e2a1b3c4d5e6f7a8b
+```
+
+Both CLIs accept `--dry-run` to preview the request without calling the API. Both exit code 2 if `$OTX_API_KEY` is unset (when not in dry-run). Report missing key; do not fabricate.
 
 ## Response format
 
@@ -74,4 +105,7 @@ Default rating for downstream `/score-source`: **C3** (fairly reliable, possibly
 ## See also
 
 - Integration setup: `tools/integrations/otx.md`
-- CLI source: `tools/clis/otx.js`
+- Node CLI source: `tools/clis/otx.js`
+- Python CLI source (OTXv2 SDK): `tools/clis/otx.py`
+- Official Python SDK: https://github.com/AlienVault-OTX/OTX-Python-SDK
+- API reference: https://otx.alienvault.com/api

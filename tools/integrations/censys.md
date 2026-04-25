@@ -25,11 +25,41 @@
 
 ## Endpoints used
 
+The **Node CLI** (`tools/clis/censys.js`) hits:
 - `GET /api/v2/hosts/{ip}` — host summary
-- `GET /api/v2/hosts/search?q={query}` — search (uses queries)
-- `GET /api/v2/certificates/search?q={query}` — certificate search (uses queries)
+- `GET /api/v2/hosts/search?q={query}` — search
 
-Authentication: HTTP Basic Auth with `CENSYS_API_ID:CENSYS_API_SECRET`.
+The **Python CLI** (`tools/clis/censys.py`) wraps the official SDK and adds:
+- `GET /api/v2/hosts/aggregate?q={query}&field={field}` — **FREE aggregation** (no credits)
+- `GET /api/v2/certificates/{sha256}` — certificate detail by fingerprint
+- `GET /api/v2/certificates/search?q={query}` — certificate search
+- `GET /api/v1/account` — remaining quota
+- Multi-page cursor traversal for hosts.search and certs.search
+
+Authentication: HTTP Basic Auth with `CENSYS_API_ID:CENSYS_API_SECRET` (handled by SDK).
+
+## The killer feature: aggregations are free
+
+Most CTI tooling treats every query as paid. Censys's `aggregate` endpoint is the exception — it returns bucket counts for any field across a query without consuming credits. Use it relentlessly before paid searches:
+
+```bash
+# How many hosts match a JARM fingerprint, broken down by country?
+python3 tools/clis/censys.py aggregate \
+  'services.tls.jarm.fingerprint: "1234..."' \
+  --field location.country_code
+
+# What ASNs are hosting Cobalt Strike servers?
+python3 tools/clis/censys.py aggregate \
+  'services.product: "Cobalt Strike Team Server"' \
+  --field autonomous_system.asn --buckets 50
+
+# Distribution of services on a /24 of suspect infrastructure
+python3 tools/clis/censys.py aggregate \
+  'ip: 185.220.101.0/24' \
+  --field services.port
+```
+
+Use the bucket counts to decide whether a paid `search` is worthwhile and how to scope it.
 
 ## Admiralty defaults (for `/score-source`)
 
@@ -61,7 +91,9 @@ These are the situations where Censys beats Shodan.
 
 ## See also
 
-- API docs: https://search.censys.io/api
+- API docs: https://docs.censys.com/reference/get-started
 - Search syntax: https://search.censys.io/search/language
+- Official Python SDK: https://github.com/censys/censys-sdk-python
 - Lookup skill: `skills/lookup-censys/SKILL.md`
-- CLI source: `tools/clis/censys.js`
+- Node CLI source: `tools/clis/censys.js`
+- Python CLI source: `tools/clis/censys.py`
