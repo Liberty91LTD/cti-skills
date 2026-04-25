@@ -1,8 +1,16 @@
 # API keys and local settings
 .claude/settings.local.json
 
-# Exports (regenerable)
-data/exports/
+# User CTI artifacts — keep directory structure (.gitkeep), ignore content
+data/assessments/**
+data/detection-rules/**
+data/exports/**
+data/investigations/**
+data/iocs/**
+data/pirs/**
+data/reports/**
+data/stix-bundles/**
+!data/**/.gitkeep
 
 # OS files
 .DS_Store
