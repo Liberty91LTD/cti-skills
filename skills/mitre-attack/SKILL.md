@@ -9,10 +9,23 @@ metadata:
 # MITRE ATT&CK Local Reference
 
 ## Dataset
-Local file: `mitre-attack/enterprise-attack.json`
-Download via `scripts/setup.sh` or manually from: https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json
+Local file: `mitre-attack/enterprise-attack.json` (~45 MB STIX 2.1 bundle).
 
-This is a STIX 2.1 bundle containing all Enterprise ATT&CK objects.
+**First use — if the file is missing**, run the bundled download script before any query:
+
+```bash
+./scripts/download-mitre.sh
+```
+
+The script is idempotent (skips if the file is already present) and supports `--force` for refresh. If `scripts/download-mitre.sh` is not present in the install (e.g. for plugin-only deployments), fall back to:
+
+```bash
+mkdir -p mitre-attack
+curl -fsSL https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json \
+  -o mitre-attack/enterprise-attack.json
+```
+
+This yields a STIX 2.1 bundle containing all Enterprise ATT&CK objects.
 
 ## Querying the Dataset
 
