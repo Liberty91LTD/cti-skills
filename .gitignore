@@ -25,3 +25,8 @@ Thumbs.db
 
 # MITRE ATT&CK data (large, downloaded via setup)
 mitre-attack/*.json
+
+# Python venvs and bytecode cache from self-bootstrapping CLIs
+tools/clis/.venv-*/
+tools/clis/__pycache__/
+*.pyc
