@@ -169,6 +169,22 @@ def _summarise_scan(scan):
     overall = verdicts.get("overall", {}) or {}
     lists = scan.get("lists", {}) or {}
     stats = scan.get("stats", {}) or {}
+
+    # hasVerdicts:true only means at least one engine produced a verdict —
+    # NOT that anything was flagged. The actual signal is in malicious=true,
+    # a non-zero score, populated brands list, or suspicious-flavoured tags.
+    score = overall.get("score") or 0
+    brands = overall.get("brands") or []
+    cats = overall.get("categories") or []
+    if overall.get("malicious"):
+        verdict = "malicious"
+    elif score > 0 or brands or any(c in cats for c in ("phishing", "malware", "scam")):
+        verdict = "suspicious"
+    elif overall.get("hasVerdicts"):
+        verdict = "clean"
+    else:
+        verdict = "unknown"
+
     return {
         "uuid": task.get("uuid"),
         "scanned_url": task.get("url"),
@@ -179,10 +195,10 @@ def _summarise_scan(scan):
         "asn_name": page.get("asnname"),
         "server": page.get("server"),
         "title": page.get("title"),
-        "verdict_overall": "malicious" if overall.get("malicious") else ("suspicious" if overall.get("hasVerdicts") else "clean"),
-        "verdict_score": overall.get("score"),
-        "verdict_categories": overall.get("categories"),
-        "verdict_brands": overall.get("brands"),
+        "verdict_overall": verdict,
+        "verdict_score": score,
+        "verdict_categories": cats,
+        "verdict_brands": brands,
         "verdict_tags": overall.get("tags"),
         "screenshot_url": task.get("screenshotURL"),
         "report_url": task.get("reportURL"),

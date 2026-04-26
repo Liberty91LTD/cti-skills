@@ -225,17 +225,36 @@ def cmd_count(args):
                       "facets": results.get("facets")}, indent=2, default=str))
 
 
+def _shodan_http_get(path, params):
+    """Direct HTTP GET against api.shodan.io — used for endpoints the SDK
+    no longer exposes (resolve, reverse). Auth is the ?key= query param."""
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+    if not API_KEY:
+        die("SHODAN_API_KEY not set", 2)
+    qs = dict(params or {})
+    qs["key"] = API_KEY
+    url = f"https://api.shodan.io{path}?" + urllib.parse.urlencode(qs)
+    try:
+        with urllib.request.urlopen(url, timeout=30) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace") if e.fp else ""
+        die(f"Shodan HTTP {e.code}: {body[:200]}", 1)
+    except urllib.error.URLError as e:
+        die(f"Shodan network error: {e.reason}", 1)
+
+
 def cmd_dns_resolve(args):
     hostnames = [h.strip() for h in args.hostnames.split(",") if h.strip()]
     if args.dry_run:
         print(json.dumps({"dry_run": True, "operation": "dns_resolve",
-                          "hostnames": hostnames}, indent=2))
+                          "hostnames": hostnames,
+                          "endpoint": "GET /dns/resolve"}, indent=2))
         return
-    api = make_client()
-    try:
-        results = api.dns.resolve(hostnames)
-    except shodan.exception.APIError as e:
-        die(f"Shodan API error: {e}", 1)
+    # Modern shodan-python doesn't wrap /dns/resolve. Direct HTTP call.
+    results = _shodan_http_get("/dns/resolve", {"hostnames": ",".join(hostnames)})
     print(json.dumps({"source": "shodan", "operation": "dns_resolve",
                       "query_time": now_iso(), "results": results}, indent=2))
 
@@ -243,13 +262,11 @@ def cmd_dns_resolve(args):
 def cmd_dns_reverse(args):
     ips = [i.strip() for i in args.ips.split(",") if i.strip()]
     if args.dry_run:
-        print(json.dumps({"dry_run": True, "operation": "dns_reverse", "ips": ips}, indent=2))
+        print(json.dumps({"dry_run": True, "operation": "dns_reverse", "ips": ips,
+                          "endpoint": "GET /dns/reverse"}, indent=2))
         return
-    api = make_client()
-    try:
-        results = api.dns.reverse(ips)
-    except shodan.exception.APIError as e:
-        die(f"Shodan API error: {e}", 1)
+    # Modern shodan-python doesn't wrap /dns/reverse. Direct HTTP call.
+    results = _shodan_http_get("/dns/reverse", {"ips": ",".join(ips)})
     print(json.dumps({"source": "shodan", "operation": "dns_reverse",
                       "query_time": now_iso(), "results": results}, indent=2))
 
