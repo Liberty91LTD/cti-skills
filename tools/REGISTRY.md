@@ -15,6 +15,8 @@ All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type
 | AlienVault OTX | `tools/clis/otx.py` | OTXv2 SDK + venv | full-section indicator details, pulse search, pulse get, subscribed pulses |
 | Censys | `tools/clis/censys.py` | censys-sdk + venv | **free aggregations**, certificate search/view, multi-page cursor, account info |
 | GreyNoise | `tools/clis/greynoise.py` | pygreynoise SDK + venv | context, RIOT, similarity, timeline, GNQL search & stats, bulk quick |
+| MISP | `tools/clis/misp.py` | stdlib | **two-way** — query events/attributes/objects + write attributes, create events, upload STIX 2 bundles, tag, publish |
+| Ransomware.live | `tools/clis/ransomwarelive.py` | stdlib | leak-site victim claims, **group profiles** (TTPs, leak-site infra), per-group IOCs + YARA, ransom notes, negotiations, CSIRT contacts |
 | Shodan | `tools/clis/shodan.py` | shodan-python SDK + venv | search, count, facets, DNS reverse/domain, account, ports/services |
 | URLScan | `tools/clis/urlscan.py` | stdlib | Lucene search, quota, screenshot/DOM download, full submit options |
 | VirusTotal | `tools/clis/virustotal.py` | stdlib | **relationship traversal** (the pivoting feature), URL submit, comments, Intel search |
@@ -36,6 +38,8 @@ The Node and Python CLIs are complementary — Node for fast inline lookups in i
 | [AbuseIPDB](integrations/abuseipdb.md) | `/lookup-abuseipdb` | `ABUSEIPDB_API_KEY` | IP only | 1000 checks/day | C3 |
 | [GreyNoise](integrations/greynoise.md) | `/lookup-greynoise` | `GREYNOISE_API_KEY` | IP only | 50 req/day (community) | B2 |
 | [Censys](integrations/censys.md) | `/lookup-censys` | `CENSYS_PAT` (Platform) / `CENSYS_API_ID`+`CENSYS_API_SECRET` (legacy) | IP, search query, certs | 250/month | A2 |
+| [MISP](integrations/misp.md) | `/lookup-misp` | `MISP_URL` + `MISP_API_KEY` | events, attributes, objects, STIX 2 bundles | host-bound (no public limit) | B2 (varies by Org) |
+| [Ransomware.live](integrations/ransomwarelive.md) | `/lookup-ransomwarelive` | `RANSOMWARE_LIVE` | victim, group, sector, country, IOCs, YARA | 3000/day (PRO) | B2 (descriptions B3–B4) |
 
 Plus one local reference:
 

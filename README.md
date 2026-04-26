@@ -140,7 +140,7 @@ All skills live flat under `skills/` and are user-invocable as `/<skill-name>`. 
 - **Detection engineering** — `/sigma-writing`, `/yara-writing`, `/kql-writing`
 - **Knowledge cells** — `/china-cyber-espionage`, `/russia-cyber-espionage`, `/iran-cyber-espionage`, `/dprk-cyber-espionage`, `/ransomware-ecosystem`, `/infostealers`, `/initial-access-brokers`, `/phishing-social-engineering`, `/supply-chain-threats`, `/carding-financial-fraud`, `/hacktivism`
 - **OSINT + collection** — `/osint-methodology`, `/darkweb-collection`, `/vulnerability-intelligence`
-- **Lookups** — `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/mitre-attack`
+- **Lookups** — `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-ransomwarelive`, `/mitre-attack`
 - **Management** — `/pir-management`, `/stakeholder-management`, `/feedback-loops`, `/sops`, `/maturity-assessment`, `/intelligence-sharing`
 - **Methodology** — `/cti-hyperloop` (optional operating doctrine)
 
@@ -157,6 +157,8 @@ Optional. The pack degrades gracefully — skills skip enrichments for which no 
 | GreyNoise | `GREYNOISE_API_KEY` | 50 req/day |
 | AlienVault OTX | `OTX_API_KEY` | 10,000 req/hour |
 | Censys | `CENSYS_API_ID` + `CENSYS_API_SECRET` | 250 queries/month |
+| MISP | `MISP_URL` + `MISP_API_KEY` | host-bound (your instance) |
+| Ransomware.live | `RANSOMWARE_LIVE` | 3,000/day (PRO) |
 
 Three ways to configure:
 

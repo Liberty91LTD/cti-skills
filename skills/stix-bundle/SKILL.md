@@ -194,6 +194,8 @@ Represents a pattern that can be used to detect suspicious activity.
 
 ## TLP Marking Definitions (Standard UUIDs)
 
+These are the canonical marking-definition object IDs. Reference them from `object_marking_refs`; **do not include the marking-definition object itself in the bundle** (see below).
+
 ```json
 "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"  // TLP:CLEAR
 "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"  // TLP:GREEN
@@ -201,6 +203,44 @@ Represents a pattern that can be used to detect suspicious activity.
 "marking-definition--826578e1-40a3-4b46-a8d7-b76e4fd71d29"  // TLP:AMBER+STRICT
 "marking-definition--e828b379-4e03-4974-9ac4-e53a884c97c1"  // TLP:RED
 ```
+
+### MISP-compatible bundles — reference TLPs, don't inline them
+
+For bundles that will be imported into MISP via `/lookup-misp` `upload-stix`, **only reference TLP marking-definition UUIDs** in `object_marking_refs`. Don't include a `{"type": "marking-definition", ...}` object in the bundle's `objects` array.
+
+The inline shape that older STIX 2.0 examples show — `definition_type: "tlp"` with `definition: {"tlp": "clear"}` — fails MISP's STIX 2 importer with `"Does not match any TLP Marking definition!"`. MISP resolves the canonical UUIDs from its own catalog; supplying an inline copy triggers the spec-conformance check and the whole bundle is rejected.
+
+✅ **Correct (MISP-compatible)** — reference only, marking resolved by consumer:
+```json
+{
+  "type": "bundle",
+  "id": "bundle--...",
+  "objects": [
+    {
+      "type": "indicator",
+      "id": "indicator--...",
+      "object_marking_refs": ["marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"],
+      "pattern": "[ipv4-addr:value = '203.0.113.42']",
+      "pattern_type": "stix",
+      "valid_from": "2026-04-26T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+❌ **Don't do this** for MISP-bound bundles — inlined TLP definition trips the importer:
+```json
+{
+  "type": "marking-definition",
+  "id": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9",
+  "definition_type": "tlp",
+  "definition": {"tlp": "clear"}
+}
+```
+
+If you need a self-contained bundle for non-MISP consumers (offline ingest, archives, partners without a TLP catalog), the inline form is valid STIX 2.1 — keep a separate non-MISP variant rather than tweaking the MISP one.
+
+If you need TLP applied inside MISP after import, do it via a `tag-event` call rather than a STIX marking — see `tools/integrations/misp.md`.
 
 ## Output Location
 

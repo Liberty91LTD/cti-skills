@@ -12,7 +12,8 @@
 #
 # Recognised env vars (also used at runtime by the CLIs):
 #   VIRUSTOTAL_API_KEY URLSCAN_API_KEY SHODAN_API_KEY ABUSEIPDB_API_KEY
-#   GREYNOISE_API_KEY OTX_API_KEY CENSYS_PAT
+#   GREYNOISE_API_KEY OTX_API_KEY CENSYS_PAT MISP_URL MISP_API_KEY
+#   RANSOMWARE_LIVE
 
 set -euo pipefail
 
@@ -36,6 +37,9 @@ FLAG_ABUSEIPDB_API_KEY=""
 FLAG_GREYNOISE_API_KEY=""
 FLAG_OTX_API_KEY=""
 FLAG_CENSYS_PAT=""
+FLAG_MISP_URL=""
+FLAG_MISP_API_KEY=""
+FLAG_RANSOMWARE_LIVE=""
 
 show_help() {
   sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
@@ -55,6 +59,9 @@ for arg in "$@"; do
     --greynoise=*)     FLAG_GREYNOISE_API_KEY="${arg#*=}" ;;
     --otx=*)           FLAG_OTX_API_KEY="${arg#*=}" ;;
     --censys=*)        FLAG_CENSYS_PAT="${arg#*=}" ;;
+    --misp-url=*)      FLAG_MISP_URL="${arg#*=}" ;;
+    --misp=*)          FLAG_MISP_API_KEY="${arg#*=}" ;;
+    --ransomwarelive=*) FLAG_RANSOMWARE_LIVE="${arg#*=}" ;;
     *) echo "Unknown argument: $arg" >&2; echo "Run with --help for usage." >&2; exit 2 ;;
   esac
 done
@@ -70,6 +77,9 @@ SERVICES=(
   "GREYNOISE_API_KEY|GreyNoise|community tier at viz.greynoise.io"
   "OTX_API_KEY|AlienVault OTX|free 10k/hr at otx.alienvault.com"
   "CENSYS_PAT|Censys PAT|Personal Access Token at accounts.censys.io/settings/personal-access-tokens"
+  "MISP_URL|MISP URL|base URL of your MISP instance (e.g. https://misp.example.org)"
+  "MISP_API_KEY|MISP auth key|My Profile → Auth keys in your MISP instance"
+  "RANSOMWARE_LIVE|Ransomware.live PRO|free PRO key at my.ransomware.live (3000/day)"
 )
 
 read_secret() {
@@ -155,6 +165,34 @@ verify_key() {
     GREYNOISE_API_KEY)  cli="greynoise";  args="ip 8.8.8.8" ;;
     OTX_API_KEY)        cli="otx";        args="ip 8.8.8.8" ;;
     CENSYS_PAT) return ;;  # platform SDK validates at runtime; no dry-run CLI yet
+    MISP_URL)
+      printf '  ✓ %-15s set\n' "$label"
+      return
+      ;;
+    MISP_API_KEY)
+      cli_path="$REPO_ROOT/tools/clis/misp.py"
+      if [ ! -f "$cli_path" ]; then
+        printf '  · %-15s skipped (CLI not found)\n' "$label"; return
+      fi
+      if python3 "$cli_path" search-events --limit 1 --dry-run >/dev/null 2>&1; then
+        printf '  ✓ %-15s key present, CLI invocation OK (dry-run)\n' "$label"
+      else
+        printf '  ✗ %-15s CLI dry-run failed\n' "$label"
+      fi
+      return
+      ;;
+    RANSOMWARE_LIVE)
+      cli_path="$REPO_ROOT/tools/clis/ransomwarelive.py"
+      if [ ! -f "$cli_path" ]; then
+        printf '  · %-15s skipped (CLI not found)\n' "$label"; return
+      fi
+      if python3 "$cli_path" validate --dry-run >/dev/null 2>&1; then
+        printf '  ✓ %-15s key present, CLI invocation OK (dry-run)\n' "$label"
+      else
+        printf '  ✗ %-15s CLI dry-run failed\n' "$label"
+      fi
+      return
+      ;;
   esac
   local cli_path="$REPO_ROOT/tools/clis/$cli.js"
   if [ ! -f "$cli_path" ]; then

@@ -89,7 +89,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 |---|---|---|
 | `cti-orchestrator` | 1.0.0 | 2026-04-20 |
 | `ip-investigation` | 1.0.0 | 2026-04-20 |
-| `domain-investigation` | 1.0.0 | 2026-04-20 |
+| `domain-investigation` | 1.1.0 | 2026-04-26 |
 | `hash-investigation` | 1.0.0 | 2026-04-20 |
 | `url-investigation` | 1.0.0 | 2026-04-20 |
 
@@ -101,6 +101,8 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `lookup-greynoise` | 1.0.0 | 2026-04-20 |
 | `lookup-otx` | 1.0.0 | 2026-04-20 |
 | `lookup-shodan` | 1.0.0 | 2026-04-20 |
+| `lookup-misp` | 1.0.0 | 2026-04-26 |
+| `lookup-ransomwarelive` | 1.0.0 | 2026-04-26 |
 | `lookup-urlscan` | 1.0.0 | 2026-04-20 |
 | `lookup-virustotal` | 1.0.0 | 2026-04-20 |
 | `mitre-attack` | 1.0.0 | 2026-04-20 |
@@ -119,6 +121,13 @@ These remain for reference but agents should prefer the `lookup-*` skills above.
 | `virustotal-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-virustotal` |
 
 ## Changelog
+
+### 1.2.0 — 2026-04-26
+- `domain-investigation` 1.1.0 — chains `/lookup-ransomwarelive search` against an org-candidate derived from the domain's apex, surfaces `ransomware_status` in the consolidated output, and adds a "Ransomware-claim hits" handling section covering name-collision risk and the metadata-vs-description credibility split.
+- Added `lookup-ransomwarelive` skill wrapping ransomware.live's PRO API. Covers victim search/recent/detail (27k+ leak-site claims across 330+ groups), group listings + rich `group-profile` (description, TTPs, tools, leak-site `.onion` infra, vulnerabilities), per-group IOC dumps, YARA rules with full content, ransom-note samples, negotiation chats, press archive, sector reference, and country CSIRT contacts. Stdlib-only Python CLI at `tools/clis/ransomwarelive.py`. Reads `$RANSOMWARE_LIVE`. Source reliability defaults to B2 with credibility nuance: metadata is B2, criminal-written `description` field is B3–B4 (often inflated). Total skill count: 67 (66 active + `stix-bundle` reference).
+
+### 1.1.0 — 2026-04-26
+- Added `lookup-misp` skill with two-way MISP integration (the first write-capable lookup skill in the pack). Covers query (`search-events`, `search-attributes`, `search-objects`, `get-event`, `list-tags`) and write (`add-attribute`, `create-event`, `upload-stix`, `tag-event`, `publish-event`). Supports STIX 2 round-tripping — `upload-stix` consumes bundles produced by `/stix-bundle`, and `search-events --returnFormat stix2` exports MISP events as STIX. Stdlib-only Python CLI at `tools/clis/misp.py`. Reads `$MISP_URL` and `$MISP_API_KEY`. Self-signed-cert support via `--insecure`. Total skill count: 65 active + 1 reference (`stix-bundle`).
 
 ### 1.0.0 — 2026-04-20
 - Initial versioned release

@@ -35,7 +35,11 @@
         "mitre-attack",
         "virustotal",
         "shodan",
-        "urlscan"
+        "urlscan",
+        "misp",
+        "stix",
+        "ransomware",
+        "ransomware.live"
       ],
       "category": "cybersecurity",
       "tags": ["security", "intelligence", "analysis"],
