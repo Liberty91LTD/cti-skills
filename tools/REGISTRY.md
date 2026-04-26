@@ -35,7 +35,7 @@ The Node and Python CLIs are complementary — Node for fast inline lookups in i
 | [Shodan](integrations/shodan.md) | `/lookup-shodan` | `SHODAN_API_KEY` | IP, domain | 1 req/sec | B2 |
 | [AbuseIPDB](integrations/abuseipdb.md) | `/lookup-abuseipdb` | `ABUSEIPDB_API_KEY` | IP only | 1000 checks/day | C3 |
 | [GreyNoise](integrations/greynoise.md) | `/lookup-greynoise` | `GREYNOISE_API_KEY` | IP only | 50 req/day (community) | B2 |
-| [Censys](integrations/censys.md) | `/lookup-censys` | `CENSYS_API_ID` + `CENSYS_API_SECRET` | IP, search query | 250/month | A2 |
+| [Censys](integrations/censys.md) | `/lookup-censys` | `CENSYS_PAT` (Platform) / `CENSYS_API_ID`+`CENSYS_API_SECRET` (legacy) | IP, search query, certs | 250/month | A2 |
 
 Plus one local reference:
 

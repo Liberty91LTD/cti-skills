@@ -37,7 +37,7 @@ In-chat configuration of API keys for the seven threat-intel integrations bundle
 | AbuseIPDB | `ABUSEIPDB_API_KEY` | 1000 checks/day | abuseipdb.com → account → API |
 | GreyNoise | `GREYNOISE_API_KEY` | 50 req/day (community) | viz.greynoise.io → account |
 | AlienVault OTX | `OTX_API_KEY` | 10k req/hour | otx.alienvault.com → settings |
-| Censys | `CENSYS_API_ID` + `CENSYS_API_SECRET` | 250 queries/month | censys.io → account → API |
+| Censys | `CENSYS_PAT` | 250 queries/month | accounts.censys.io → settings → personal-access-tokens |
 
 A starter set of **VirusTotal + OTX + URLScan + AbuseIPDB** covers most IP/domain/URL/hash investigations. Shodan and GreyNoise add value for IP-focused work. Censys is optional (very tight rate limit).
 

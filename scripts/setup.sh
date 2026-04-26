@@ -12,7 +12,7 @@
 #
 # Recognised env vars (also used at runtime by the CLIs):
 #   VIRUSTOTAL_API_KEY URLSCAN_API_KEY SHODAN_API_KEY ABUSEIPDB_API_KEY
-#   GREYNOISE_API_KEY OTX_API_KEY CENSYS_API_ID CENSYS_API_SECRET
+#   GREYNOISE_API_KEY OTX_API_KEY CENSYS_PAT
 
 set -euo pipefail
 
@@ -35,8 +35,7 @@ FLAG_SHODAN_API_KEY=""
 FLAG_ABUSEIPDB_API_KEY=""
 FLAG_GREYNOISE_API_KEY=""
 FLAG_OTX_API_KEY=""
-FLAG_CENSYS_API_ID=""
-FLAG_CENSYS_API_SECRET=""
+FLAG_CENSYS_PAT=""
 
 show_help() {
   sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
@@ -55,8 +54,7 @@ for arg in "$@"; do
     --abuseipdb=*)     FLAG_ABUSEIPDB_API_KEY="${arg#*=}" ;;
     --greynoise=*)     FLAG_GREYNOISE_API_KEY="${arg#*=}" ;;
     --otx=*)           FLAG_OTX_API_KEY="${arg#*=}" ;;
-    --censys-id=*)     FLAG_CENSYS_API_ID="${arg#*=}" ;;
-    --censys-secret=*) FLAG_CENSYS_API_SECRET="${arg#*=}" ;;
+    --censys=*)        FLAG_CENSYS_PAT="${arg#*=}" ;;
     *) echo "Unknown argument: $arg" >&2; echo "Run with --help for usage." >&2; exit 2 ;;
   esac
 done
@@ -71,8 +69,7 @@ SERVICES=(
   "ABUSEIPDB_API_KEY|AbuseIPDB|free 1000/day at abuseipdb.com"
   "GREYNOISE_API_KEY|GreyNoise|community tier at viz.greynoise.io"
   "OTX_API_KEY|AlienVault OTX|free 10k/hr at otx.alienvault.com"
-  "CENSYS_API_ID|Censys API ID|free 250/mo at censys.io"
-  "CENSYS_API_SECRET|Censys API Secret|paired with API ID"
+  "CENSYS_PAT|Censys PAT|Personal Access Token at accounts.censys.io/settings/personal-access-tokens"
 )
 
 read_secret() {
@@ -157,7 +154,7 @@ verify_key() {
     ABUSEIPDB_API_KEY)  cli="abuseipdb";  args="ip 8.8.8.8" ;;
     GREYNOISE_API_KEY)  cli="greynoise";  args="ip 8.8.8.8" ;;
     OTX_API_KEY)        cli="otx";        args="ip 8.8.8.8" ;;
-    CENSYS_API_ID|CENSYS_API_SECRET) return ;;  # validated together below
+    CENSYS_PAT) return ;;  # platform SDK validates at runtime; no dry-run CLI yet
   esac
   local cli_path="$REPO_ROOT/tools/clis/$cli.js"
   if [ ! -f "$cli_path" ]; then

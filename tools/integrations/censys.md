@@ -2,11 +2,23 @@
 
 [Censys](https://censys.io/) is an internet-wide scanning and certificate-transparency dataset. It's the strongest option for TLS certificate pivoting and high-fidelity host reconnaissance, but the free tier is severely quota-limited.
 
-## Getting API credentials
+## Auth — two models
 
-1. Sign up at https://accounts.censys.io/register (free)
-2. Account → API → copy **API ID** and **API Secret** (two values, both required)
-3. Set `CENSYS_API_ID` and `CENSYS_API_SECRET` in your environment or via `./scripts/setup.sh`
+Censys runs two products with different auth:
+
+1. **Censys Platform** (new, recommended) — single **Personal Access Token (PAT)** with Bearer auth.
+   - Sign up at https://accounts.censys.io/register
+   - Get token at https://accounts.censys.io/settings/personal-access-tokens
+   - Set `CENSYS_PAT` in env or via `/cti-setup` / `./scripts/setup.sh`
+   - The full token value is shown **once** at creation — copy immediately.
+   - Used by the Python CLI (`tools/clis/censys.py`) via the `censys-platform` SDK.
+
+2. **Censys Search (legacy)** — **API ID + API Secret** pair with HTTP Basic Auth.
+   - Older accounts only; new signups don't get this.
+   - Set `CENSYS_API_ID` and `CENSYS_API_SECRET`.
+   - Used by the Node CLI (`tools/clis/censys.js`).
+
+If you're on a new account, use only `CENSYS_PAT`. The Python CLI is the path forward.
 
 ## Rate limits
 
@@ -25,41 +37,49 @@
 
 ## Endpoints used
 
-The **Node CLI** (`tools/clis/censys.js`) hits:
-- `GET /api/v2/hosts/{ip}` — host summary
-- `GET /api/v2/hosts/search?q={query}` — search
+The **Node CLI** (`tools/clis/censys.js`) hits the legacy Search API:
+- `GET https://search.censys.io/api/v2/hosts/{ip}` — host summary
+- `GET https://search.censys.io/api/v2/hosts/search?q={query}` — search
 
-The **Python CLI** (`tools/clis/censys.py`) wraps the official SDK and adds:
-- `GET /api/v2/hosts/aggregate?q={query}&field={field}` — **FREE aggregation** (no credits)
-- `GET /api/v2/certificates/{sha256}` — certificate detail by fingerprint
-- `GET /api/v2/certificates/search?q={query}` — certificate search
-- `GET /api/v1/account` — remaining quota
-- Multi-page cursor traversal for hosts.search and certs.search
+Auth: HTTP Basic with `CENSYS_API_ID:CENSYS_API_SECRET`.
 
-Authentication: HTTP Basic Auth with `CENSYS_API_ID:CENSYS_API_SECRET` (handled by SDK).
+The **Python CLI** (`tools/clis/censys.py`) hits the new Censys Platform API via the `censys-platform` SDK:
+- `GET /v3/global/asset/host/{ip}` — host detail (with optional `?at_time=`)
+- `GET /v3/global/asset/host/{ip}/timeline` — host activity timeline
+- `GET /v3/global/service/{host_id}` — service listing on a host
+- `POST /v3/global/search/query` — host search (Bearer body)
+- `POST /v3/global/search/aggregate` — **FREE aggregation** (no credits)
+- `GET /v3/global/asset/certificate/{cert_id}` — certificate by ID
+- `POST /v3/global/asset/certificate` — bulk certificate retrieval
 
-## The killer feature: aggregations are free
+Auth: `Authorization: Bearer $CENSYS_PAT`.
 
-Most CTI tooling treats every query as paid. Censys's `aggregate` endpoint is the exception — it returns bucket counts for any field across a query without consuming credits. Use it relentlessly before paid searches:
+## Platform free-tier API limits (verified 2026-04-26)
 
-```bash
-# How many hosts match a JARM fingerprint, broken down by country?
-python3 tools/clis/censys.py aggregate \
-  'services.tls.jarm.fingerprint: "1234..."' \
-  --field location.country_code
+Confirmed by live test: on the new Censys Platform, free Community accounts get **per-IP endpoints only** via API. The aggregation and search endpoints return:
 
-# What ASNs are hosting Cobalt Strike servers?
-python3 tools/clis/censys.py aggregate \
-  'services.product: "Cobalt Strike Team Server"' \
-  --field autonomous_system.asn --buckets 50
-
-# Distribution of services on a /24 of suspect infrastructure
-python3 tools/clis/censys.py aggregate \
-  'ip: 185.220.101.0/24' \
-  --field services.port
+```
+403 Forbidden — "This endpoint requires an organization ID for API access.
+Free users can only access this endpoint through the Platform UI."
 ```
 
-Use the bucket counts to decide whether a paid `search` is worthwhile and how to scope it.
+So on the free tier you can:
+- `GET /v3/global/asset/host/{ip}` — host detail ✓
+- `GET /v3/global/asset/host/{ip}/timeline` — host timeline ✓
+- `GET /v3/global/service/{host_id}` — service listing ✓
+- `GET /v3/global/asset/certificate/{cert_id}` — certificate by ID ✓
+
+But NOT:
+- `POST /v3/global/search/query` — host search ✗ (requires org_id, paid)
+- `POST /v3/global/search/aggregate` — aggregations ✗ (paid; this is a regression from the legacy API where they were free)
+- `POST /v3/global/asset/certificate` — bulk cert list ✗ (likely same)
+
+Search and aggregation are still available through the web UI at https://platform.censys.io/. For CLI access to those endpoints you need a paid Platform plan (the platform pricing page lists Researcher / Pro tiers).
+
+If you need free CLI access to search and aggregate, your options are:
+1. **Use Shodan instead** — Membership ($49 one-time) gives search access, and `count` is free.
+2. **Use a legacy Censys Search account** — older accounts with `CENSYS_API_ID` + `CENSYS_API_SECRET` may still have free search/aggregate access via the legacy API. The Node CLI uses that path.
+3. **Pay for a Platform plan** if you specifically need the new platform's threat-hunting capabilities.
 
 ## Admiralty defaults (for `/score-source`)
 

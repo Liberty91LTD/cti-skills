@@ -25,37 +25,41 @@ Queries Censys for host and certificate reconnaissance on IPs, or runs a Censys 
 
 ## How to invoke
 
-Two CLIs are provided. Pick by capability needed:
+Two CLIs are provided. Pick by capability needed.
 
-### Basic host + search — Node CLI (zero deps)
+> **Auth note**: Censys migrated to a single Personal Access Token (PAT) on the new Platform. The Node CLI uses the legacy Search API (HTTP Basic Auth with `CENSYS_API_ID` + `CENSYS_API_SECRET`); the Python CLI uses the new Platform API (Bearer auth with `CENSYS_PAT`). New accounts get a PAT — use the Python CLI. Old accounts may still have working legacy credentials and can use either.
+
+### Basic host + search — Node CLI (legacy Search API)
 
 ```bash
 node tools/clis/censys.js ip <ip>
 node tools/clis/censys.js search "<query>"      # Censys Search syntax
 ```
 
-Hits hosts/{ip} or hosts/search. Best for fast retrieval inside an investigation chain.
+Requires `CENSYS_API_ID` + `CENSYS_API_SECRET` (legacy). Hits hosts/{ip} or hosts/search.
 
-### Full SDK surface — Python CLI (uses official censys-sdk-python)
+### Full Platform surface — Python CLI (new Censys Platform SDK)
 
 ```bash
-python3 tools/clis/censys.py host <ip>
-python3 tools/clis/censys.py search "<query>" [--per-page N] [--pages N]
-python3 tools/clis/censys.py certs view <sha256_fingerprint>
-python3 tools/clis/censys.py certs search "<query>" [--per-page N] [--pages N]
-python3 tools/clis/censys.py aggregate "<query>" --field FIELD [--buckets N]
-python3 tools/clis/censys.py account
+python3 tools/clis/censys.py host <ip> [--at-time ISO8601]
+python3 tools/clis/censys.py timeline <ip> --start ISO8601 --end ISO8601
+python3 tools/clis/censys.py services <ip>
+python3 tools/clis/censys.py search "<query>" [--page-size N] [--page-token TOKEN] [--fields F1,F2]
+python3 tools/clis/censys.py aggregate "<query>" --field FIELD [--buckets N] [--filter-by-query]
+python3 tools/clis/censys.py certs view <cert_id>
+python3 tools/clis/censys.py certs list <id1,id2,...>
 ```
 
-Self-bootstraps a private venv at `tools/clis/.venv-censys/` on first run.
+Requires `CENSYS_PAT` (new). Self-bootstraps a private venv at `tools/clis/.venv-censys/` on first run (installs `censys-platform`).
 
 Capabilities the Node CLI doesn't have, ordered by CTI value:
 
 1. **Aggregate** — the unsung hero. **Aggregations are free** (do not consume query credits) and let you ask "how many hosts in this query break down by country / port / ASN / product?" in a single call. Use this BEFORE a search to scope the result set without spending credits.
-2. **Certificate search** — find every cert matching a query (subject CN, issuer, SAN, fingerprint pattern). The strongest TLS-pivoting capability.
-3. **Certificate view by fingerprint** — pull full cert detail including all hosts that have served it.
-4. **Multi-page search** with cursor — collect more than `per_page` results when a single page isn't enough.
-5. **Account** — see remaining query credits BEFORE a search-heavy session.
+2. **Host timeline** — the activity history of a single IP between two timestamps. New in Platform.
+3. **At-time host view** — see what a host looked like at a past timestamp (Platform-only).
+4. **Service listing** — enumerate just the services on a host without the full record.
+5. **Certificate view by ID** + **certificate list (bulk)** — pull cert detail or batch fetch.
+6. **Cursor-based pagination** — `--page-token` for traversing large result sets.
 
 Examples:
 ```bash
@@ -69,28 +73,51 @@ python3 tools/clis/censys.py aggregate \
   'services.tls.jarm.fingerprint: "1234567890abcdef..."' \
   --field autonomous_system.asn --buckets 50
 
-# Cert search: every certificate signed for *.badcorp.example
-python3 tools/clis/censys.py certs search \
-  'parsed.names: "*.badcorp.example"'
+# What was this IP doing two weeks ago? (Platform-only)
+python3 tools/clis/censys.py host 185.220.101.45 \
+  --at-time 2026-04-12T00:00:00Z
 
-# Pivot from a cert fingerprint to all hosts that served it
+# Daily activity timeline for an IP
+python3 tools/clis/censys.py timeline 185.220.101.45 \
+  --start 2026-04-01T00:00:00Z --end 2026-04-26T00:00:00Z
+
+# Certificate view by ID (the SHA-256 fingerprint)
+python3 tools/clis/censys.py certs view 5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8
+
+# Search hosts and only return specific fields (saves payload)
 python3 tools/clis/censys.py search \
-  'services.tls.certificates.leaf_data.fingerprint_sha256: 5e884898...'
-
-# Quota check before committing to a sweep
-python3 tools/clis/censys.py account
+  'services.tls.certificates.leaf_data.subject.common_name: "*.badcorp.example"' \
+  --fields ip,location.country_code,services.port
 ```
 
-Both CLIs accept `--dry-run`. Both exit code 2 if credentials are missing (when not in dry-run). Report missing credentials; do not fabricate.
+Both CLIs accept `--dry-run`. Python CLI exits code 2 if `CENSYS_PAT` is unset; Node CLI exits code 2 if either of the legacy variables is unset. Report missing credentials; do not fabricate.
 
-### Quota awareness — read this first
+### Free tier reality check (Platform API)
 
-Censys free tier is **250 queries/month**, period. Each `host`, `search` page, and `certs` call costs one credit. Before a sweep:
-1. Run `account` to check balance.
-2. Run `aggregate` (free) to understand scope.
-3. Only then run targeted `search` or `host` calls.
+The new Censys Platform tightened free-tier API access. As of 2026, free Community accounts can call these endpoints **only**:
 
-For bulk infrastructure mapping, **prefer Shodan** unless you specifically need Censys' superior certificate or scan-quality data.
+- `host` — view host detail by IP ✓
+- `services` — list services on a host ✓
+- `timeline` — host activity timeline between two timestamps ✓
+- `certs view` — certificate by ID ✓
+
+These are restricted on free tier (return `403 "endpoint requires organization ID"`):
+
+- `search` — paid plan with organization required
+- `aggregate` — paid plan only (no longer free as it was on the legacy API)
+- `certs list` — likely same restriction
+
+For **search / aggregation / pivoting on a free account**, use the Censys web UI at https://platform.censys.io/. The web UI has full access; API access for those endpoints is a paid feature.
+
+For **CLI use on free tier**, the Python CLI is still useful for per-IP enrichment (`host`, `services`, `timeline`) but won't replace the legacy Search API's free aggregations. If you have a legacy account with `CENSYS_API_ID` + `CENSYS_API_SECRET`, the Node CLI may give you better free-tier reach for now.
+
+### Credits (free tier)
+
+Each per-IP call on a free account counts against the **250 queries/month** quota. Be deliberate.
+
+### When to use Censys vs Shodan
+
+For bulk infrastructure mapping, **prefer Shodan** — its free-membership tier ($49 one-time) gives you proper search access, and `count` is free. Reserve Censys for high-fidelity per-IP enrichment of indicators you've already found elsewhere.
 
 ## Response format
 
