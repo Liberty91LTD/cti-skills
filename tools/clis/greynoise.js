@@ -47,13 +47,14 @@ async function main() {
   if (!isIP(value)) die(`not an IP address: ${value}`, 3);
 
   const url = `${API_BASE}/v3/community/${encodeURIComponent(value)}`;
-  const headers = { key: API_KEY || '', Accept: 'application/json' };
+  // Community endpoint works unauthenticated. Send the key only if set.
+  const headers = { Accept: 'application/json' };
+  if (API_KEY) headers.key = API_KEY;
 
   if (dryRun) {
-    console.log(JSON.stringify({ dry_run: true, method: 'GET', url, headers: { key: API_KEY ? '<redacted>' : '<unset>' } }, null, 2));
+    console.log(JSON.stringify({ dry_run: true, method: 'GET', url, headers: { key: API_KEY ? '<redacted>' : '<unset (community endpoint OK without)>' } }, null, 2));
     return;
   }
-  if (!API_KEY) die('GREYNOISE_API_KEY not set.', 2);
 
   const resp = await get(url, headers);
 

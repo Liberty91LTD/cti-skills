@@ -69,12 +69,13 @@ python3 tools/clis/greynoise.py stats 'tags:"Mirai" last_seen:30d'
 python3 tools/clis/greynoise.py similarity 185.220.101.45 --limit 50
 ```
 
-Both CLIs accept `--dry-run`. Both exit code 2 if `$GREYNOISE_API_KEY` is unset (when not in dry-run). Report missing key; do not fabricate.
+Both CLIs accept `--dry-run`.
 
-### Tier awareness
+### Tier awareness — this matters
 
-- **Community endpoint** is free (50/day) and good enough for "is this a known scanner?" — that's most investigation use.
-- **Enterprise endpoints** unlock the pivoting power but require a paid tier. The CLI returns a 402 / "upgrade required" error if your key doesn't have access — that's the signal to fall back to community.
+- **Community endpoint** (`/v3/community/{ip}`) is **public and unauthenticated**. Both CLIs work without `$GREYNOISE_API_KEY` for the `community` subcommand. Rate-limited per source IP (a few per minute is fine; sustained bulk lookups will throttle).
+- **Enterprise endpoints** (context, RIOT, GNQL, similarity, timeline, quick) require a paid Enterprise key. As of 2026 GreyNoise no longer offers a free community API key tier — what their portal calls an "API key" gates Enterprise access. The CLIs return a 401 / 402 / "upgrade required" error if your key doesn't have access; fall back to `community`.
+- The community endpoint is sufficient for the most common CTI question — "is this IP a known scanner?" — for most investigation use.
 
 ## Response format
 

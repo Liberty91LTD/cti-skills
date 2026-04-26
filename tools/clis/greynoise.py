@@ -136,14 +136,36 @@ def _summarise(d):
 
 
 def cmd_community(args):
+    """Community endpoint — works unauthenticated. Skip the SDK entirely."""
     if args.dry_run:
         print(json.dumps({"dry_run": True, "operation": "community.ip", "ip": args.ip,
-                          "tier": "free (50/day)"}, indent=2))
+                          "tier": "free (no key required)"}, indent=2))
         return
-    api = make_client()
-    d = _wrap(api.ip_community, args.ip)
+
+    import urllib.error
+    import urllib.request
+    url = f"https://api.greynoise.io/v3/community/{args.ip}"
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    if API_KEY:
+        req.add_header("key", API_KEY)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            d = json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            d = {"ip": args.ip, "observed": False,
+                 "message": "GreyNoise has not observed this IP in background noise"}
+        elif e.code == 429:
+            die("rate limited (429). Community tier has per-IP throttling.", 1)
+        else:
+            body = e.read().decode("utf-8", errors="replace") if e.fp else ""
+            die(f"HTTP {e.code}: {body[:200]}", 1)
+    except urllib.error.URLError as e:
+        die(f"network error: {e.reason}", 1)
+
     print(json.dumps({"source": "greynoise", "operation": "community",
                       "indicator": args.ip, "query_time": now_iso(),
+                      "authenticated": bool(API_KEY),
                       "result": d}, indent=2, default=str))
 
 

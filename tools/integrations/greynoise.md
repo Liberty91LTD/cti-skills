@@ -2,20 +2,22 @@
 
 [GreyNoise](https://www.greynoise.io/) classifies internet-wide scanning and background noise. Their honeypots observe opportunistic scanning activity, and they flag IPs as either "noise" (mass scanning, not targeting you specifically) or "RIOT" (rule-it-out: known-benign common services like CDNs, search engines, ISPs).
 
-## Getting an API key
+## Auth model (2026)
 
-1. Sign up at https://www.greynoise.io/ (free community access)
-2. Account → API keys → copy
-3. Set `GREYNOISE_API_KEY` in your environment or via `./scripts/setup.sh`
+GreyNoise restructured their tiers: there is **no longer a free community API key tier**. Two auth modes are now in play:
+
+1. **Community endpoint (no key required)** — `GET /v3/community/{ip}` is public. The CLIs work without `GREYNOISE_API_KEY` for the `community` subcommand. Throttled per source IP.
+2. **Enterprise key** — from `viz.greynoise.io` → workspace → API key. Unlocks context, RIOT, GNQL search, similarity, timeline, bulk quick. Paid tier; the portal will show "Upgrade your account to access this feature" if you don't have an Enterprise plan.
+
+Set `GREYNOISE_API_KEY` only if you have Enterprise access. The community endpoint will use the key if set (slightly higher per-IP rate ceiling) but does not require it.
 
 ## Rate limits
 
-| Tier | Queries/day | Endpoints |
+| Endpoint | Auth | Limit |
 |---|---|---|
-| Community (free) | 50 | `/community/{ip}` |
-| Enterprise | higher | `/noise/context/{ip}`, search, pivots |
-
-The CLI tries `/community/{ip}` first; falls back to `/noise/context/{ip}` if the key has enterprise access.
+| `/v3/community/{ip}` | none / Community | per-source-IP throttle (a few req/min OK) |
+| `/v3/community/{ip}` | Enterprise | higher (per plan) |
+| context / RIOT / GNQL / similarity / timeline | Enterprise | per plan |
 
 ## Supported indicators
 
