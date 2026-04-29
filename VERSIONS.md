@@ -29,8 +29,8 @@ Agents should check this file on session start and warn the user if 2+ skills ha
 | Skill | Version | Last updated |
 |---|---|---|
 | `campaign-tracking` | 1.0.0 | 2026-04-20 |
-| `darkweb-collection` | 1.0.0 | 2026-04-20 |
-| `indicator-pivoting` | 1.0.0 | 2026-04-20 |
+| `darkweb-collection` | 2.0.0 | 2026-04-28 |
+| `indicator-pivoting` | 2.0.0 | 2026-04-28 |
 | `malware-analysis` | 1.0.0 | 2026-04-20 |
 | `osint-methodology` | 1.0.0 | 2026-04-20 |
 | `threat-actor-profiling` | 1.0.0 | 2026-04-20 |
@@ -74,7 +74,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 |---|---|---|
 | `confidence-levels` | 1.0.0 | 2026-04-20 |
 | `intelligence-writing` | 1.0.0 | 2026-04-20 |
-| `ioc-enrichment-workflow` | 1.0.0 | 2026-04-20 |
+| `ioc-enrichment-workflow` | 2.0.0 | 2026-04-28 |
 | `ioc-export` | 1.0.0 | 2026-04-20 |
 | `kql-writing` | 1.0.0 | 2026-04-20 |
 | `likelihood-language` | 1.0.0 | 2026-04-20 |
@@ -121,6 +121,15 @@ These remain for reference but agents should prefer the `lookup-*` skills above.
 | `virustotal-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-virustotal` |
 
 ## Changelog
+
+### 1.5.0 — 2026-04-28
+- Added `tools/audit-integrations.py` — stdlib auditor that parses `tools/REGISTRY.md` as the source of truth and runs ten checks across the codebase (registry/disk consistency, integration-guide presence, CLI presence, `VERSIONS.md` coverage, dead `*-agent` references, unknown `/lookup-*` references, `cti-setup` env-var coverage, `scripts/setup.sh` env-var coverage, composite-skill cross-reference coverage, and "the N services" cardinality drift). Wired into `validate-skills.sh` as a non-fatal step. Documented the add/update/remove integration workflow in `CONTRIBUTING.md`. Sweep-cleanup driven by the auditor in this same release: `ioc-enrichment-workflow` 2.0.0 (18 retired `*-agent` references replaced with `/lookup-*` skill names; expanded routing tables; added `lookup-misp` and `lookup-ransomwarelive` correlation steps); `ip-investigation` / `domain-investigation` / `hash-investigation` / `url-investigation` now cross-reference `/lookup-misp` for internal-correlation; `osint-methodology`, `campaign-tracking`, `vulnerability-intelligence`, `threat-actor-profiling`, and `malware-analysis` gained "Related skills" sections that route into the current `/lookup-*` set, `/indicator-pivoting`, and `/darkweb-collection`. Auditor reports 0 FAIL / 0 WARN at end of release.
+
+### 1.4.0 — 2026-04-28
+- `indicator-pivoting` 2.0.0 — overhauled to use the current `/lookup-*` skills (the prior version routed to the retired `*-agent` agents) and to include concrete CLI invocations per pivot type. Added decision trees + commands for four new starting indicator types: URL, TLS certificate (SHA-256/CN), registrant email/org, and actor/family/campaign label. Added a Telegram-handle / .onion starting point that hands off to `/darkweb-collection`. New "Pivot routing — by goal" table maps every common pivot to its first-/second-choice lookup. Added a five-hop worked example (phish URL → APT cluster) with real CLI commands and per-hop confidence scoring. Refreshed pivot-quality table (added JARM, JA3, MITRE-technique-overlap caveats) and pivot-documentation template. MAJOR bump because the routing table and frontmatter description changed in ways that prior callers should re-read.
+
+### 1.3.0 — 2026-04-28
+- `darkweb-collection` 2.0.0 — substantial expansion. Restructured into `SKILL.md` + `references/` + `scripts/` (first skill in the pack to use the subdir layout). New material: 37 sourced underground forums across 8 categories (`references/forums.md`), 34 sourced Telegram channels across 6 categories (`references/telegram-channels.md`), vendor-first access matrix covering 13 commercial CTI vendors plus a DIY Tails/Whonix/Tor/Telethon playbook (`references/access-methods.md`), handler-side OPSEC primer including persona separation, stylometry, mental-health framing, and explicit out-of-scope statement for CSAM/terrorism/violent-extremist content (`references/opsec.md`), and passive-monitoring strategy with selector taxonomy + cadence table + storage schema (`references/passive-monitoring.md`). Three new stdlib-only Python CLIs under `scripts/`: `onion_search.py` (clearnet search of Ahmia + dark.fail + IntelligenceX onion indexers), `telegram_monitor.py` (read-only Telethon channel monitor; light dep), `keyword_match.py` (local regex/keyword scanner over collected JSONL). Reads `INTELX_API_KEY` (optional, freemium) and `TELEGRAM_API_ID`/`TELEGRAM_API_HASH`/`TELEGRAM_SESSION` (for Telegram monitor). MAJOR bump because the skill's frontmatter description, file layout, and recommended posture all changed; prior callers relying on the v1 single-file shape need to re-read.
 
 ### 1.2.0 — 2026-04-26
 - `domain-investigation` 1.1.0 — chains `/lookup-ransomwarelive search` against an org-candidate derived from the domain's apex, surfaces `ransomware_status` in the consolidated output, and adds a "Ransomware-claim hits" handling section covering name-collision risk and the metadata-vs-description credibility split.

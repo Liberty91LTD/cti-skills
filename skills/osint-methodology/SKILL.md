@@ -102,3 +102,15 @@ Record every finding with full attribution:
 - Respect robots.txt and terms of service
 - Be aware of data protection regulations (GDPR)
 - Do not engage with threat actors or participate in illegal activity
+
+## Related skills
+
+When OSINT collection surfaces an indicator, route into the appropriate enrichment / pivot:
+
+- **Bulk IOC enrichment** — `/ioc-enrichment-workflow` chains `/lookup-virustotal`, `/lookup-otx`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-urlscan`, `/lookup-censys`, and `/lookup-misp`
+- **Single-indicator first hop** — `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`
+- **Multi-hop graph walk** — `/indicator-pivoting`
+- **Internal correlation against your own catalogue** — `/lookup-misp search-attributes` / `search-events`
+- **Ransomware victim-status sweeps on org names** — `/lookup-ransomwarelive search --q <orgname>`
+- **Underground forums and Telegram** — `/darkweb-collection` (read its OPSEC primer before any DIY collection)
+- **Apply rigor to the finished product** — `/score-source`, `/apply-tlp`, `/confidence-language`, `/likelihood-language`

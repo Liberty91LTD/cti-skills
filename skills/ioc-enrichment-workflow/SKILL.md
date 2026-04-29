@@ -1,70 +1,88 @@
 ---
 name: ioc-enrichment-workflow
-description: Workflow for enriching raw IOCs. Routes each IOC type to appropriate tool agents and synthesises results.
+description: Workflow for enriching raw IOCs. Routes each IOC type to the appropriate /lookup-* skills, optionally correlates against MISP, and synthesises a single enrichment record per indicator. Use when the user has a batch of raw IOCs to process before triage or before pushing into a sharing platform.
 user-invocable: false
 metadata:
-  version: 1.0.0
+  version: 2.0.0
+  tags: [enrichment, workflow, composition]
 ---
 
 # IOC Enrichment Workflow
 
-This workflow defines how to enrich raw indicators of compromise by routing them to the appropriate tool agents and synthesising results.
+This workflow defines how to enrich raw indicators of compromise by routing them to the appropriate `/lookup-*` skills and synthesising results.
 
-## Enrichment Routing by IOC Type
+**This skill invokes:** `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, optionally `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
 
-### IPv4/IPv6 Address
-| Order | Agent | What to extract |
+## Enrichment routing by IOC type
+
+### IPv4/IPv6 address
+
+| Order | Skill | What to extract |
 |-------|-------|----------------|
-| 1 | virustotal-agent | Detection ratio, community score, associated domains, last analysis results |
-| 2 | abuseipdb-agent | Abuse confidence score, report count, ISP, usage type, country |
-| 3 | greynoise-agent | Classification (benign/malicious/unknown), noise status, actor, tags |
-| 4 | shodan-agent | Open ports, banners, services, OS, hostnames, vulns, last update |
-| 5 | otx-agent | Pulse count, associated pulses, reputation, related indicators |
-| 6 | censys-agent | Services, certificates, autonomous system, location |
+| 1 | `/lookup-virustotal` | Detection ratio, community score, associated domains, last analysis results |
+| 2 | `/lookup-abuseipdb` | Abuse confidence score, report count, ISP, usage type, country |
+| 3 | `/lookup-greynoise` | Classification (benign/malicious/unknown), noise status, actor, tags |
+| 4 | `/lookup-shodan` | Open ports, banners, services, OS, hostnames, vulns, last update |
+| 5 | `/lookup-otx` | Pulse count, associated pulses, reputation, related indicators |
+| 6 | `/lookup-censys` | Services, certificates, autonomous system, location |
+| 7 | `/lookup-misp` | Internal correlation — `search-attributes --value <ip>` to surface prior catalogued events |
 
 ### Domain
-| Order | Agent | What to extract |
+
+| Order | Skill | What to extract |
 |-------|-------|----------------|
-| 1 | virustotal-agent | Detection ratio, WHOIS, DNS records, subdomains, communicating files |
-| 2 | urlscan-agent | Screenshot, page content, redirects, technologies, IPs resolved |
-| 3 | shodan-agent | DNS resolution history, open ports on resolved IPs |
-| 4 | otx-agent | Pulse count, associated indicators, passive DNS |
-| 5 | censys-agent | Certificate history, associated IPs |
+| 1 | `/lookup-virustotal` | Detection ratio, WHOIS, DNS records, subdomains, communicating files |
+| 2 | `/lookup-urlscan` | Existing scans (search, don't re-submit by default): screenshot, page content, redirects, technologies, IPs resolved |
+| 3 | `/lookup-shodan` | DNS resolution, open ports on resolved IPs |
+| 4 | `/lookup-otx` | Pulse count, associated indicators, passive DNS |
+| 5 | `/lookup-censys` | Certificate history, associated IPs (paid plan) |
+| 6 | `/lookup-misp` | `search-attributes --value <domain>` for internal correlation |
+| 7 | `/lookup-ransomwarelive` | `search --q <org-candidate>` — sweep ransomware leak-site claims that match the apex (see `/domain-investigation` § Ransomware-claim hits for caveats) |
 
 ### URL
-| Order | Agent | What to extract |
+
+| Order | Skill | What to extract |
 |-------|-------|----------------|
-| 1 | virustotal-agent | Detection ratio, final URL, redirections, downloaded files |
-| 2 | urlscan-agent | Screenshot, DOM content, requests made, IPs contacted, technologies |
-| 3 | otx-agent | Pulse associations, reputation |
+| 1 | `/lookup-virustotal` | Detection ratio, final URL, redirections, downloaded files |
+| 2 | `/lookup-urlscan` | Existing scans first; submit fresh only if no recent capture exists. Screenshot, DOM, requests, IPs contacted, technologies |
+| 3 | `/lookup-otx` | Pulse associations, reputation |
+| 4 | `/lookup-misp` | `search-attributes --value <url>` for internal correlation |
 
-### File Hash (MD5, SHA-1, SHA-256)
-| Order | Agent | What to extract |
+### File hash (MD5, SHA-1, SHA-256)
+
+| Order | Skill | What to extract |
 |-------|-------|----------------|
-| 1 | virustotal-agent | Detection ratio, file type, size, names, behavioural analysis, MITRE ATT&CK tags |
-| 2 | otx-agent | Pulse associations, related indicators, YARA matches |
+| 1 | `/lookup-virustotal` | Detection ratio, file type, size, names, behavioural analysis, MITRE ATT&CK tags |
+| 2 | `/lookup-otx` | Pulse associations, related indicators, YARA matches |
+| 3 | `/lookup-misp` | `search-attributes --value <hash>` for internal correlation |
+| 4 | `/lookup-ransomwarelive` | `iocs <group>` and `yara <group>` if the hash hits a known ransomware family from VT classification |
 
-### Email Address
-| Order | Agent | What to extract |
+### Email address
+
+| Order | Skill | What to extract |
 |-------|-------|----------------|
-| 1 | virustotal-agent | Associated domains, files |
-| 2 | otx-agent | Pulse associations |
+| 1 | `/lookup-virustotal` | Associated domains and files (premium feature, may return empty on free tier) |
+| 2 | `/lookup-otx` | Pulse associations |
+| 3 | `/lookup-misp` | `search-attributes --type email --value <email>` for internal correlation |
 
-## Enrichment Process
+## Enrichment process
 
-### Step 1: Parse and Classify
+### Step 1: Parse and classify
+
 Read the input IOC list. For each indicator:
 1. Determine type (IPv4, IPv6, domain, URL, hash, email)
 2. Validate format (regex check)
 3. Deduplicate
 
-### Step 2: Batch and Route
-Group IOCs by type. For each group, request the orchestrator to dispatch the appropriate tool agents (see routing table above).
+### Step 2: Batch and route
 
-**Parallelisation**: For a single IOC, dispatch all relevant agents in parallel. For bulk IOCs, process in batches of 10 to respect rate limits.
+Group IOCs by type. For each group, dispatch the relevant `/lookup-*` skills (see routing tables above).
 
-### Step 3: Synthesise Results
-For each IOC, combine results from all agents into a single enrichment record:
+**Parallelisation**: For a single IOC, dispatch all relevant lookups in parallel. For bulk IOCs, process in batches of 10 to respect rate limits (see `tools/REGISTRY.md` for per-API limits).
+
+### Step 3: Synthesise results
+
+For each IOC, combine results from all lookups into a single enrichment record:
 
 ```yaml
 indicator: 203.0.113.42
@@ -101,39 +119,67 @@ censys:
   services: [HTTP, HTTPS]
   certificate_issuer: "Let's Encrypt"
 
+misp:
+  matched_attributes: 3
+  matched_events: [42, 137]   # event IDs in the local instance
+  prior_tags: ["tlp:amber", "actor:apt28"]
+
 synthesis:
   verdict: malicious
   confidence: 85
-  context: "Known C2 server associated with APT28 campaigns. Hosted on bulletproof infrastructure in Russia. Multiple community reports confirm malicious activity."
+  context: "Known C2 server associated with APT28 campaigns. Hosted on bulletproof infrastructure in Russia. Multiple community reports plus prior MISP events confirm malicious activity."
   tags: [apt28, c2, cobalt-strike]
   mitre_attack: [T1071.001]
 ```
 
-### Step 4: Assess and Tag
-Apply source assessment (Admiralty Scale) to the enrichment:
+### Step 4: Assess and tag
+
+Apply source assessment (Admiralty Scale) to the enrichment with `/score-source`:
 - Source reliability: B (established tool APIs, usually reliable)
-- Information credibility: Based on corroboration across tools (if 3+ tools agree → 1/Confirmed; if 2 agree → 2/Probably true; single source → 3/Possibly true)
+- Information credibility: based on corroboration across tools (3+ tools agree → 1/Confirmed; 2 agree → 2/Probably true; single source → 3/Possibly true)
+- A MISP hit on a previously-curated event lifts credibility one step (your team has already vetted it once)
 
 ### Step 5: Store
-Write enrichment results to `data/iocs/active/YYYY-MM-DD-<context>.md` with appropriate frontmatter.
 
-## Rate Limit Awareness
+Write enrichment results to `data/iocs/active/YYYY-MM-DD-<context>.md` with appropriate frontmatter. Apply `/apply-tlp` before sharing outside the team.
 
-| Service | Rate limit | Mitigation |
-|---------|-----------|------------|
-| VirusTotal (free) | 4 requests/min | Batch with 15s delays |
-| VirusTotal (premium) | 1000 requests/min | Batch freely |
-| URLScan.io (free) | 100 searches/day | Prioritise domains/URLs |
-| Shodan (free) | 1 request/sec | Sequential processing |
-| AbuseIPDB (free) | 1000 requests/day | IPs only |
-| GreyNoise (free) | 50 requests/day | IPs only, prioritise |
-| OTX | 10,000 requests/hour | Batch freely |
-| Censys (free) | 250 requests/month | Selective use only |
+### Step 6 (optional): Push back
 
-## Handling Missing API Keys
+If the enrichment confirms a previously-unknown malicious indicator and you maintain a MISP instance, push it back via `/lookup-misp add-attribute` (or `create-event` for a fresh cluster) so future enrichments hit your own catalogue first.
+
+### Step 7 (optional): Pivot
+
+If the enrichment surfaces strong cluster candidates (cert siblings, JARM matches, communicating files), hand off to `/indicator-pivoting` for the next hop.
+
+## Rate-limit awareness
+
+Per-API limits live in `tools/REGISTRY.md`. Summary:
+
+| Service | Free-tier limit | Mitigation |
+|---------|-----------------|------------|
+| VirusTotal (free) | 4/min, 500/day | Batch with 15s delays |
+| URLScan.io (free) | 100 scans/day | Prefer `search` over `submit` |
+| Shodan (free) | 1 req/sec | Sequential processing |
+| AbuseIPDB (free) | 1000 checks/day | IPs only |
+| GreyNoise (free) | 50 req/day | IPs only, prioritise |
+| OTX | 10k req/hour | Batch freely |
+| Censys | 250/month | Selective use only |
+| MISP | host-bound | Local; no public limit |
+| ransomware.live (PRO) | 3000/day | Plenty for bulk org-candidate sweeps |
+
+## Handling missing API keys
 
 If an API key is not configured for a service:
 1. Skip that enrichment source
 2. Note in the synthesis that the source was unavailable
 3. Adjust confidence accordingly (fewer sources = lower corroboration)
 4. Continue with available sources
+
+To configure missing keys, point the user at `/cti-setup`.
+
+## Related skills
+
+- `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-ransomwarelive` — the underlying lookups
+- `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` — single-seed first-hop chains; this workflow is the bulk-list equivalent
+- `/indicator-pivoting` — when an enrichment opens new pivot candidates
+- `/score-source`, `/apply-tlp`, `/confidence-language` — apply rigor to each finished enrichment record

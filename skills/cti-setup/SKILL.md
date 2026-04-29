@@ -8,7 +8,7 @@ metadata:
 
 # cti-setup
 
-In-chat configuration of API keys for the seven threat-intel integrations bundled with this pack. Use this when the user is in Claude Code and doesn't want to drop to a shell to run `./scripts/setup.sh`.
+In-chat configuration of API keys for the threat-intel integrations bundled with this pack. Use this when the user is in Claude Code and doesn't want to drop to a shell to run `./scripts/setup.sh`.
 
 ## When to invoke
 
@@ -20,14 +20,14 @@ In-chat configuration of API keys for the seven threat-intel integrations bundle
 ## What you do
 
 1. **Check current state.** Read `.claude/settings.local.json`. If it's missing or has no `env` block, the user has zero keys configured. If it has some, list which are present and which are missing.
-2. **Tell the user the menu.** Present the seven services in a table with: name, env variable, free-tier limit, signup URL. Make clear all are optional and that the pack degrades gracefully.
-3. **Ask which to configure.** Let the user provide one, several, or all. Don't force them through eight prompts.
+2. **Tell the user the menu.** Present the services in a table with: name, env variable, free-tier limit, signup URL. Make clear all are optional and that the pack degrades gracefully.
+3. **Ask which to configure.** Let the user provide one, several, or all. Don't force them through every prompt.
 4. **Receive the keys.** When the user shares a key, treat it as sensitive — do not echo it back in plain text in your response (refer to it as `your VirusTotal key` or the masked tail `…<last 4 chars>`).
 5. **Write the merged file.** Use the non-destructive merge below — preserve every other field in `settings.local.json`.
 6. **Offer to verify.** Ask if they want you to dry-run each configured key against its CLI to confirm it's wired up.
 7. **Tell them what's next.** "Try `/ip-investigation 8.8.8.8`" or similar concrete next command.
 
-## The seven services
+## The services
 
 | Service | Env variable | Free tier | Signup |
 |---|---|---|---|
@@ -38,8 +38,10 @@ In-chat configuration of API keys for the seven threat-intel integrations bundle
 | GreyNoise | `GREYNOISE_API_KEY` | 50 req/day (community) | viz.greynoise.io → account |
 | AlienVault OTX | `OTX_API_KEY` | 10k req/hour | otx.alienvault.com → settings |
 | Censys | `CENSYS_PAT` | 250 queries/month | accounts.censys.io → settings → personal-access-tokens |
+| MISP | `MISP_URL` + `MISP_API_KEY` | self-hosted / org-provided | your MISP instance → My Profile → Auth keys |
+| Ransomware.live | `RANSOMWARE_LIVE` | 3000 req/day (PRO) | my.ransomware.live → free PRO key |
 
-A starter set of **VirusTotal + OTX + URLScan + AbuseIPDB** covers most IP/domain/URL/hash investigations. Shodan and GreyNoise add value for IP-focused work. Censys is optional (very tight rate limit).
+A starter set of **VirusTotal + OTX + URLScan + AbuseIPDB** covers most IP/domain/URL/hash investigations. Shodan and GreyNoise add value for IP-focused work. Censys is optional (very tight rate limit). MISP requires both a base URL and an auth key — point it at your org's instance. Ransomware.live powers the `lookup-ransomwarelive` and `ransomware-ecosystem` skills (victim/group tracking).
 
 ## How to write the file
 
@@ -48,10 +50,13 @@ The file is `.claude/settings.local.json`. It is gitignored. **Do not overwrite 
 ```bash
 ./scripts/setup.sh --non-interactive \
   --virustotal=USER_PROVIDED_KEY \
-  --shodan=USER_PROVIDED_KEY
+  --shodan=USER_PROVIDED_KEY \
+  --misp-url=https://misp.example.org \
+  --misp=USER_PROVIDED_KEY \
+  --ransomwarelive=USER_PROVIDED_KEY
 ```
 
-(Pass only the flags for keys the user actually shared.)
+(Pass only the flags for keys the user actually shared. Available flags: `--virustotal`, `--urlscan`, `--shodan`, `--abuseipdb`, `--greynoise`, `--otx`, `--censys`, `--misp-url`, `--misp`, `--ransomwarelive`.)
 
 If `scripts/setup.sh` is not present (e.g. plugin-only install), do the merge yourself with this Node one-liner. Replace `KEY=VAL` pairs with the user's input:
 

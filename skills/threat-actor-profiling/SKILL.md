@@ -101,3 +101,13 @@ Always list all known aliases and cross-reference when building profiles.
 - Review quarterly for staleness
 - Move concluded campaigns from Active to Historical
 - Update intelligence gaps as gaps are filled or new ones identified
+
+## Related skills
+
+- **Ransomware-group profiles (highest leverage)** — `/lookup-ransomwarelive group <name>` and `group-profile <name>` return curated TTPs, leak-site `.onion` infrastructure, vulnerabilities exploited, and per-group IOC + YARA dumps. Use these as the *primary* feed for any ransomware actor profile, then enrich.
+- **Community attribution** — `/lookup-otx pulse-search "<actor-or-alias>"` for community-tagged indicators; `/lookup-misp search-events --tag "actor=<name>"` for prior internal cataloguing
+- **Build the infrastructure cluster** — `/indicator-pivoting` walks the IOC graph (hand off `pivot_candidates` from the lookups above)
+- **Underground-forum and Telegram footprint** — `/darkweb-collection` for forum/channel monitoring of an actor's known aliases
+- **Campaigns attributed to the actor** — `/campaign-tracking` for per-campaign records that roll up into the profile
+- **Knowledge cells the profile may feed into** — `/ransomware-ecosystem`, `/initial-access-brokers`, `/infostealers`, plus any country/sector knowledge cells (e.g., `/iran-cyber-espionage`)
+- **Apply rigor** — `/score-source`, `/apply-tlp`, `/confidence-language`, `/likelihood-language`, `/intelligence-writing`

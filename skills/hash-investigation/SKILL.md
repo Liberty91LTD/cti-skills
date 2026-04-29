@@ -11,7 +11,7 @@ metadata:
 
 Investigate a file hash end-to-end. Chain lookups, surface malware family attribution, prioritize infrastructure pivots, and decide whether deeper malware analysis is warranted.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-otx`, optionally `/malware-analysis`, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-misp` (internal correlation), optionally `/malware-analysis`, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -40,6 +40,11 @@ request_malware_analysis: <optional bool — trigger /malware-analysis after loo
 ```
 /lookup-virustotal hash <value>    # detection stats, family, behavior tags
 /lookup-otx hash <value>           # community pulses, campaign attribution
+```
+
+Optionally add:
+```
+/lookup-misp search-attributes --value <value>   # internal correlation against your own catalogued events
 ```
 
 ### 3. Check if known-benign

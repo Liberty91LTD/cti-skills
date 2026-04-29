@@ -116,3 +116,12 @@ Campaigns may be related. Document relationships:
 4. **Reporting**: Campaign report produced per intelligence-writing templates
 5. **Conclusion**: Campaign ends (dormant or concluded), move to historical
 6. **Knowledge cell update**: Feed findings into relevant knowledge cell
+
+## Related skills
+
+- **Build the IOC cluster** — `/indicator-pivoting` (multi-hop graph walk), `/ioc-enrichment-workflow` (bulk enrichment of raw IOCs)
+- **Per-indicator first-hop investigation** — `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`
+- **Ransomware-group campaigns** — `/lookup-ransomwarelive group-profile <name>` returns the group's documented TTPs, leak-site infrastructure, and per-group IOC + YARA dumps; pair with `/ransomware-ecosystem` knowledge cell
+- **Publish the campaign as a sharable artefact** — `/lookup-misp create-event` writes the cluster into your MISP instance; `/stix-bundle` produces the STIX 2.1 representation
+- **Actor attribution** — `/threat-actor-profiling` consumes the campaign output to build / update an actor profile
+- **Apply rigor to the campaign report** — `/score-source`, `/apply-tlp`, `/confidence-language`, `/likelihood-language`, `/intelligence-writing`

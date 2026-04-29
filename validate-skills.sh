@@ -146,4 +146,18 @@ done < <(find "${targets[@]}" -type f -name 'SKILL.md' -print0 2>/dev/null)
 
 echo "---"
 echo "Checked $CHECKED skills — $ERRORS errors, $WARNINGS warnings"
+
+# Optional integration audit (non-fatal — surfaces drift in the integration set,
+# e.g. dead *-agent references, missing VERSIONS/cti-setup rows, composite
+# coverage gaps). Skip if Python or the auditor is unavailable.
+AUDITOR="$(dirname "$0")/tools/audit-integrations.py"
+if [ -f "$AUDITOR" ] && command -v python3 >/dev/null 2>&1; then
+  echo "---"
+  echo "Integration audit (non-fatal):"
+  if ! python3 "$AUDITOR"; then
+    WARNINGS=$((WARNINGS + 1))
+    echo "(integration audit reported issues — run \`python3 tools/audit-integrations.py\` for the full list)"
+  fi
+fi
+
 exit "$ERRORS"
