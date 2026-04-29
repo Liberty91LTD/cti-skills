@@ -317,6 +317,50 @@ def check_composite_coverage(catalog, findings):
                     f"`{composite}` does not reference `/{skill}` (expected by indicator-type or EXTRA_COVERAGE rule)"))
 
 
+TRIGGER_PHRASE_RE = re.compile(
+    r"\b(use\s+(when|as)|when\s+the\s+user|invoked\s+(by|when)|activates?\s+when|apply\s+when|triggered?\s+by)\b",
+    re.IGNORECASE,
+)
+
+
+def check_description_triggers(catalog, findings):
+    """Every user-invocable skill should have a trigger phrase in its frontmatter
+    description so the orchestrator can route to it. CONTRIBUTING.md line 44
+    documents this convention. Skips skills with `user-invocable: false`."""
+    skills_root = REPO_ROOT / "skills"
+    for skill_dir in sorted(skills_root.iterdir()):
+        if not skill_dir.is_dir():
+            continue
+        sm = skill_dir / "SKILL.md"
+        if not sm.exists():
+            continue
+        try:
+            text = sm.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        m = re.match(r"---\s*\n(.*?)\n---", text, re.S)
+        if not m:
+            continue
+        fm = m.group(1)
+        # respect user-invocable: false
+        invokable = re.search(r"^user-invocable:\s*(\w+)", fm, re.M)
+        if invokable and invokable.group(1).lower() == "false":
+            continue
+        desc_m = re.search(r"^description:\s*(.+?)(?=\n[a-zA-Z_-]+:|\Z)", fm, re.S | re.M)
+        if not desc_m:
+            findings.append(Finding("WARN", "description-trigger",
+                f"`{skill_dir.name}` has no `description` field",
+                where=f"skills/{skill_dir.name}/SKILL.md"))
+            continue
+        desc = desc_m.group(1).strip()
+        if not TRIGGER_PHRASE_RE.search(desc):
+            findings.append(Finding("WARN", "description-trigger",
+                f"`{skill_dir.name}` description missing trigger phrase "
+                f"(\"Use when…\" / \"when the user…\" / \"invoked by…\" etc.) — "
+                f"see CONTRIBUTING.md",
+                where=f"skills/{skill_dir.name}/SKILL.md"))
+
+
 def check_cardinality(catalog, findings):
     """Flag hardcoded 'the seven services' / 'the nine integrations' phrases.
 
@@ -404,6 +448,7 @@ def main():
     check_dead_agent_refs(catalog, findings)
     check_unknown_lookup_refs(catalog, findings)
     check_composite_coverage(catalog, findings)
+    check_description_triggers(catalog, findings)
     check_cardinality(catalog, findings)
 
     if args.as_json:

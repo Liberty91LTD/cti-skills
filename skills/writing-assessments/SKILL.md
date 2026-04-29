@@ -1,6 +1,6 @@
 ---
 name: writing-assessments
-description: Guide for writing threat assessments, risk assessments, and vulnerability assessments. Distinct structures for each type.
+description: Use when the user asks to write a threat / risk / vulnerability assessment, or wants the appropriate template for each type. Distinct structures and section ordering per assessment kind.
 user-invocable: true
 metadata:
   version: 1.0.0

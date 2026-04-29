@@ -1,6 +1,6 @@
 ---
 name: dprk-cyber-espionage
-description: Knowledge cell for North Korean (DPRK) state-sponsored cyber espionage operations. Self-updating intelligence knowledge base.
+description: Use when the user asks about North Korean state-sponsored cyber operations or specific DPRK actors (Lazarus, APT38, BlueNoroff, Andariel, Kimsuky, etc.), revenue-generation campaigns, IT-worker schemes, or DPRK targeting of cryptocurrency / supply chain. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

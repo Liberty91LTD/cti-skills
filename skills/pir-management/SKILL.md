@@ -1,6 +1,6 @@
 ---
 name: pir-management
-description: Priority Intelligence Requirements lifecycle. Creation, review, tracking, and refinement of PIRs that drive all collection and analysis.
+description: Use when the user asks to create, review, retire, or refine Priority Intelligence Requirements, or wants to align collection and analysis to the current PIR set. Covers the PIR lifecycle end-to-end.
 user-invocable: true
 metadata:
   version: 1.0.0

@@ -1,6 +1,6 @@
 ---
 name: initial-access-brokers
-description: Knowledge cell for initial access brokers. Self-updating intelligence knowledge base.
+description: Use when the user asks about initial access brokers (IABs), the access-listing market, ransomware-feeding-IAB pipelines, specific broker handles, or how access is priced and packaged. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

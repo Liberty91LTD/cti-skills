@@ -1,6 +1,6 @@
 ---
 name: iran-cyber-espionage
-description: Knowledge cell for Iranian state-sponsored cyber espionage operations. Self-updating intelligence knowledge base.
+description: Use when the user asks about Iranian state-sponsored cyber operations or specific IRGC/MOIS-aligned actors (APT35/Charming Kitten, APT34/OilRig, MuddyWater, Imperial Kitten, etc.), wiper campaigns, or front-group hacktivist clusters (Predatory Sparrow, Handala). Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

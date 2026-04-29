@@ -1,6 +1,6 @@
 ---
 name: yara-writing
-description: YARA rule writing guide for malware detection. Pattern matching rules for identifying malicious files.
+description: Use when the user asks for a YARA rule, "write YARA for this sample/family", or `/hash-investigation` / `/malware-analysis` surfaces a sample worth a static-content rule. Pattern-matching rules for identifying malicious files.
 user-invocable: true
 metadata:
   version: 1.0.0

@@ -1,6 +1,6 @@
 ---
 name: carding-financial-fraud
-description: Knowledge cell for carding and financial fraud. Self-updating intelligence knowledge base.
+description: Use when the user asks about carding, BIN attacks, payment-card breach markets, fullz/CVV2 trade, autoshops (BidenCash, Brian's Club, Russianmarket, B1ack's Stash), or financial-fraud TTPs. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

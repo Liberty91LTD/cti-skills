@@ -120,6 +120,7 @@ The Censys migration (legacy `CENSYS_API_ID`/`CENSYS_API_SECRET` → `CENSYS_PAT
 | `cti-setup` | WARN | env var not mentioned in `skills/cti-setup/SKILL.md` |
 | `setup-sh` | WARN | env var not handled by `scripts/setup.sh` |
 | `composite-coverage` | WARN | composite skill missing a `/lookup-X` it should reference |
+| `description-trigger` | WARN | user-invocable skill's frontmatter description has no trigger phrase (`Use when…` / `when the user…` / `invoked by…` etc.) — orchestrator routing depends on it (see line 44 of this file) |
 | `cardinality` | WARN | hardcoded `the seven services` / `the nine integrations` out of sync with the current catalog count |
 
 Run `python3 tools/audit-integrations.py --strict` to make warnings fail. Run `--json` for CI consumption.

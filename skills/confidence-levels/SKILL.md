@@ -1,6 +1,6 @@
 ---
 name: confidence-levels
-description: Confidence level scales for analytical judgments. Every assessment must carry a confidence level.
+description: Use when assigning a confidence level to an analytical judgment, the user asks "how confident are we?" / "what is the confidence on X?", or the orchestrator's tradecraft pipeline calls for a confidence level before publishing. Provides the MISP 0-100 scale and qualitative-band mapping.
 user-invocable: true
 metadata:
   version: 1.0.0

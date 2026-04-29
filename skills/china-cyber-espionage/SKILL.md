@@ -1,6 +1,6 @@
 ---
 name: china-cyber-espionage
-description: Knowledge cell for Chinese state-sponsored cyber espionage operations. Self-updating intelligence knowledge base.
+description: Use when the user asks about Chinese state-sponsored cyber operations or specific PRC-aligned actors (APT41, Volt Typhoon, Mustang Panda, APT10, APT31, Salt Typhoon, etc.), MSS/PLA-attributed campaigns, or PRC sector targeting. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

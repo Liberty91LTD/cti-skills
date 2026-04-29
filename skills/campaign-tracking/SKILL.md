@@ -1,6 +1,6 @@
 ---
 name: campaign-tracking
-description: Campaign documentation and tracking template. Timeline, attribution, victimology, attack chain, Diamond Model mapping, and IOC clusters.
+description: Use when documenting a named campaign across time and victims, the user asks to start or update a campaign record, or another skill identified a multi-incident cluster that warrants formal tracking. Provides the template (timeline, attribution, victimology, attack chain, Diamond Model mapping, IOC clusters) and the lifecycle from active to historical.
 user-invocable: true
 metadata:
   version: 1.0.0

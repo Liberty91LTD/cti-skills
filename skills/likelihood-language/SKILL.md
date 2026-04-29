@@ -1,6 +1,6 @@
 ---
 name: likelihood-language
-description: Probability yardstick for forward-looking assessments. Standardises likelihood language across all products.
+description: Use when phrasing a forward-looking statement, the user asks "how likely is X?" / "what's the likelihood?", or the tradecraft pipeline applies a probability yardstick to a finished product. Standardised likelihood language across all products.
 user-invocable: true
 metadata:
   version: 1.0.0

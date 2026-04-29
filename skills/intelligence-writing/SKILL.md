@@ -1,6 +1,6 @@
 ---
 name: intelligence-writing
-description: Intelligence writing guide with product templates. BLUF, active voice, clear sourcing. Templates for all product types.
+description: Use when writing a finished intelligence product, the user asks for a flash-report / threat-assessment / briefing / FINTEL template, or wants the BLUF + active-voice + clear-sourcing conventions. Covers all product types.
 user-invocable: true
 metadata:
   version: 1.0.0

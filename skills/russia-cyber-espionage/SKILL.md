@@ -1,6 +1,6 @@
 ---
 name: russia-cyber-espionage
-description: Knowledge cell for Russian state-sponsored cyber espionage operations. Self-updating intelligence knowledge base.
+description: Use when the user asks about Russian state-sponsored cyber operations or specific actors (APT28/Fancy Bear, Sandworm, Cozy Bear/APT29, Turla, GRU-affiliated hacktivist fronts like CARR/NoName057), wartime ICS/OT campaigns, or pro-RU information operations. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

@@ -1,6 +1,6 @@
 ---
 name: intelligence-sharing
-description: Guide to intelligence sharing models, standards, and communities. ISAC participation, TLP-governed sharing, STIX/TAXII, FIRST, MISP.
+description: Use when the user asks about ISAC participation, TAXII feeds, MISP communities, FIRST, STIX-based sharing, or how to publish intelligence externally. Covers sharing models, standards, communities, and TLP-governed dissemination.
 user-invocable: true
 metadata:
   version: 1.0.0

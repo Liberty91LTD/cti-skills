@@ -1,6 +1,6 @@
 ---
 name: infostealers
-description: Knowledge cell for infostealers. Self-updating intelligence knowledge base.
+description: Use when the user asks about infostealer families (LummaC2, RedLine, Vidar, Stealc, Raccoon, Rhadamanthys, etc.), log marketplaces (Russian Market, Genesis successors, BidenCash, Hudson Rock corpus), or stealer-driven incidents and credential exposure. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

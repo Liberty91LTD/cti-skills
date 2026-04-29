@@ -1,6 +1,6 @@
 ---
 name: maturity-assessment
-description: CTI programme maturity model. Five-level assessment across six dimensions for benchmarking and improvement planning.
+description: Use when assessing the maturity of a CTI programme, the user asks "how mature is our CTI?" / "what should we improve next?", or wants a benchmark against the five-level model across six dimensions.
 user-invocable: true
 metadata:
   version: 1.0.0

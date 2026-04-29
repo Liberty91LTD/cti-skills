@@ -1,6 +1,6 @@
 ---
 name: cti-hyperloop
-description: CTI Hyperloop framework — operational doctrine mapping the intelligence lifecycle across strategic, operational, and tactical levels with bidirectional feedback.
+description: Use when the user asks about the CTI Hyperloop framework, the intelligence lifecycle as a high-tempo loop, or how to map intelligence work across strategic / operational / tactical levels with bidirectional feedback. Liberty91's operational doctrine.
 user-invocable: true
 metadata:
   version: 1.0.0

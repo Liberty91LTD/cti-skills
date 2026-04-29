@@ -1,6 +1,6 @@
 ---
 name: tlp-guide
-description: Traffic Light Protocol v2.0 guide. Determines appropriate sharing restrictions for all intelligence outputs.
+description: Use when the user asks "what TLP should this be?", applying TLP markings to a finished product, or the tradecraft pipeline calls for TLP determination before sharing. Covers TLP v2.0 (CLEAR / GREEN / AMBER / AMBER+STRICT / RED).
 user-invocable: true
 metadata:
   version: 1.0.0

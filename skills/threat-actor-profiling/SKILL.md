@@ -1,6 +1,6 @@
 ---
 name: threat-actor-profiling
-description: How to build and maintain a threat actor profile. Comprehensive template with attribution, TTPs, campaigns, infrastructure patterns, and intelligence gaps.
+description: Use when the user asks to build or update a threat-actor profile, "tell me about actor X" / "profile actor Y", or another skill needs the canonical profile template (attribution, TTPs, campaigns, infrastructure patterns, intelligence gaps).
 user-invocable: true
 metadata:
   version: 1.0.0

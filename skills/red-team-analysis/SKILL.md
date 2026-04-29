@@ -1,6 +1,6 @@
 ---
 name: red-team-analysis
-description: Devil's advocate technique for challenging prevailing analytical judgments. Deliberately argues the opposing position to expose weaknesses.
+description: Use when challenging a prevailing analytical judgment, the user asks "what is the opposing case?" / "argue the other side", or wants a devil's-advocate review of an assessment. Deliberately argues the opposite position to expose weaknesses.
 user-invocable: true
 metadata:
   version: 1.0.0

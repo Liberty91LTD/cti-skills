@@ -1,6 +1,6 @@
 ---
 name: sigma-writing
-description: SIGMA detection rule format specification and writing guide. Translates intelligence into vendor-agnostic detection rules.
+description: Use when the user asks for a SIGMA detection rule, "write a SIGMA rule for X", or `/hash-investigation` / `/malware-analysis` surfaces behaviour worth a vendor-agnostic detection. Format spec + writing guide.
 user-invocable: true
 metadata:
   version: 1.0.0

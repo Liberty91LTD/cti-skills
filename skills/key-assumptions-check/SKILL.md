@@ -1,6 +1,6 @@
 ---
 name: key-assumptions-check
-description: Procedure for surfacing and challenging assumptions underlying analytical judgments. Use before or after major assessments.
+description: Use when surfacing the assumptions underlying an analytical judgment, the user asks "what are we assuming?" / "are these assumptions still valid?", or before publishing a high-impact assessment. Standard SAT applied during major assessments.
 user-invocable: true
 metadata:
   version: 1.0.0

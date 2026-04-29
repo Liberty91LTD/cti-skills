@@ -1,6 +1,6 @@
 ---
 name: sops
-description: Standard Operating Procedures index for CTI operations. Covers daily triage, IOC processing, flash reports, threat actor updates, and briefings.
+description: Use when the user asks about CTI standard operating procedures (daily triage, IOC processing, flash-report cadence, threat-actor profile updates, briefing schedule), or wants to look up a specific SOP.
 user-invocable: true
 metadata:
   version: 1.0.0

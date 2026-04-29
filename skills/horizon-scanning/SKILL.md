@@ -1,6 +1,6 @@
 ---
 name: horizon-scanning
-description: Methodology for identifying emerging threats before they materialise. Weak signal identification, trend analysis, and scenario development.
+description: Use when the user asks "what is coming next?", wants strategic forecasting, or is hunting weak signals of emerging threats before they materialise. Covers signal identification, trend analysis, and scenario development.
 user-invocable: true
 metadata:
   version: 1.0.0

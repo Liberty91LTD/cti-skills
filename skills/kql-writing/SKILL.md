@@ -1,6 +1,6 @@
 ---
 name: kql-writing
-description: KQL (Kusto Query Language) writing guide for Microsoft Sentinel detection queries.
+description: Use when the user asks for a KQL query, a Microsoft Sentinel / Defender / Azure Log Analytics detection or hunt, or wants to translate a finding from `/hash-investigation` / `/malware-analysis` into KQL. Format spec + writing guide.
 user-invocable: true
 metadata:
   version: 1.0.0

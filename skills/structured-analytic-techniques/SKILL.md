@@ -1,6 +1,6 @@
 ---
 name: structured-analytic-techniques
-description: Index of all Structured Analytic Techniques (SATs). Categorised by type with usage guidance. Start here when choosing which technique to apply.
+description: Use when the user asks "which SAT should I use for X?", wants the index of Structured Analytic Techniques, or is choosing between ACH, key-assumptions-check, red-team-analysis, indicators of change, etc.
 user-invocable: true
 metadata:
   version: 1.0.0

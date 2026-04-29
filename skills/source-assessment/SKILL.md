@@ -1,6 +1,6 @@
 ---
 name: source-assessment
-description: NATO Admiralty Scale for assessing source reliability and information credibility. Apply to every piece of collected intelligence.
+description: Use when rating a source with the NATO Admiralty Scale, the user asks "is this reliable?" / "rate this source", or the tradecraft pipeline calls for source assessment before publishing. Reliability A-F, credibility 1-6.
 user-invocable: true
 metadata:
   version: 1.0.0

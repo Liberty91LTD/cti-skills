@@ -1,6 +1,6 @@
 ---
 name: hacktivism
-description: Knowledge cell for hacktivism. Self-updating intelligence knowledge base.
+description: Use when the user asks about hacktivist activity (Killnet, NoName057(16), IT Army of Ukraine, Anonymous Sudan, RipperSec, CARR, etc.), DDoS-claiming groups, politically-motivated cyber operations, or wartime cyber-ops chatter. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

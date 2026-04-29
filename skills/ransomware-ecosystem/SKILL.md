@@ -1,6 +1,6 @@
 ---
 name: ransomware-ecosystem
-description: Knowledge cell for ransomware ecosystem. Self-updating intelligence knowledge base.
+description: Use when the user asks about the ransomware ecosystem, RaaS dynamics, affiliate markets, attribution between groups, leak-site behaviour, or recent group activity (LockBit lineage, ALPHV/BlackCat, RansomHub, Akira, Play, Qilin, Cl0p, Medusa, etc.). Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

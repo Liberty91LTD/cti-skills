@@ -1,6 +1,6 @@
 ---
 name: stakeholder-management
-description: Stakeholder identification, mapping, and intelligence tailoring. Ensures intelligence reaches the right people in the right format.
+description: Use when the user asks "who are our customers?" / "how do we tailor for X stakeholder?" / "who should this report go to?", or wants to map / re-map stakeholder needs. Ensures intelligence reaches the right people in the right format.
 user-invocable: true
 metadata:
   version: 1.0.0

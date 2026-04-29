@@ -1,6 +1,6 @@
 ---
 name: phishing-social-engineering
-description: Knowledge cell for phishing and social engineering. Self-updating intelligence knowledge base.
+description: Use when the user asks about phishing campaigns, social-engineering techniques, BEC (business email compromise), pretexting, AiTM (adversary-in-the-middle) kits, or specific phishing-kit families. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell

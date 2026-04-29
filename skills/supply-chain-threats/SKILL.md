@@ -1,6 +1,6 @@
 ---
 name: supply-chain-threats
-description: Knowledge cell for supply chain threats. Self-updating intelligence knowledge base.
+description: Use when the user asks about supply-chain attacks, third-party / vendor compromise (SolarWinds, Kaseya, 3CX, MOVEit, XZ-utils-style), software-bill-of-materials risks, or library / dependency-injection attacks. Self-updating knowledge cell.
 user-invocable: true
 metadata:
   category: knowledge-cell
