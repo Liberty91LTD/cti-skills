@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+if grep -iE "^co-authored-by:.*claude" "$1" >/dev/null; then
+  echo "✗ Co-Authored-By: Claude trailer is not allowed (per project policy)."
+  exit 1
+fi
