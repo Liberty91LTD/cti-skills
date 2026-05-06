@@ -170,6 +170,12 @@ Keys are merged into `.claude/settings.local.json` (gitignored). The pack degrad
 
 To verify keys are wired up: `./scripts/setup.sh --verify` (or ask Claude to verify after `/cti-setup`).
 
+## Acknowledgements
+
+This pack codifies established Cyber Threat Intelligence tradecraft into composable agent skills. It rests on decades of public scholarship, open standards, free training material from CTI educators, and vendor research that the community publishes openly. The full per-skill credits live in **[`CREDITS.md`](CREDITS.md)**.
+
+**If we missed you.** We've tried to credit sources where we could find them. If you've contributed to work this pack draws on and feel you haven't been properly credited, please reach out at **Contact@liberty91.com** and we'll update the credits.
+
 ## Contributing
 
 Forks and PRs welcome from anyone. Merges reserved to Liberty91 Ltd maintainers. See [CONTRIBUTING.md](CONTRIBUTING.md).
