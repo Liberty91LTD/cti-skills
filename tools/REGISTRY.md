@@ -5,7 +5,7 @@ External threat-intelligence integrations in the `cti-skills` pack. Each has:
 - An **integration guide** (`tools/integrations/<api>.md`) — auth setup, rate limits, Admiralty defaults
 - A **CLI** (`tools/clis/<api>.js`) — zero-dependency Node.js wrapper the skill shells out to
 
-All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type> <value> [--dry-run]`. They read API keys from environment variables (set via `./scripts/setup.sh` or your shell rc).
+All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type> <value> [--dry-run]`. They read API keys from environment variables (set via `./scripts/setup.sh` or your shell rc). _Exception: ReversingLabs ships Python-only — its auth requires a token exchange the SDK handles, and there is no upstream Node SDK._
 
 **Python CLIs with richer endpoint coverage** are now provided for every integration:
 
@@ -17,6 +17,7 @@ All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type
 | GreyNoise | `tools/clis/greynoise.py` | pygreynoise SDK + venv | context, RIOT, similarity, timeline, GNQL search & stats, bulk quick |
 | MISP | `tools/clis/misp.py` | stdlib | **two-way** — query events/attributes/objects + write attributes, create events, upload STIX 2 bundles, tag, publish |
 | Ransomware.live | `tools/clis/ransomwarelive.py` | stdlib | leak-site victim claims, **group profiles** (TTPs, leak-site infra), per-group IOCs + YARA, ransom notes, negotiations, CSIRT contacts |
+| ReversingLabs | `tools/clis/reversinglabs.py` | reversinglabs-sdk-py3 + venv | hash classification, detailed/sandbox reports, advanced search, network URL/domain/IP intel, container/extracted-file pivot |
 | Shodan | `tools/clis/shodan.py` | shodan-python SDK + venv | search, count, facets, DNS reverse/domain, account, ports/services |
 | URLScan | `tools/clis/urlscan.py` | stdlib | Lucene search, quota, screenshot/DOM download, full submit options |
 | VirusTotal | `tools/clis/virustotal.py` | stdlib | **relationship traversal** (the pivoting feature), URL submit, comments, Intel search |
@@ -40,6 +41,7 @@ The Node and Python CLIs are complementary — Node for fast inline lookups in i
 | [Censys](integrations/censys.md) | `/lookup-censys` | `CENSYS_PAT` (Platform) / `CENSYS_API_ID`+`CENSYS_API_SECRET` (legacy) | IP, search query, certs | 250/month | A2 |
 | [MISP](integrations/misp.md) | `/lookup-misp` | `MISP_URL` + `MISP_API_KEY` | events, attributes, objects, STIX 2 bundles | host-bound (no public limit) | B2 (varies by Org) |
 | [Ransomware.live](integrations/ransomwarelive.md) | `/lookup-ransomwarelive` | `RANSOMWARE_LIVE` | victim, group, sector, country, IOCs, YARA | 3000/day (PRO) | B2 (descriptions B3–B4) |
+| [ReversingLabs A1000](integrations/reversinglabs.md) | `/lookup-reversinglabs` | `REVERSINGLABS_USER` + `REVERSINGLABS_PASSWORD` (+ optional `REVERSINGLABS_HOST`) | hash, url, domain, ip | undocumented; 429 + Retry-After | A2 |
 
 Plus one local reference:
 

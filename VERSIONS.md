@@ -103,6 +103,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `lookup-shodan` | 1.0.0 | 2026-04-20 |
 | `lookup-misp` | 1.0.0 | 2026-04-26 |
 | `lookup-ransomwarelive` | 1.0.0 | 2026-04-26 |
+| `lookup-reversinglabs` | 1.0.0 | 2026-05-08 |
 | `lookup-urlscan` | 1.0.0 | 2026-04-20 |
 | `lookup-virustotal` | 1.0.0 | 2026-04-20 |
 | `mitre-attack` | 1.0.0 | 2026-04-20 |
@@ -116,11 +117,15 @@ These remain for reference but agents should prefer the `lookup-*` skills above.
 | `censys-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-censys` |
 | `greynoise-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-greynoise` |
 | `otx-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-otx` |
+| `reversinglabs-api` | 1.0.0 | 2026-05-08 | reference companion to `lookup-reversinglabs` |
 | `shodan-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-shodan` |
 | `urlscan-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-urlscan` |
 | `virustotal-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-virustotal` |
 
 ## Changelog
+
+### 1.7.0 — 2026-05-08
+- Added `lookup-reversinglabs` skill wrapping the ReversingLabs Spectra Analyze (A1000) API. Covers hash classification, detailed reports (incl. MITRE ATT&CK mapping, TitaniumCore static analysis, sandbox results), file/URL submission with optional polling, network threat intelligence for URLs/domains/IPs, advanced search for pivoting by threatname/AV-signature/family, parent-container and extracted-file relationships, and read-only YARA-ruleset matches. SDK-backed Python CLI at `tools/clis/reversinglabs.py` with self-bootstrapping venv. Reads `$REVERSINGLABS_USER` + `$REVERSINGLABS_PASSWORD` (+ optional `$REVERSINGLABS_HOST`); SDK auto-exchanges credentials for a token via `/api-token-auth/`. Source reliability defaults to A2 with B3 downgrade rules for `unknown`/`suspicious` verdicts and very fresh samples. Added companion `reversinglabs-api` reference skill (non-invokable). Cross-referenced from `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`, and `/indicator-pivoting`. No Node CLI — RL has no upstream Node SDK and auth requires the token exchange.
 
 ### 1.6.0 — 2026-04-29
 - Backfilled trigger phrases in 34 user-invocable skill descriptions that pre-dated the [`CONTRIBUTING.md`](CONTRIBUTING.md) line-44 convention. Affected: `campaign-tracking`, `carding-financial-fraud`, `china-cyber-espionage`, `confidence-levels`, `cti-hyperloop`, `dprk-cyber-espionage`, `hacktivism`, `horizon-scanning`, `infostealers`, `initial-access-brokers`, `intelligence-sharing`, `intelligence-writing`, `iran-cyber-espionage`, `key-assumptions-check`, `kql-writing`, `likelihood-language`, `malware-analysis`, `maturity-assessment`, `phishing-social-engineering`, `pir-management`, `ransomware-ecosystem`, `red-team-analysis`, `russia-cyber-espionage`, `sigma-writing`, `sops`, `source-assessment`, `stakeholder-management`, `structured-analytic-techniques`, `supply-chain-threats`, `threat-actor-profiling`, `tlp-guide`, `vulnerability-intelligence`, `writing-assessments`, `yara-writing`. Each description now starts with "Use when…" or contains "when the user…" so an orchestrator can match user intent against the frontmatter. No version bump per skill (description-only edit), but adds an 11th check to the auditor — `description-trigger` — that warns on user-invocable skills missing a trigger phrase. Skips `user-invocable: false` (library / pipeline skills loaded by other skills, not surfaced to user routing). Auditor reports 0 FAIL / 0 WARN at end of release.

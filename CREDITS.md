@@ -34,7 +34,7 @@ The orchestration layer, the skill-composition pattern, the `lookup-*` integrati
 
 ## Data and API providers
 
-The `lookup-*` skills wrap public services: **VirusTotal** (Google), **Shodan** (Shodan LLC, John Matherly), **Censys** (Censys, Inc., originated University of Michigan), **GreyNoise Intelligence** (Andrew Morris), **AbuseIPDB** (Marathon Studios), **AlienVault OTX** (LevelBlue), **urlscan.io** (Johannes Gilger), **MISP** communities, and **ransomware.live** (Julien Mousqueton).
+The `lookup-*` skills wrap public and licensed services: **VirusTotal** (Google), **Shodan** (Shodan LLC, John Matherly), **Censys** (Censys, Inc., originated University of Michigan), **GreyNoise Intelligence** (Andrew Morris), **AbuseIPDB** (Marathon Studios), **AlienVault OTX** (LevelBlue), **urlscan.io** (Johannes Gilger), **MISP** communities, **ransomware.live** (Julien Mousqueton), and **ReversingLabs Spectra Analyze / A1000** (ReversingLabs Inc., founders Mario Vuksan and Tomislav Pericin).
 
 ## Vendor research and government advisories
 
@@ -77,6 +77,8 @@ One row per skill. *Foundational source* names the framework, paper, doctrine, o
 | `lookup-misp` | Two-way MISP integration for events/attributes/objects. | [MISP Project (Malware Information Sharing Platform)](https://www.misp-project.org/) | MISP Project / CIRCL (Andras Iklody, Alexandre Dulaunoy, Christophe Vandeplas) | Filigran; Andreas Sfakianakis | Foundational framework | MISP is open-source under AGPL; born at CIRCL Luxembourg. |
 | `lookup-otx` | Wrapper skill for AlienVault OTX pulse lookups. | [AlienVault OTX](https://otx.alienvault.com/) | AT&T Cybersecurity / LevelBlue | Andy Piazza; Katie Nickels | Data/API provider | — |
 | `lookup-ransomwarelive` | Wrapper for ransomware.live victim/group lookups. | [ransomware.live (leak-site aggregation)](https://www.ransomware.live/) | Julien Mousqueton | Andy Piazza; Recorded Future | Data/API provider | Free community resource by Julien Mousqueton; aggregates 27k+ victims, 330+ groups. |
+| `lookup-reversinglabs` | Wrapper for ReversingLabs Spectra Analyze (A1000) malware analysis, classification, sandbox, and network threat intel. | [ReversingLabs Spectra Analyze documentation](https://docs.reversinglabs.com/SpectraAnalyze/) | ReversingLabs Inc. (founders Mario Vuksan and Tomislav Pericin) | Mandiant / Google Cloud; Andy Piazza | Data/API provider | Licensed product; uses the official `reversinglabs-sdk-py3` Python SDK. |
+| `reversinglabs-api` | ReversingLabs Spectra Analyze (A1000) API reference. | [ReversingLabs Spectra Analyze API docs](https://docs.reversinglabs.com/SpectraAnalyze/) | ReversingLabs Inc. | — | Data/API provider | Reference companion to `lookup-reversinglabs`. |
 | `lookup-shodan` | Wrapper skill for Shodan host reconnaissance. | [Shodan](https://www.shodan.io/) | Shodan LLC (John Matherly) | Andy Piazza; Katie Nickels | Data/API provider | — |
 | `lookup-urlscan` | Wrapper for urlscan.io submission and search. | [urlscan.io](https://urlscan.io/) | urlscan.io GmbH (Johannes Gilger) | Andy Piazza; Katie Nickels | Data/API provider | — |
 | `lookup-virustotal` | Wrapper skill for VirusTotal reputation lookups. | [VirusTotal](https://www.virustotal.com/) | VirusTotal / Google | Andy Piazza; Katie Nickels | Data/API provider | — |

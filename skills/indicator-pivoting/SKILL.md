@@ -14,7 +14,7 @@ Pivoting is the art of using one known indicator to discover related infrastruct
 
 This skill is the canonical "how to walk the IOC graph" reference. The four investigation skills (`/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`) chain a fixed set of lookups for a known seed type; this skill takes over when you need to keep walking past their first-hop output.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-otx`, `/lookup-shodan`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-misp`, `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. May hand off to `/threat-actor-profiling`, `/campaign-tracking`, `/malware-analysis`, `/yara-writing`, `/sigma-writing`, `/darkweb-collection`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-otx`, `/lookup-shodan`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-misp`, `/lookup-ransomwarelive`, `/lookup-reversinglabs`; then `/score-source`, `/apply-tlp`, `/confidence-language`. May hand off to `/threat-actor-profiling`, `/campaign-tracking`, `/malware-analysis`, `/yara-writing`, `/sigma-writing`, `/darkweb-collection`.
 
 ## When to invoke
 
@@ -284,8 +284,11 @@ Not all pivots are equal. Score each before reporting:
 | Subdomain enumeration | `/lookup-shodan dns domain` | `/lookup-censys` (paid) |
 | Live URL analysis | `/lookup-urlscan submit` | `/lookup-virustotal url` |
 | Existing URL captures | `/lookup-urlscan search` | — |
-| File reputation | `/lookup-virustotal` | `/lookup-otx` |
-| C2 extraction from a hash | `/lookup-virustotal` `--relationships contacted_ips,contacted_domains,contacted_urls` | — |
+| File reputation | `/lookup-virustotal` | `/lookup-otx`, `/lookup-reversinglabs hash` |
+| Authoritative classification + MITRE ATT&CK mapping | `/lookup-reversinglabs report --detailed` | `/malware-analysis` |
+| Pivot to siblings by malware family / threat name | `/lookup-reversinglabs search 'threatname:<name>'` | `/lookup-otx pulse-search` |
+| Parent container / extracted children | `/lookup-reversinglabs containers` / `extracted` | — |
+| C2 extraction from a hash | `/lookup-virustotal` `--relationships contacted_ips,contacted_domains,contacted_urls` | `/lookup-reversinglabs report --fields networkthreatintelligence` |
 | Community/actor attribution | `/lookup-otx` | `/lookup-misp search-events --tag` |
 | Internal correlation against own catalogued IOCs | `/lookup-misp` | — |
 | Ransomware-group profile / IOCs / YARA | `/lookup-ransomwarelive` | — |
@@ -408,7 +411,7 @@ Apply `/score-source`, `/apply-tlp`, and `/confidence-language` before publishin
 ## Related skills
 
 - `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` — first-hop chains; this skill takes over for deeper traversal
-- `/lookup-virustotal`, `/lookup-shodan`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-otx`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-misp`, `/lookup-ransomwarelive` — the underlying lookups
+- `/lookup-virustotal`, `/lookup-shodan`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-otx`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-misp`, `/lookup-ransomwarelive`, `/lookup-reversinglabs` — the underlying lookups
 - `/darkweb-collection` — when the pivot leads off-network into forum / Telegram chatter
 - `/threat-actor-profiling`, `/campaign-tracking` — what to do with the cluster once you have it
 - `/malware-analysis`, `/yara-writing`, `/sigma-writing` — sample-grounded follow-ups to a hash pivot

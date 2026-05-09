@@ -13,7 +13,7 @@
 # Recognised env vars (also used at runtime by the CLIs):
 #   VIRUSTOTAL_API_KEY URLSCAN_API_KEY SHODAN_API_KEY ABUSEIPDB_API_KEY
 #   GREYNOISE_API_KEY OTX_API_KEY CENSYS_PAT MISP_URL MISP_API_KEY
-#   RANSOMWARE_LIVE
+#   RANSOMWARE_LIVE REVERSINGLABS_USER REVERSINGLABS_PASSWORD
 
 set -euo pipefail
 
@@ -40,6 +40,9 @@ FLAG_CENSYS_PAT=""
 FLAG_MISP_URL=""
 FLAG_MISP_API_KEY=""
 FLAG_RANSOMWARE_LIVE=""
+FLAG_REVERSINGLABS_USER=""
+FLAG_REVERSINGLABS_PASSWORD=""
+FLAG_REVERSINGLABS_HOST=""
 
 show_help() {
   sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
@@ -62,6 +65,9 @@ for arg in "$@"; do
     --misp-url=*)      FLAG_MISP_URL="${arg#*=}" ;;
     --misp=*)          FLAG_MISP_API_KEY="${arg#*=}" ;;
     --ransomwarelive=*) FLAG_RANSOMWARE_LIVE="${arg#*=}" ;;
+    --reversinglabs-user=*) FLAG_REVERSINGLABS_USER="${arg#*=}" ;;
+    --reversinglabs-password=*) FLAG_REVERSINGLABS_PASSWORD="${arg#*=}" ;;
+    --reversinglabs-host=*) FLAG_REVERSINGLABS_HOST="${arg#*=}" ;;
     *) echo "Unknown argument: $arg" >&2; echo "Run with --help for usage." >&2; exit 2 ;;
   esac
 done
@@ -80,6 +86,9 @@ SERVICES=(
   "MISP_URL|MISP URL|base URL of your MISP instance (e.g. https://misp.example.org)"
   "MISP_API_KEY|MISP auth key|My Profile → Auth keys in your MISP instance"
   "RANSOMWARE_LIVE|Ransomware.live PRO|free PRO key at my.ransomware.live (3000/day)"
+  "REVERSINGLABS_USER|ReversingLabs A1000 username|licensed Spectra Analyze account (ask your RL admin)"
+  "REVERSINGLABS_PASSWORD|ReversingLabs A1000 password|paired with REVERSINGLABS_USER"
+  "REVERSINGLABS_HOST|ReversingLabs A1000 host|optional — defaults to https://a1000.reversinglabs.com"
 )
 
 read_secret() {
@@ -191,6 +200,26 @@ verify_key() {
       else
         printf '  ✗ %-15s CLI dry-run failed\n' "$label"
       fi
+      return
+      ;;
+    REVERSINGLABS_USER)
+      printf '  ✓ %-15s set\n' "$label"
+      return
+      ;;
+    REVERSINGLABS_PASSWORD)
+      cli_path="$REPO_ROOT/tools/clis/reversinglabs.py"
+      if [ ! -f "$cli_path" ]; then
+        printf '  · %-15s skipped (CLI not found)\n' "$label"; return
+      fi
+      if python3 "$cli_path" hash 5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8 --dry-run >/dev/null 2>&1; then
+        printf '  ✓ %-15s creds present, CLI invocation OK (dry-run)\n' "$label"
+      else
+        printf '  ✗ %-15s CLI dry-run failed\n' "$label"
+      fi
+      return
+      ;;
+    REVERSINGLABS_HOST)
+      printf '  ✓ %-15s set\n' "$label"
       return
       ;;
   esac

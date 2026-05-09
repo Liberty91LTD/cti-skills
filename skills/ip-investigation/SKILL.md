@@ -11,7 +11,7 @@ metadata:
 
 Investigate an IP address end-to-end. Chain multiple `lookup-*` skills, consolidate results, prioritize follow-up IOCs, and return a rated investigation summary. You invoke skills — you don't call APIs directly.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-otx`, optionally `/lookup-censys`, optionally `/lookup-misp` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-otx`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel + sample fan-out), optionally `/lookup-misp` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -52,6 +52,8 @@ Optionally add:
 ```
 /lookup-censys ip <value>       # ONLY if Shodan insufficient + quota available
 /lookup-misp search-attributes --value <value>   # internal correlation against your own catalogued events
+/lookup-reversinglabs ip <value> --pivot files,domains,urls --max-results 25
+# ONLY when you have ReversingLabs and want sample fan-out from the IP (each pivot is a separate API call)
 ```
 
 ### 3. Short-circuit on noise

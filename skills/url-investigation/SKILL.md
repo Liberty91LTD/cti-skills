@@ -11,7 +11,7 @@ metadata:
 
 Investigate a URL end-to-end. Scan it live (URLScan), cross-reference reputation (VT, OTX), extract parent domain + resolved IP for sibling investigations.
 
-**This skill invokes:** `/lookup-urlscan`, `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-misp` (internal correlation), optionally `/domain-investigation` and/or `/ip-investigation` for the parent/resolved infrastructure, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-urlscan`, `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-misp` (internal correlation), optionally `/domain-investigation` and/or `/ip-investigation` for the parent/resolved infrastructure, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -56,6 +56,7 @@ This takes 45-90 seconds on first submission. While waiting, run the other looku
 Optionally add:
 ```
 /lookup-misp search-attributes --value <value>   # internal correlation against your own catalogued events
+/lookup-reversinglabs url <value>          # ONLY when you have ReversingLabs — malware-corpus reputation for the URL
 ```
 
 ### 4. Consolidate

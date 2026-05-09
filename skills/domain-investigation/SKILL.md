@@ -11,7 +11,7 @@ metadata:
 
 Investigate a domain or hostname end-to-end. Chain `lookup-*` skills, consolidate, prioritize follow-up IOCs, and return a rated investigation summary.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-otx`, `/lookup-ransomwarelive`, optionally `/lookup-censys`, optionally `/lookup-misp` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-otx`, `/lookup-ransomwarelive`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-misp` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -54,6 +54,8 @@ Optionally:
 # ONLY if certificate pivoting is valuable; costs a query credit
 /lookup-misp search-attributes --value <domain>
 # internal correlation against your own catalogued events
+/lookup-reversinglabs domain <domain>
+# ONLY when you have ReversingLabs — malware-corpus reputation for the domain
 ```
 
 ### 3. Consolidate
