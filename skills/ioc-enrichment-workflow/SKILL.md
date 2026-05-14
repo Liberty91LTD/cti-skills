@@ -3,7 +3,7 @@ name: ioc-enrichment-workflow
 description: Workflow for enriching raw IOCs. Routes each IOC type to the appropriate /lookup-* skills, optionally correlates against MISP, and synthesises a single enrichment record per indicator. Use when the user has a batch of raw IOCs to process before triage or before pushing into a sharing platform.
 user-invocable: false
 metadata:
-  version: 2.0.0
+  version: 2.1.0
   tags: [enrichment, workflow, composition]
 ---
 
@@ -11,7 +11,7 @@ metadata:
 
 This workflow defines how to enrich raw indicators of compromise by routing them to the appropriate `/lookup-*` skills and synthesising results.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, optionally `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-reversinglabs`, optionally `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
 
 ## Enrichment routing by IOC type
 
@@ -24,8 +24,9 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 | 3 | `/lookup-greynoise` | Classification (benign/malicious/unknown), noise status, actor, tags |
 | 4 | `/lookup-shodan` | Open ports, banners, services, OS, hostnames, vulns, last update |
 | 5 | `/lookup-otx` | Pulse count, associated pulses, reputation, related indicators |
-| 6 | `/lookup-censys` | Services, certificates, autonomous system, location |
-| 7 | `/lookup-misp` | Internal correlation — `search-attributes --value <ip>` to surface prior catalogued events |
+| 6 | `/lookup-reversinglabs` | RL classification, files seen contacting the IP (malware-corpus reputation). **Run when configured** — independent of VT/AbuseIPDB. |
+| 7 | `/lookup-censys` | Services, certificates, autonomous system, location |
+| 8 | `/lookup-misp` | Internal correlation — `search-attributes --value <ip>` to surface prior catalogued events |
 
 ### Domain
 
@@ -35,9 +36,10 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 | 2 | `/lookup-urlscan` | Existing scans (search, don't re-submit by default): screenshot, page content, redirects, technologies, IPs resolved |
 | 3 | `/lookup-shodan` | DNS resolution, open ports on resolved IPs |
 | 4 | `/lookup-otx` | Pulse count, associated indicators, passive DNS |
-| 5 | `/lookup-censys` | Certificate history, associated IPs (paid plan) |
-| 6 | `/lookup-misp` | `search-attributes --value <domain>` for internal correlation |
-| 7 | `/lookup-ransomwarelive` | `search --q <org-candidate>` — sweep ransomware leak-site claims that match the apex (see `/domain-investigation` § Ransomware-claim hits for caveats) |
+| 5 | `/lookup-reversinglabs` | RL classification, files seen resolving / contacting the domain (malware-corpus reputation). **Run when configured.** |
+| 6 | `/lookup-censys` | Certificate history, associated IPs (paid plan) |
+| 7 | `/lookup-misp` | `search-attributes --value <domain>` for internal correlation |
+| 8 | `/lookup-ransomwarelive` | `search --q <org-candidate>` — sweep ransomware leak-site claims that match the apex (see `/domain-investigation` § Ransomware-claim hits for caveats) |
 
 ### URL
 
@@ -46,16 +48,18 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 | 1 | `/lookup-virustotal` | Detection ratio, final URL, redirections, downloaded files |
 | 2 | `/lookup-urlscan` | Existing scans first; submit fresh only if no recent capture exists. Screenshot, DOM, requests, IPs contacted, technologies |
 | 3 | `/lookup-otx` | Pulse associations, reputation |
-| 4 | `/lookup-misp` | `search-attributes --value <url>` for internal correlation |
+| 4 | `/lookup-reversinglabs` | RL classification, files seen requesting the URL (malware-corpus reputation). **Run when configured.** Use `submit-url` only for fresh crawl + sandbox. |
+| 5 | `/lookup-misp` | `search-attributes --value <url>` for internal correlation |
 
 ### File hash (MD5, SHA-1, SHA-256)
 
 | Order | Skill | What to extract |
 |-------|-------|----------------|
 | 1 | `/lookup-virustotal` | Detection ratio, file type, size, names, behavioural analysis, MITRE ATT&CK tags |
-| 2 | `/lookup-otx` | Pulse associations, related indicators, YARA matches |
-| 3 | `/lookup-misp` | `search-attributes --value <hash>` for internal correlation |
-| 4 | `/lookup-ransomwarelive` | `iocs <group>` and `yara <group>` if the hash hits a known ransomware family from VT classification |
+| 2 | `/lookup-reversinglabs` | **Run when configured — strongest single-source verdict.** `hash --av-scanners --ticloud` for classification + threat name + AV ratio; `report --detailed` for MITRE ATT&CK mapping, sandbox, and networkthreatintelligence (C2 indicators extracted from the sample) |
+| 3 | `/lookup-otx` | Pulse associations, related indicators, YARA matches |
+| 4 | `/lookup-misp` | `search-attributes --value <hash>` for internal correlation |
+| 5 | `/lookup-ransomwarelive` | `iocs <group>` and `yara <group>` if the hash hits a known ransomware family from VT/RL classification |
 
 ### Email address
 
@@ -166,6 +170,7 @@ Per-API limits live in `tools/REGISTRY.md`. Summary:
 | Censys | 250/month | Selective use only |
 | MISP | host-bound | Local; no public limit |
 | ransomware.live (PRO) | 3000/day | Plenty for bulk org-candidate sweeps |
+| ReversingLabs (A1000) | undocumented; 429 + `Retry-After` | Back off on 429. Each `--pivot` entry on the `ip` op is a separate call — fan out deliberately. |
 
 ## Handling missing API keys
 
@@ -179,7 +184,7 @@ To configure missing keys, point the user at `/cti-setup`.
 
 ## Related skills
 
-- `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-ransomwarelive` — the underlying lookups
+- `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-reversinglabs`, `/lookup-ransomwarelive` — the underlying lookups
 - `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` — single-seed first-hop chains; this workflow is the bulk-list equivalent
 - `/indicator-pivoting` — when an enrichment opens new pivot candidates
 - `/score-source`, `/apply-tlp`, `/confidence-language` — apply rigor to each finished enrichment record

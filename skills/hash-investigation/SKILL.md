@@ -2,7 +2,7 @@
 name: hash-investigation
 description: Use when a user asks to check, identify, or characterize a file hash (MD5, SHA-1, SHA-256). Chains VirusTotal and OTX, optionally triggers /malware-analysis for deeper behavioral review. Returns detection signals, malware family, behavioral tags, and pivot candidates (communicating IPs, dropped files). Invoked by /cti-orchestrator when the target is a hash.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   tags: [investigation, composition, malware, hash]
   tradecraft: true
 ---
@@ -37,16 +37,21 @@ request_malware_analysis: <optional bool — trigger /malware-analysis after loo
 
 ### 2. Parallel lookups
 
+**Always run** (free / commonly available):
 ```
 /lookup-virustotal hash <value>    # detection stats, family, behavior tags
 /lookup-otx hash <value>           # community pulses, campaign attribution
 ```
 
-Optionally add:
+**Add to the same parallel batch if credentials are configured** — don't demote these to "later, maybe":
 ```
-/lookup-misp search-attributes --value <value>   # internal correlation against your own catalogued events
-/lookup-reversinglabs hash <value> --av-scanners --ticloud   # ONLY when you have ReversingLabs — authoritative verdict, threat name, AV detection ratio
-/lookup-reversinglabs report <value> --detailed              # ONLY when VT signal is thin or you need MITRE ATT&CK + sandbox
+/lookup-reversinglabs hash <value> --av-scanners --ticloud   # if $REVERSINGLABS_USER is set. Vendor-authoritative verdict + threat name + AV detection ratio. RL is the strongest single-source verdict on a hash; run it whenever available, not just when VT signal is thin.
+/lookup-misp search-attributes --value <value>               # if $MISP_URL + $MISP_KEY are set. Internal correlation against your own catalogued events.
+```
+
+**Escalation lookup** (run sequentially after the parallel batch only if the call below is warranted):
+```
+/lookup-reversinglabs report <value> --detailed              # when you need MITRE ATT&CK mapping, sandbox detonation output, or networkthreatintelligence (C2 indicators extracted from the sample). Heavier than `hash` — use when classification alone is not enough.
 ```
 
 ### 3. Check if known-benign

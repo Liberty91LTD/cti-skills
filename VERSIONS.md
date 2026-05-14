@@ -10,7 +10,7 @@ Agents should check this file on session start and warn the user if 2+ skills ha
 
 ## Pack version
 
-**cti-skills:** 1.0.0 (2026-04-20)
+**cti-skills:** 1.8.0 (2026-05-14)
 
 ## Skills
 
@@ -31,7 +31,7 @@ Agents should check this file on session start and warn the user if 2+ skills ha
 | `campaign-tracking` | 1.0.0 | 2026-04-20 |
 | `darkweb-collection` | 2.0.0 | 2026-04-28 |
 | `indicator-pivoting` | 2.0.0 | 2026-04-28 |
-| `malware-analysis` | 1.0.0 | 2026-04-20 |
+| `malware-analysis` | 1.1.0 | 2026-05-14 |
 | `osint-methodology` | 1.0.0 | 2026-04-20 |
 | `threat-actor-profiling` | 1.0.0 | 2026-04-20 |
 | `vulnerability-intelligence` | 1.0.0 | 2026-04-20 |
@@ -74,7 +74,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 |---|---|---|
 | `confidence-levels` | 1.0.0 | 2026-04-20 |
 | `intelligence-writing` | 1.0.0 | 2026-04-20 |
-| `ioc-enrichment-workflow` | 2.0.0 | 2026-04-28 |
+| `ioc-enrichment-workflow` | 2.1.0 | 2026-05-14 |
 | `ioc-export` | 1.0.0 | 2026-04-20 |
 | `kql-writing` | 1.0.0 | 2026-04-20 |
 | `likelihood-language` | 1.0.0 | 2026-04-20 |
@@ -82,16 +82,16 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `stix-bundle` | 1.0.0 | 2026-04-20 |
 | `tlp-guide` | 1.0.0 | 2026-04-20 |
 | `writing-assessments` | 1.0.0 | 2026-04-20 |
-| `yara-writing` | 1.0.0 | 2026-04-20 |
+| `yara-writing` | 1.1.0 | 2026-05-14 |
 
 ### Orchestrator + investigation skills (new in Phase C)
 | Skill | Version | Last updated |
 |---|---|---|
 | `cti-orchestrator` | 1.0.0 | 2026-04-20 |
-| `ip-investigation` | 1.0.0 | 2026-04-20 |
-| `domain-investigation` | 1.1.0 | 2026-04-26 |
-| `hash-investigation` | 1.0.0 | 2026-04-20 |
-| `url-investigation` | 1.0.0 | 2026-04-20 |
+| `ip-investigation` | 1.1.0 | 2026-05-14 |
+| `domain-investigation` | 1.2.0 | 2026-05-14 |
+| `hash-investigation` | 1.1.0 | 2026-05-14 |
+| `url-investigation` | 1.1.0 | 2026-05-14 |
 
 ### Lookup skills (external API wrappers)
 | Skill | Version | Last updated |
@@ -123,6 +123,13 @@ These remain for reference but agents should prefer the `lookup-*` skills above.
 | `virustotal-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-virustotal` |
 
 ## Changelog
+
+### 1.8.0 — 2026-05-14
+- Promoted `/lookup-reversinglabs` from "Optionally add — ONLY when you have ReversingLabs" to "**Add to the same parallel batch if credentials are configured**" across the four investigation skills (`ip-investigation` 1.1.0, `domain-investigation` 1.2.0, `hash-investigation` 1.1.0, `url-investigation` 1.1.0). Prior phrasing biased agents toward skipping RL even when credentials were available; the new framing makes RL the default-when-configured peer of VT/OTX in the always-parallel block. Heavy / fan-out operations (RL `ip --pivot`, RL `submit-url`, RL `report --detailed`) stay in a separate escalation block.
+- `malware-analysis` 1.1.0 — first-class integration with `/lookup-reversinglabs report --detailed` for MITRE ATT&CK auto-mapping, TitaniumCore static analysis, sandbox results, and `networkthreatintelligence` C2 extraction. Added a "Tooling for the sections above" callout pointing the reader at the RL report as the single richest pre-fill source for the static/dynamic/MITRE/IOC sections of the analysis output template. RL added to the "Related skills" section alongside VT relationships.
+- `ioc-enrichment-workflow` 2.1.0 — added `/lookup-reversinglabs` to the header invokes line, to all four routing tables (IP, domain, URL, hash), to the rate-limit awareness table (429 + Retry-After, no public per-minute quota), and to the related-skills index. For hashes RL sits at position 2 right after VT as the strongest single-source verdict; for IP/domain/URL it's marked "**Run when configured**" so the reader doesn't treat it as last-resort.
+- `yara-writing` 1.1.0 — added "Validation against a real corpus" section pointing at `/lookup-reversinglabs yara-matches` (operational telemetry from deployed rules), `search 'threatname:<family>'` (sample collection for test suites), and `containers`/`extracted` (parent-child rule coverage). Added a "Related skills" section.
+- **Driver:** an agent running `/hash-investigation` on a WannaCry SHA-256 ran VT + OTX from the always-parallel block and skipped RL even with credentials configured, because the procedure buried RL under "ONLY when you have…" language. The fix is doctrinal, not API-level: when RL credentials are present, RL is part of the default lookup batch — not an escalation.
 
 ### 1.7.0 — 2026-05-08
 - Added `lookup-reversinglabs` skill wrapping the ReversingLabs Spectra Analyze (A1000) API. Covers hash classification, detailed reports (incl. MITRE ATT&CK mapping, TitaniumCore static analysis, sandbox results), file/URL submission with optional polling, network threat intelligence for URLs/domains/IPs, advanced search for pivoting by threatname/AV-signature/family, parent-container and extracted-file relationships, and read-only YARA-ruleset matches. SDK-backed Python CLI at `tools/clis/reversinglabs.py` with self-bootstrapping venv. Reads `$REVERSINGLABS_USER` + `$REVERSINGLABS_PASSWORD` (+ optional `$REVERSINGLABS_HOST`); SDK auto-exchanges credentials for a token via `/api-token-auth/`. Source reliability defaults to A2 with B3 downgrade rules for `unknown`/`suspicious` verdicts and very fresh samples. Added companion `reversinglabs-api` reference skill (non-invokable). Cross-referenced from `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`, and `/indicator-pivoting`. No Node CLI — RL has no upstream Node SDK and auth requires the token exchange.

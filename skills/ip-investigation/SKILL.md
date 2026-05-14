@@ -2,7 +2,7 @@
 name: ip-investigation
 description: Use when a user asks to investigate, check, enrich, or characterize an IP address (IPv4 or IPv6). Chains VirusTotal, Shodan, AbuseIPDB, GreyNoise, OTX, and optionally Censys in parallel, then consolidates findings and prioritizes follow-up IOCs. Invoked by /cti-orchestrator when the target is an IP.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   tags: [investigation, composition, ip]
   tradecraft: true
 ---
@@ -48,12 +48,17 @@ Invoke in parallel (agents should batch these calls):
 /lookup-otx ip <value>          # community pulses
 ```
 
-Optionally add:
+**Add to the same parallel batch if credentials are configured**:
 ```
-/lookup-censys ip <value>       # ONLY if Shodan insufficient + quota available
-/lookup-misp search-attributes --value <value>   # internal correlation against your own catalogued events
+/lookup-reversinglabs ip <value>                 # if $REVERSINGLABS_USER is set. Network reputation from RL's malware-analysis corpus — files seen contacting this IP, RL classification. One API call, no pivot fan-out.
+/lookup-misp search-attributes --value <value>   # if $MISP_URL + $MISP_KEY are set. Internal correlation against your own catalogued events.
+```
+
+Optionally add (escalation — separate API budget):
+```
+/lookup-censys ip <value>                                                # ONLY if Shodan insufficient + quota available
 /lookup-reversinglabs ip <value> --pivot files,domains,urls --max-results 25
-# ONLY when you have ReversingLabs and want sample fan-out from the IP (each pivot is a separate API call)
+# only when you want sample fan-out from the IP — each --pivot entry is a separate API call
 ```
 
 ### 3. Short-circuit on noise

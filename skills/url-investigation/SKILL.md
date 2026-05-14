@@ -2,7 +2,7 @@
 name: url-investigation
 description: Use when a user asks to scan, investigate, or characterize a URL. Submits to URLScan (unlisted by default), cross-references with VirusTotal and OTX, extracts the parent domain and resolved IP for follow-up investigation. Returns verdict, redirect chain, contacted infrastructure, and screenshot. Invoked by /cti-orchestrator when the target is a URL.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   tags: [investigation, composition, url]
   tradecraft: true
 ---
@@ -53,10 +53,16 @@ This takes 45-90 seconds on first submission. While waiting, run the other looku
 /lookup-otx url <value>          # community pulses referencing this URL
 ```
 
-Optionally add:
+**Add to the same parallel batch if credentials are configured**:
 ```
-/lookup-misp search-attributes --value <value>   # internal correlation against your own catalogued events
-/lookup-reversinglabs url <value>          # ONLY when you have ReversingLabs — malware-corpus reputation for the URL
+/lookup-reversinglabs url <value>                # if $REVERSINGLABS_USER is set. Network reputation from RL's malware-analysis corpus — files seen requesting this URL, RL classification. One API call.
+/lookup-misp search-attributes --value <value>   # if $MISP_URL + $MISP_KEY are set. Internal correlation against your own catalogued events.
+```
+
+Optionally (escalation):
+```
+/lookup-reversinglabs submit-url <value> --crawler local --wait
+# only when you need a fresh RL crawl + sandbox detonation of the URL — slower and consumes submission budget
 ```
 
 ### 4. Consolidate

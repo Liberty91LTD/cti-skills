@@ -2,7 +2,7 @@
 name: domain-investigation
 description: Use when a user asks to investigate, check, or characterize a domain or hostname. Chains VirusTotal, URLScan (search existing scans), Shodan (DNS resolve + host), OTX, ransomware.live (victim-status sweep), and optionally Censys. Returns reputation, resolution, hosting fingerprint, ransomware-claim status, and pivot candidates. Invoked by /cti-orchestrator when the target is a domain.
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   tags: [investigation, composition, domain]
   tradecraft: true
 ---
@@ -48,14 +48,16 @@ tlp_ceiling: <optional, default AMBER>
 
 For the ransomware.live sweep, derive an `org-candidate` from the domain by stripping the public suffix and any common subdomains (`www.acme-corp.com` → `acme-corp` or `acme corp`). If the apex contains a hyphen or dot, also try the first label alone. The PRO tier returns the full match set in one call (no pagination), so two candidate queries cost at most two of the 3000-call daily budget.
 
-Optionally:
+**Add to the same parallel batch if credentials are configured**:
+```
+/lookup-reversinglabs domain <domain>            # if $REVERSINGLABS_USER is set. Network reputation from RL's malware-analysis corpus — files seen resolving / contacting this domain, RL classification. One API call.
+/lookup-misp search-attributes --value <domain>  # if $MISP_URL + $MISP_KEY are set. Internal correlation against your own catalogued events.
+```
+
+Optionally (escalation):
 ```
 /lookup-censys search "services.tls.certificates.leaf_data.subject.common_name: <domain>"
 # ONLY if certificate pivoting is valuable; costs a query credit
-/lookup-misp search-attributes --value <domain>
-# internal correlation against your own catalogued events
-/lookup-reversinglabs domain <domain>
-# ONLY when you have ReversingLabs — malware-corpus reputation for the domain
 ```
 
 ### 3. Consolidate
