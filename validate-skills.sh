@@ -147,6 +147,18 @@ done < <(find "${targets[@]}" -type f -name 'SKILL.md' -print0 2>/dev/null)
 echo "---"
 echo "Checked $CHECKED skills — $ERRORS errors, $WARNINGS warnings"
 
+# Pack version consistency check (fatal — drift here means the plugin cache
+# under ~/.claude/plugins/cache/cti-skills/cti-skills/<version>/ does not
+# rotate when skill bodies change, so running sessions see stale skill text).
+VERSION_CHECKER="$(dirname "$0")/tools/check-versions.py"
+if [ -f "$VERSION_CHECKER" ] && command -v python3 >/dev/null 2>&1; then
+  echo "---"
+  echo "Pack version consistency:"
+  if ! python3 "$VERSION_CHECKER"; then
+    ERRORS=$((ERRORS + 1))
+  fi
+fi
+
 # Optional integration audit (non-fatal — surfaces drift in the integration set,
 # e.g. dead *-agent references, missing VERSIONS/cti-setup rows, composite
 # coverage gaps). Skip if Python or the auditor is unavailable.
