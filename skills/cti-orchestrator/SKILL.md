@@ -97,6 +97,25 @@ After significant new intelligence is collected, consider whether a knowledge ce
 
 Use `/feedback-loops` to log the update if non-trivial.
 
+## Lookup catalog
+
+Authoritative list of `/lookup-*` skills available in this pack. **Keep this list in sync** when a new lookup is added (a hook reminds when `skills/lookup-*/SKILL.md` is touched). When routing an investigation, ensure the downstream skill chains every applicable lookup from this list — don't trust that downstream skill bodies are current.
+
+| Skill | Indicator types | Default Admiralty | Notes |
+|---|---|---|---|
+| `/lookup-virustotal` | ip, domain, hash, url | B2 | Crowd-sourced AV aggregate; default first call |
+| `/lookup-otx` | ip, domain, hash, url | C3 | AlienVault community pulses; cheap and unconstrained |
+| `/lookup-abuseipdb` | ip | B2 | Abuse-report history; IP-only |
+| `/lookup-greynoise` | ip | B2 | Internet-noise classifier; use to short-circuit on benign scanners |
+| `/lookup-shodan` | ip, domain | B2 | Host fingerprint, ports, services, vulns |
+| `/lookup-censys` | ip, cert search | B2 | Deep host + certificate recon; **250/month free quota** — use sparingly |
+| `/lookup-urlscan` | url, domain | B2 | Live scan + existing-scan search |
+| `/lookup-reversinglabs` | ip, domain, url, hash | **A2** | Spectra Analyze (A1000) — vendor-authoritative classification, MITRE ATT&CK, sandbox, sample fan-out. **Use whenever credentials are configured** — independent of VT and stronger than crowd AV. |
+| `/lookup-misp` | any | B2 | Internal correlation against your own MISP catalogue |
+| `/lookup-ransomwarelive` | org-name, group | B2 (group/dates), B3 (descriptions) | Ransomware leak-site claims; treat criminal-written descriptions cautiously |
+
+When a downstream investigation skill (e.g. `/hash-investigation`) is invoked but its SKILL.md doesn't reference a lookup that obviously applies (e.g. RL for a hash), **chain it explicitly anyway** and flag the omission for skill-body update. Better to over-chain once than miss high-value signal.
+
 ## What you do NOT do
 
 - **Do not call external APIs directly.** Always invoke a `/lookup-*` skill.
