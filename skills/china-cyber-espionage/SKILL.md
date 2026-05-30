@@ -108,6 +108,17 @@ Chinese cyber operations have undergone significant tactical evolution over the 
 - **Coordination between MSS and PLA operations**: The degree of operational coordination, deconfliction, and intelligence sharing between MSS and PLA cyber units is unclear.
 - **AI integration**: The extent to which Chinese cyber operators are leveraging large language models and AI tools for vulnerability research, social engineering, and operational planning.
 
+## Live enrichment
+
+When CrowdStrike Falcon Intelligence credentials are configured (`$CROWDSTRIKE_CLIENT_ID`), pull live vendor intelligence to keep this cell current and to answer specific actor questions:
+
+- **Actor profile** — `/lookup-crowdstrike actor "Mustang Panda"` (origins, target countries/industries, motivations, capability, aliases)
+- **TTPs** — `/lookup-crowdstrike ttps "Mustang Panda"` → ATT&CK technique IDs; resolve against `/mitre-attack`
+- **Latest reporting** — `/lookup-crowdstrike reports --actor "Mustang Panda" --latest`
+- **Actor population** — `/lookup-crowdstrike actors --origin china` to enumerate China-attributed adversaries CrowdStrike tracks (CrowdStrike uses the "Panda" cryptonym for PRC state-nexus actors)
+
+Route through `/threat-actor-profiling` for a full structured profile. CrowdStrike report bodies are typically TLP:AMBER+ — cite report IDs internally, do not redistribute.
+
 ## Sources & References
 
 1. CISA Advisory AA24-038A: "PRC State-Sponsored Actors Compromise and Maintain Persistent Access to U.S. Critical Infrastructure" (February 2024)

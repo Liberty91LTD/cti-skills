@@ -1,5 +1,8 @@
 # API keys and local settings
 .claude/settings.local.json
+.env
+.env.local
+!.env.example
 
 # User CTI artifacts — keep directory structure (.gitkeep), ignore content
 data/assessments/**

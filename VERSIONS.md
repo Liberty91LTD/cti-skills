@@ -10,7 +10,7 @@ Agents should check this file on session start and warn the user if 2+ skills ha
 
 ## Pack version
 
-**cti-skills:** 1.8.0 (2026-05-14)
+**cti-skills:** 1.9.0 (2026-05-30)
 
 ## Skills
 
@@ -104,6 +104,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `lookup-misp` | 1.0.0 | 2026-04-26 |
 | `lookup-ransomwarelive` | 1.0.0 | 2026-04-26 |
 | `lookup-reversinglabs` | 1.0.0 | 2026-05-08 |
+| `lookup-crowdstrike` | 1.0.0 | 2026-05-30 |
 | `lookup-urlscan` | 1.0.0 | 2026-04-20 |
 | `lookup-virustotal` | 1.0.0 | 2026-04-20 |
 | `mitre-attack` | 1.0.0 | 2026-04-20 |
@@ -118,11 +119,18 @@ These remain for reference but agents should prefer the `lookup-*` skills above.
 | `greynoise-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-greynoise` |
 | `otx-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-otx` |
 | `reversinglabs-api` | 1.0.0 | 2026-05-08 | reference companion to `lookup-reversinglabs` |
+| `crowdstrike-api` | 1.0.0 | 2026-05-30 | reference companion to `lookup-crowdstrike` |
 | `shodan-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-shodan` |
 | `urlscan-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-urlscan` |
 | `virustotal-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-virustotal` |
 
 ## Changelog
+
+### 1.9.0 — 2026-05-30
+- Added `lookup-crowdstrike` skill wrapping the CrowdStrike Falcon Intelligence (Intel) API. Unlike the IOC-reputation lookups, it spans two use cases: (a) **indicator** reputation for IP/domain/hash/URL (malicious confidence, linked actors + malware families, report refs), and (b) **finished/actor intelligence** — `actor` (adversary profile: origins, target countries/industries, motivations, capability, aliases), `actors` (search by origin/target/motivation via FQL), `reports` (finished reporting by actor / free-text / latest, plus PDF download), and `ttps` (MITRE ATT&CK technique set for an actor). Plus `indicators` — browse/sweep the indicator feed for the latest malicious IOCs, filterable by confidence/type/actor/malware/recency (newest-first). SDK-backed Python CLI at `tools/clis/crowdstrike.py` with self-bootstrapping venv around `crowdstrike-falconpy`. Reads `$CROWDSTRIKE_CLIENT_ID` + `$CROWDSTRIKE_CLIENT_SECRET` (+ optional `$CROWDSTRIKE_BASE_URL` for non-US-1 clouds); FalconPy handles the OAuth2 client-credentials token exchange. Source reliability defaults to A2 with B3 downgrade rules for low/unverified indicators and sparse actor records. Added companion `crowdstrike-api` reference skill (non-invokable) holding the full Intel operation catalogue and FQL primer.
+- **IOC-path wiring** — `/lookup-crowdstrike indicator` added to `/cti-orchestrator` lookup catalog (A2, "use when configured"), the always-parallel batch of all four investigation skills (`ip`/`domain`/`hash`/`url-investigation`), all four `ioc-enrichment-workflow` routing tables, and `malware-analysis` (vendor actor attribution + ATT&CK).
+- **Actor-path wiring** — added `actor`/`ttps`/`reports` references to `threat-actor-profiling` (primary vendor feed for state-sponsored actors) and a "Live enrichment" section to each regional espionage cell (`iran`/`russia`/`china`/`dprk-cyber-espionage`) with region-appropriate actor examples, so questions like "what TTPs does Charming Kitten use?", "which actors operate from Russia?", and "latest report on Mustang Panda" auto-include a CrowdStrike response when credentials are configured.
+- Registry, `scripts/setup.sh` (env vars + flags + dry-run verify case), and `cti-setup` services table updated for the new credentials. No Node CLI — CrowdStrike has no upstream Node SDK and auth requires the OAuth2 exchange the FalconPy SDK handles.
 
 ### 1.8.0 — 2026-05-14
 - Promoted `/lookup-reversinglabs` from "Optionally add — ONLY when you have ReversingLabs" to "**Add to the same parallel batch if credentials are configured**" across the four investigation skills (`ip-investigation` 1.1.0, `domain-investigation` 1.2.0, `hash-investigation` 1.1.0, `url-investigation` 1.1.0). Prior phrasing biased agents toward skipping RL even when credentials were available; the new framing makes RL the default-when-configured peer of VT/OTX in the always-parallel block. Heavy / fan-out operations (RL `ip --pivot`, RL `submit-url`, RL `report --detailed`) stay in a separate escalation block.

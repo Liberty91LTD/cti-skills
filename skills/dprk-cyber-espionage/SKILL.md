@@ -112,6 +112,17 @@ DPRK cyber operations have undergone significant evolution:
 - **Zero-day capability**: Whether DPRK groups develop zero-day exploits internally or acquire them from brokers or allied states is unclear. Their reliance on social engineering and N-day exploitation may mask developing capabilities.
 - **AI tool adoption**: The degree to which DPRK operators leverage LLMs and AI tools for code generation, social engineering content, and operational planning is emerging.
 
+## Live enrichment
+
+When CrowdStrike Falcon Intelligence credentials are configured (`$CROWDSTRIKE_CLIENT_ID`), pull live vendor intelligence to keep this cell current and to answer specific actor questions:
+
+- **Actor profile** — `/lookup-crowdstrike actor "Lazarus"` / `actor "Labyrinth Chollima"` (origins, target countries/industries, motivations, capability, aliases)
+- **TTPs** — `/lookup-crowdstrike ttps "Lazarus"` → ATT&CK technique IDs; resolve against `/mitre-attack`
+- **Latest reporting** — `/lookup-crowdstrike reports --actor "Stardust Chollima" --latest`
+- **Actor population** — `/lookup-crowdstrike actors --origin north-korea` to enumerate DPRK-attributed adversaries CrowdStrike tracks (CrowdStrike uses the "Chollima" cryptonym for DPRK state-nexus actors)
+
+Route through `/threat-actor-profiling` for a full structured profile. CrowdStrike report bodies are typically TLP:AMBER+ — cite report IDs internally, do not redistribute.
+
 ## Sources & References
 
 1. FBI/CISA/Treasury Joint Advisory: "TraderTraitor: North Korean State-Sponsored APT Targets Blockchain Companies" (April 2022)

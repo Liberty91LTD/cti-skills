@@ -111,6 +111,7 @@ Authoritative list of `/lookup-*` skills available in this pack. **Keep this lis
 | `/lookup-censys` | ip, cert search | B2 | Deep host + certificate recon; **250/month free quota** — use sparingly |
 | `/lookup-urlscan` | url, domain | B2 | Live scan + existing-scan search |
 | `/lookup-reversinglabs` | ip, domain, url, hash | **A2** | Spectra Analyze (A1000) — vendor-authoritative classification, MITRE ATT&CK, sandbox, sample fan-out. **Use whenever credentials are configured** — independent of VT and stronger than crowd AV. |
+| `/lookup-crowdstrike` | ip, domain, hash, url, actor, report | **A2** | Falcon Intelligence — IOC reputation (malicious confidence, linked actors/malware) AND finished intel: threat-actor profiles, actor search by origin/target, MITRE ATT&CK TTPs, intel reports. **Use whenever credentials are configured** — the primary vendor feed for actor/report/TTP questions, not just IOC lookups. |
 | `/lookup-misp` | any | B2 | Internal correlation against your own MISP catalogue |
 | `/lookup-ransomwarelive` | org-name, group | B2 (group/dates), B3 (descriptions) | Ransomware leak-site claims; treat criminal-written descriptions cautiously |
 

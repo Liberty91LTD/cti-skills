@@ -110,6 +110,17 @@ Iranian cyber operations have evolved across multiple dimensions:
 - **Influence operation scale**: The full extent of Iranian information operations using fake personas and fabricated hacktivist entities is likely underestimated.
 - **Post-conflict posture**: How Iranian cyber operations will evolve following the Israel-Hamas conflict -- whether escalated capabilities and targeting will persist or retract.
 
+## Live enrichment
+
+When CrowdStrike Falcon Intelligence credentials are configured (`$CROWDSTRIKE_CLIENT_ID`), pull live vendor intelligence to keep this cell current and to answer specific actor questions:
+
+- **Actor profile** — `/lookup-crowdstrike actor "Charming Kitten"` (origins, target countries/industries, motivations, capability, aliases)
+- **TTPs** — `/lookup-crowdstrike ttps "Charming Kitten"` → ATT&CK technique IDs; resolve against `/mitre-attack`
+- **Latest reporting** — `/lookup-crowdstrike reports --actor "Imperial Kitten" --latest`
+- **Actor population** — `/lookup-crowdstrike actors --origin iran` to enumerate Iran-attributed adversaries CrowdStrike tracks
+
+Route through `/threat-actor-profiling` for a full structured profile. CrowdStrike report bodies are typically TLP:AMBER+ — cite report IDs internally, do not redistribute.
+
 ## Sources & References
 
 1. Microsoft Threat Intelligence: "Peach Sandstorm password spray campaigns enable intelligence collection at high-value targets" (September 2023)

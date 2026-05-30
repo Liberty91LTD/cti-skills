@@ -276,7 +276,7 @@ def check_unknown_lookup_refs(catalog, findings):
     or be in an explicit retired-list comment."""
     current = {row["skill"] for row in catalog}
     targets = sorted(REPO_ROOT.rglob("*.md")) + sorted(REPO_ROOT.rglob("*.py")) + sorted(REPO_ROOT.rglob("*.js")) + sorted(REPO_ROOT.rglob("*.sh"))
-    targets = [t for t in targets if "/.git/" not in str(t) and "/archive/" not in str(t)]
+    targets = [t for t in targets if "/.git/" not in str(t) and "/archive/" not in str(t) and "/.venv" not in str(t)]
     for fp in targets:
         try:
             text = fp.read_text(encoding="utf-8", errors="replace")
@@ -368,7 +368,7 @@ def check_cardinality(catalog, findings):
     fenced code blocks (which are also illustrative)."""
     current_count = len(catalog)
     targets = list(REPO_ROOT.rglob("*.md"))
-    targets = [t for t in targets if "/.git/" not in str(t) and "/archive/" not in str(t) and "/data/" not in str(t)]
+    targets = [t for t in targets if "/.git/" not in str(t) and "/archive/" not in str(t) and "/data/" not in str(t) and "/.venv" not in str(t)]
     for fp in targets:
         try:
             text = fp.read_text(encoding="utf-8", errors="replace")

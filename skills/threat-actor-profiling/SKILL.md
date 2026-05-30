@@ -104,7 +104,8 @@ Always list all known aliases and cross-reference when building profiles.
 
 ## Related skills
 
-- **Ransomware-group profiles (highest leverage)** — `/lookup-ransomwarelive group <name>` and `group-profile <name>` return curated TTPs, leak-site `.onion` infrastructure, vulnerabilities exploited, and per-group IOC + YARA dumps. Use these as the *primary* feed for any ransomware actor profile, then enrich.
+- **Vendor finished intelligence (highest leverage for state-sponsored / espionage actors)** — when CrowdStrike credentials are configured, `/lookup-crowdstrike actor "<name>"` returns the Falcon Intel adversary profile (origins, target countries/industries, motivations, capability, aliases); `/lookup-crowdstrike ttps "<name>"` returns the actor's MITRE ATT&CK technique set (feed into the TTPs section); `/lookup-crowdstrike reports --actor "<name>" --latest` surfaces the newest finished reporting. Use these as a *primary* feed for the profile, then enrich. Resolve the returned `technique_ids` against `/mitre-attack`.
+- **Ransomware-group profiles (highest leverage for ransomware actors)** — `/lookup-ransomwarelive group <name>` and `group-profile <name>` return curated TTPs, leak-site `.onion` infrastructure, vulnerabilities exploited, and per-group IOC + YARA dumps. Use these as the *primary* feed for any ransomware actor profile, then enrich.
 - **Community attribution** — `/lookup-otx pulse-search "<actor-or-alias>"` for community-tagged indicators; `/lookup-misp search-events --tag "actor=<name>"` for prior internal cataloguing
 - **Build the infrastructure cluster** — `/indicator-pivoting` walks the IOC graph (hand off `pivot_candidates` from the lookups above)
 - **Underground-forum and Telegram footprint** — `/darkweb-collection` for forum/channel monitoring of an actor's known aliases

@@ -14,6 +14,7 @@
 #   VIRUSTOTAL_API_KEY URLSCAN_API_KEY SHODAN_API_KEY ABUSEIPDB_API_KEY
 #   GREYNOISE_API_KEY OTX_API_KEY CENSYS_PAT MISP_URL MISP_API_KEY
 #   RANSOMWARE_LIVE REVERSINGLABS_USER REVERSINGLABS_PASSWORD
+#   CROWDSTRIKE_CLIENT_ID CROWDSTRIKE_CLIENT_SECRET CROWDSTRIKE_BASE_URL
 
 set -euo pipefail
 
@@ -43,9 +44,12 @@ FLAG_RANSOMWARE_LIVE=""
 FLAG_REVERSINGLABS_USER=""
 FLAG_REVERSINGLABS_PASSWORD=""
 FLAG_REVERSINGLABS_HOST=""
+FLAG_CROWDSTRIKE_CLIENT_ID=""
+FLAG_CROWDSTRIKE_CLIENT_SECRET=""
+FLAG_CROWDSTRIKE_BASE_URL=""
 
 show_help() {
-  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
   exit 0
 }
 
@@ -68,6 +72,9 @@ for arg in "$@"; do
     --reversinglabs-user=*) FLAG_REVERSINGLABS_USER="${arg#*=}" ;;
     --reversinglabs-password=*) FLAG_REVERSINGLABS_PASSWORD="${arg#*=}" ;;
     --reversinglabs-host=*) FLAG_REVERSINGLABS_HOST="${arg#*=}" ;;
+    --crowdstrike-client-id=*) FLAG_CROWDSTRIKE_CLIENT_ID="${arg#*=}" ;;
+    --crowdstrike-client-secret=*) FLAG_CROWDSTRIKE_CLIENT_SECRET="${arg#*=}" ;;
+    --crowdstrike-base-url=*) FLAG_CROWDSTRIKE_BASE_URL="${arg#*=}" ;;
     *) echo "Unknown argument: $arg" >&2; echo "Run with --help for usage." >&2; exit 2 ;;
   esac
 done
@@ -89,6 +96,9 @@ SERVICES=(
   "REVERSINGLABS_USER|ReversingLabs A1000 username|licensed Spectra Analyze account (ask your RL admin)"
   "REVERSINGLABS_PASSWORD|ReversingLabs A1000 password|paired with REVERSINGLABS_USER"
   "REVERSINGLABS_HOST|ReversingLabs A1000 host|optional — defaults to https://a1000.reversinglabs.com"
+  "CROWDSTRIKE_CLIENT_ID|CrowdStrike Falcon client id|Falcon Intelligence API client (Support and resources → API clients and keys)"
+  "CROWDSTRIKE_CLIENT_SECRET|CrowdStrike Falcon client secret|paired with CROWDSTRIKE_CLIENT_ID"
+  "CROWDSTRIKE_BASE_URL|CrowdStrike cloud base URL|optional — defaults to https://api.crowdstrike.com (US-1)"
 )
 
 read_secret() {
@@ -219,6 +229,26 @@ verify_key() {
       return
       ;;
     REVERSINGLABS_HOST)
+      printf '  ✓ %-15s set\n' "$label"
+      return
+      ;;
+    CROWDSTRIKE_CLIENT_ID)
+      printf '  ✓ %-15s set\n' "$label"
+      return
+      ;;
+    CROWDSTRIKE_CLIENT_SECRET)
+      cli_path="$REPO_ROOT/tools/clis/crowdstrike.py"
+      if [ ! -f "$cli_path" ]; then
+        printf '  · %-15s skipped (CLI not found)\n' "$label"; return
+      fi
+      if python3 "$cli_path" indicator 1.1.1.1 --dry-run >/dev/null 2>&1; then
+        printf '  ✓ %-15s creds present, CLI invocation OK (dry-run)\n' "$label"
+      else
+        printf '  ✗ %-15s CLI dry-run failed\n' "$label"
+      fi
+      return
+      ;;
+    CROWDSTRIKE_BASE_URL)
       printf '  ✓ %-15s set\n' "$label"
       return
       ;;
