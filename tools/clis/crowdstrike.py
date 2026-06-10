@@ -281,13 +281,24 @@ def cmd_actor(args):
               "params": {"q": args.name, "limit": args.limit, "fields": fields}})
         return
     client = make_client(args.base_url)
-    kwargs = {"q": args.name, "limit": args.limit, "sort": "last_activity_date|desc"}
+    # Free-text `q` ranks by relevance, so the named actor may not land first —
+    # or at all within a small limit (e.g. q="Cozy Bear" returns PRIMITIVE/FANCY/
+    # GOSSAMER BEAR ahead of, and crowding out, COZY BEAR). Fetch a wider candidate
+    # pool, hoist an exact name/slug match to the front, then trim to the requested
+    # limit so "actor + nearby matches" still holds. Mirrors cmd_ttps resolution.
+    want = args.name.strip().lower()
+    want_slug = want.replace(" ", "-")
+    kwargs = {"q": args.name, "limit": max(args.limit, 10), "sort": "last_activity_date|desc"}
     if fields:
         kwargs["fields"] = fields
     body = unwrap("query_actor_entities", _api_call(
         "query_actor_entities",
         lambda: client.query_actor_entities(**kwargs)))
     items = resources(body) or []
+    # Stable sort: exact name/slug match (key False=0) first, relevance order kept after.
+    items.sort(key=lambda a: not (a.get("name", "").lower() == want
+                                  or a.get("slug", "").lower() == want_slug))
+    items = items[:args.limit]
     emit(envelope("actor_profile", args.name, "actor",
                   args.base_url or BASE_URL, count=len(items), actors=items))
 
