@@ -42,7 +42,7 @@ That's it. If you get stuck, type `/cti-setup` to fix keys, or `npx github:Liber
 
 ## What's in the pack
 
-- **65 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
+- **66 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
 - **7 threat-intel integrations** — VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys. Each exposed as a lookup skill any other skill can chain.
 - **Local MITRE ATT&CK dataset** — TTP mapping without network calls.
 - **Tradecraft vocabularies** — TLP, NATO Admiralty Scale, MISP confidence, probability yardstick. Auto-applied by the orchestrator; also invokable directly.
@@ -66,7 +66,7 @@ Then run `/cti-setup` inside Claude Code to add API keys.
 ```bash
 npx github:Liberty91LTD/cti-skills
 ```
-Copies all 65 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
+Copies all 66 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
 
 ### Git clone (for development or contribution)
 
@@ -140,7 +140,7 @@ All skills live flat under `skills/` and are user-invocable as `/<skill-name>`. 
 - **Detection engineering** — `/sigma-writing`, `/yara-writing`, `/kql-writing`
 - **Knowledge cells** — `/china-cyber-espionage`, `/russia-cyber-espionage`, `/iran-cyber-espionage`, `/dprk-cyber-espionage`, `/ransomware-ecosystem`, `/infostealers`, `/initial-access-brokers`, `/phishing-social-engineering`, `/supply-chain-threats`, `/carding-financial-fraud`, `/hacktivism`
 - **OSINT + collection** — `/osint-methodology`, `/darkweb-collection`, `/vulnerability-intelligence`
-- **Lookups** — `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-ransomwarelive`, `/mitre-attack`
+- **Lookups** — `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` (IOC reputation + threat-actor / TTP / report intelligence), `/mitre-attack`
 - **Management** — `/pir-management`, `/stakeholder-management`, `/feedback-loops`, `/sops`, `/maturity-assessment`, `/intelligence-sharing`
 - **Methodology** — `/cti-hyperloop` (optional operating doctrine)
 
@@ -159,12 +159,14 @@ Optional. The pack degrades gracefully — skills skip enrichments for which no 
 | Censys | `CENSYS_API_ID` + `CENSYS_API_SECRET` | 250 queries/month |
 | MISP | `MISP_URL` + `MISP_API_KEY` | host-bound (your instance) |
 | Ransomware.live | `RANSOMWARE_LIVE` | 3,000/day (PRO) |
+| ReversingLabs A1000 | `REVERSINGLABS_USER` + `REVERSINGLABS_PASSWORD` | licensed (Spectra Analyze) |
+| CrowdStrike Falcon Intelligence | `CROWDSTRIKE_CLIENT_ID` + `CROWDSTRIKE_CLIENT_SECRET` | licensed (Falcon Intelligence) |
 
 Three ways to configure:
 
 1. **Inside Claude Code** (works for all install paths): type `/cti-setup` and Claude walks you through it.
 2. **Shell script** (clone install only): `./scripts/setup.sh` — interactive prompts, or use `--non-interactive --virustotal=KEY` flags for scripted setup.
-3. **Environment variables**: export the variable in your shell rc; the CLIs read them at runtime.
+3. **Environment variables**: export the variable in your shell rc; the CLIs read them at runtime. Copy [`.env.example`](.env.example) to `.env` (gitignored) as a starting point listing every supported variable, or pass them inline (`VIRUSTOTAL_API_KEY=… ./scripts/setup.sh --non-interactive`).
 
 Keys are merged into `.claude/settings.local.json` (gitignored). The pack degrades gracefully — skills skip enrichments for which no key is configured.
 

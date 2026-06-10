@@ -110,6 +110,17 @@ Russian cyber operations have evolved significantly across several dimensions:
 - **Cyber reserve forces**: Russia's use of patriotic hackers, cyber militias, and private military company-affiliated cyber units alongside formal intelligence operations.
 - **Lessons learned integration**: How Russian operators have adapted their approach based on operational successes and failures in the Ukraine conflict.
 
+## Live enrichment
+
+When CrowdStrike Falcon Intelligence credentials are configured (`$CROWDSTRIKE_CLIENT_ID`), pull live vendor intelligence to keep this cell current and to answer specific actor questions:
+
+- **Actor profile** — `/lookup-crowdstrike actor "Cozy Bear"` / `actor "Fancy Bear"` (origins, target countries/industries, motivations, capability, aliases)
+- **TTPs** — `/lookup-crowdstrike ttps "Fancy Bear"` → ATT&CK technique IDs; resolve against `/mitre-attack`
+- **Latest reporting** — `/lookup-crowdstrike reports --actor "Voodoo Bear" --latest`
+- **Actor population** — `/lookup-crowdstrike actors --origin russia` to enumerate Russia-attributed adversaries CrowdStrike tracks (CrowdStrike uses the "Bear" cryptonym for Russian state-nexus actors)
+
+Route through `/threat-actor-profiling` for a full structured profile. CrowdStrike report bodies are typically TLP:AMBER+ — cite report IDs internally, do not redistribute.
+
 ## Sources & References
 
 1. Microsoft Threat Intelligence: "Midnight Blizzard: Guidance for responders on nation-state attack" (January 2024)
