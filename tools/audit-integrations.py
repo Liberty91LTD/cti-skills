@@ -49,11 +49,11 @@ COMPOSITE_COVERAGE = {
 # their REGISTRY indicator types don't map to ip/domain/hash/url directly. Hand
 # maintained — re-evaluate when adding a new lookup of the same shape.
 EXTRA_COVERAGE = {
-    "ip-investigation": {"lookup-misp"},
-    "domain-investigation": {"lookup-misp", "lookup-ransomwarelive"},
-    "hash-investigation": {"lookup-misp"},
-    "url-investigation": {"lookup-misp"},
-    "indicator-pivoting": {"lookup-misp", "lookup-ransomwarelive"},
+    "ip-investigation": {"lookup-misp", "lookup-opencti"},
+    "domain-investigation": {"lookup-misp", "lookup-opencti", "lookup-ransomwarelive"},
+    "hash-investigation": {"lookup-misp", "lookup-opencti"},
+    "url-investigation": {"lookup-misp", "lookup-opencti"},
+    "indicator-pivoting": {"lookup-misp", "lookup-opencti", "lookup-ransomwarelive"},
 }
 
 # Env vars documented in REGISTRY.md only as legacy/fallback. Skip them when

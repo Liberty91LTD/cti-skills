@@ -14,7 +14,7 @@ Pivoting is the art of using one known indicator to discover related infrastruct
 
 This skill is the canonical "how to walk the IOC graph" reference. The four investigation skills (`/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`) chain a fixed set of lookups for a known seed type; this skill takes over when you need to keep walking past their first-hop output.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-otx`, `/lookup-shodan`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-misp`, `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike`; then `/score-source`, `/apply-tlp`, `/confidence-language`. May hand off to `/threat-actor-profiling`, `/campaign-tracking`, `/malware-analysis`, `/yara-writing`, `/sigma-writing`, `/darkweb-collection`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-otx`, `/lookup-shodan`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-misp`, `/lookup-opencti`, `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike`; then `/score-source`, `/apply-tlp`, `/confidence-language`. May hand off to `/threat-actor-profiling`, `/campaign-tracking`, `/malware-analysis`, `/yara-writing`, `/sigma-writing`, `/darkweb-collection`.
 
 ## When to invoke
 
@@ -166,8 +166,9 @@ Hash (md5 / sha1 / sha256)
 ├── Compilation artefacts
 │   └── /lookup-virustotal file <hash>          → response includes pdb_path, compiler, packers
 │       → distinctive PDB path → /lookup-virustotal search …  (premium)
-└── MISP correlation
-    └── /lookup-misp search-attributes --value <hash>   → events that already include this hash
+└── Internal correlation
+    ├── /lookup-misp search-attributes --value <hash>   → events that already include this hash
+    └── /lookup-opencti lookup <hash>                   → observables/indicators already in your knowledge base
 ```
 
 **Concrete commands:**
@@ -187,8 +188,9 @@ python3 tools/clis/virustotal.py file 5e884898... \
 # OTX community attribution
 python3 tools/clis/otx.py file 5e884898...
 
-# Internal correlation via MISP
+# Internal correlation via MISP / OpenCTI
 python3 tools/clis/misp.py search-attributes --value 5e884898...
+python3 tools/clis/opencti.py lookup 5e884898...
 ```
 
 ### Starting from a TLS certificate (SHA-256 or CN)
@@ -232,6 +234,8 @@ Actor / family / campaign string
 │   └── /lookup-otx pulse-search "<actor-or-family>"   → IOCs from public pulses
 ├── MISP events
 │   └── /lookup-misp search-events --tag "actor=<name>" → previously catalogued IOCs
+├── OpenCTI knowledge base
+│   └── /lookup-opencti search "<actor-or-family>"      → intrusion sets, malware, reports, campaigns; then `get <id>` for relationships
 └── Surface-web mentions (forums + Telegram)
     └── /darkweb-collection (with selectors built from the actor's known aliases)
 ```
@@ -291,7 +295,7 @@ Not all pivots are equal. Score each before reporting:
 | C2 extraction from a hash | `/lookup-virustotal` `--relationships contacted_ips,contacted_domains,contacted_urls` | `/lookup-reversinglabs report --fields networkthreatintelligence` |
 | Community/actor attribution | `/lookup-otx` | `/lookup-misp search-events --tag`, `/lookup-crowdstrike indicator` (actors + malware families linked to the IOC) |
 | Actor → TTPs / reports / related infrastructure | `/lookup-crowdstrike actor "<name>"` then `ttps` / `reports --actor` | `/threat-actor-profiling` |
-| Internal correlation against own catalogued IOCs | `/lookup-misp` | — |
+| Internal correlation against own catalogued IOCs | `/lookup-misp` | `/lookup-opencti lookup` (observables + indicators, then `get` for relationships) |
 | Ransomware-group profile / IOCs / YARA | `/lookup-ransomwarelive` | — |
 | Ransomware-victim sweep on org name | `/lookup-ransomwarelive search --q` | — |
 | Underground-forum / Telegram chatter | `/darkweb-collection` | — |
@@ -412,7 +416,7 @@ Apply `/score-source`, `/apply-tlp`, and `/confidence-language` before publishin
 ## Related skills
 
 - `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` — first-hop chains; this skill takes over for deeper traversal
-- `/lookup-virustotal`, `/lookup-shodan`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-otx`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-misp`, `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` — the underlying lookups
+- `/lookup-virustotal`, `/lookup-shodan`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-otx`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-misp`, `/lookup-opencti`, `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` — the underlying lookups
 - `/darkweb-collection` — when the pivot leads off-network into forum / Telegram chatter
 - `/threat-actor-profiling`, `/campaign-tracking` — what to do with the cluster once you have it
 - `/malware-analysis`, `/yara-writing`, `/sigma-writing` — sample-grounded follow-ups to a hash pivot

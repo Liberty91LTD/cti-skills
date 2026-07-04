@@ -122,6 +122,6 @@ Campaigns may be related. Document relationships:
 - **Build the IOC cluster** — `/indicator-pivoting` (multi-hop graph walk), `/ioc-enrichment-workflow` (bulk enrichment of raw IOCs)
 - **Per-indicator first-hop investigation** — `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`
 - **Ransomware-group campaigns** — `/lookup-ransomwarelive group-profile <name>` returns the group's documented TTPs, leak-site infrastructure, and per-group IOC + YARA dumps; pair with `/ransomware-ecosystem` knowledge cell
-- **Publish the campaign as a sharable artefact** — `/lookup-misp create-event` writes the cluster into your MISP instance; `/stix-bundle` produces the STIX 2.1 representation
+- **Publish the campaign as a sharable artefact** — `/lookup-misp create-event` writes the cluster into your MISP instance; `/stix-bundle` produces the STIX 2.1 representation; `/lookup-opencti upload-stix` imports that bundle into your OpenCTI knowledge base (or `create-relationship` to link indicators to an existing campaign entity)
 - **Actor attribution** — `/threat-actor-profiling` consumes the campaign output to build / update an actor profile
 - **Apply rigor to the campaign report** — `/score-source`, `/apply-tlp`, `/confidence-language`, `/likelihood-language`, `/intelligence-writing`

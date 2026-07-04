@@ -13,7 +13,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 
 **Seeding the queue (optional):** when you don't already have a batch but want fresh leads, `/lookup-crowdstrike indicators --malicious --since 7d [--type … | --actor …]` returns the latest high-confidence CrowdStrike IOCs (newest-first). Feed the returned indicators into the per-type routing below to enrich each. Requires CrowdStrike credentials with the Indicators read scope.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, optionally `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, optionally `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
 
 ## Enrichment routing by IOC type
 
@@ -30,6 +30,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 | 7 | `/lookup-crowdstrike` | `indicator <ip>` — Falcon Intel malicious confidence, linked actors + malware families, report refs. **Run when configured.** |
 | 8 | `/lookup-censys` | Services, certificates, autonomous system, location |
 | 9 | `/lookup-misp` | Internal correlation — `search-attributes --value <ip>` to surface prior catalogued events |
+| 10 | `/lookup-opencti` | Internal correlation — `lookup <ip>` to surface existing observables/indicators in your knowledge base |
 
 ### Domain
 
@@ -43,7 +44,8 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 | 6 | `/lookup-crowdstrike` | `indicator <domain>` — Falcon Intel malicious confidence, linked actors + malware families, report refs. **Run when configured.** |
 | 7 | `/lookup-censys` | Certificate history, associated IPs (paid plan) |
 | 8 | `/lookup-misp` | `search-attributes --value <domain>` for internal correlation |
-| 9 | `/lookup-ransomwarelive` | `search --q <org-candidate>` — sweep ransomware leak-site claims that match the apex (see `/domain-investigation` § Ransomware-claim hits for caveats) |
+| 9 | `/lookup-opencti` | `lookup <domain>` — existing observables/indicators in your knowledge base |
+| 10 | `/lookup-ransomwarelive` | `search --q <org-candidate>` — sweep ransomware leak-site claims that match the apex (see `/domain-investigation` § Ransomware-claim hits for caveats) |
 
 ### URL
 
@@ -55,6 +57,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 | 4 | `/lookup-reversinglabs` | RL classification, files seen requesting the URL (malware-corpus reputation). **Run when configured.** Use `submit-url` only for fresh crawl + sandbox. |
 | 5 | `/lookup-crowdstrike` | `indicator <url>` — Falcon Intel malicious confidence, linked actors + malware families, report refs. **Run when configured.** |
 | 6 | `/lookup-misp` | `search-attributes --value <url>` for internal correlation |
+| 7 | `/lookup-opencti` | `lookup <url>` — existing observables/indicators in your knowledge base |
 
 ### File hash (MD5, SHA-1, SHA-256)
 
@@ -65,7 +68,8 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 | 3 | `/lookup-crowdstrike` | `indicator <hash>` — Falcon Intel verdict + the threat actors and malware families CrowdStrike links to this hash + report refs. **Run when configured.** |
 | 4 | `/lookup-otx` | Pulse associations, related indicators, YARA matches |
 | 5 | `/lookup-misp` | `search-attributes --value <hash>` for internal correlation |
-| 6 | `/lookup-ransomwarelive` | `iocs <group>` and `yara <group>` if the hash hits a known ransomware family from VT/RL classification |
+| 6 | `/lookup-opencti` | `lookup <hash>` — existing observables/indicators in your knowledge base |
+| 7 | `/lookup-ransomwarelive` | `iocs <group>` and `yara <group>` if the hash hits a known ransomware family from VT/RL classification |
 
 ### Email address
 
@@ -74,6 +78,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 | 1 | `/lookup-virustotal` | Associated domains and files (premium feature, may return empty on free tier) |
 | 2 | `/lookup-otx` | Pulse associations |
 | 3 | `/lookup-misp` | `search-attributes --type email --value <email>` for internal correlation |
+| 4 | `/lookup-opencti` | `lookup <email>` — existing observables/indicators in your knowledge base |
 
 ## Enrichment process
 
@@ -134,6 +139,11 @@ misp:
   matched_events: [42, 137]   # event IDs in the local instance
   prior_tags: ["tlp:amber", "actor:apt28"]
 
+opencti:
+  known_as: [observable, indicator]
+  indicator_score: 85          # x_opencti_score on the existing indicator
+  prior_labels: [apt28, c2]
+
 synthesis:
   verdict: malicious
   confidence: 85
@@ -147,7 +157,7 @@ synthesis:
 Apply source assessment (Admiralty Scale) to the enrichment with `/score-source`:
 - Source reliability: B (established tool APIs, usually reliable)
 - Information credibility: based on corroboration across tools (3+ tools agree → 1/Confirmed; 2 agree → 2/Probably true; single source → 3/Possibly true)
-- A MISP hit on a previously-curated event lifts credibility one step (your team has already vetted it once)
+- A MISP or OpenCTI hit on a previously-curated event/entity lifts credibility one step (your team has already vetted it once)
 
 ### Step 5: Store
 
@@ -155,7 +165,7 @@ Write enrichment results to `data/iocs/active/YYYY-MM-DD-<context>.md` with appr
 
 ### Step 6 (optional): Push back
 
-If the enrichment confirms a previously-unknown malicious indicator and you maintain a MISP instance, push it back via `/lookup-misp add-attribute` (or `create-event` for a fresh cluster) so future enrichments hit your own catalogue first.
+If the enrichment confirms a previously-unknown malicious indicator, push it back into your own platform so future enrichments hit your catalogue first: `/lookup-misp add-attribute` (or `create-event` for a fresh cluster) for a MISP instance, and/or `/lookup-opencti create-indicator` (with `--score` and `--labels`) for an OpenCTI knowledge base.
 
 ### Step 7 (optional): Pivot
 
@@ -175,6 +185,7 @@ Per-API limits live in `tools/REGISTRY.md`. Summary:
 | OTX | 10k req/hour | Batch freely |
 | Censys | 250/month | Selective use only |
 | MISP | host-bound | Local; no public limit |
+| OpenCTI | host-bound | Local; no public limit |
 | ransomware.live (PRO) | 3000/day | Plenty for bulk org-candidate sweeps |
 | ReversingLabs (A1000) | undocumented; 429 + `Retry-After` | Back off on 429. Each `--pivot` entry on the `ip` op is a separate call — fan out deliberately. |
 
@@ -190,7 +201,7 @@ To configure missing keys, point the user at `/cti-setup`.
 
 ## Related skills
 
-- `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, `/lookup-ransomwarelive` — the underlying lookups
+- `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, `/lookup-ransomwarelive` — the underlying lookups
 - `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` — single-seed first-hop chains; this workflow is the bulk-list equivalent
 - `/indicator-pivoting` — when an enrichment opens new pivot candidates
 - `/score-source`, `/apply-tlp`, `/confidence-language` — apply rigor to each finished enrichment record

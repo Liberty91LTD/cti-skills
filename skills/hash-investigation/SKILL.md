@@ -11,7 +11,7 @@ metadata:
 
 Investigate a file hash end-to-end. Chain lookups, surface malware family attribution, prioritize infrastructure pivots, and decide whether deeper malware analysis is warranted.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (vendor-authoritative classification + MITRE ATT&CK + sandbox), optionally `/lookup-crowdstrike` (Falcon Intel verdict + actor/malware attribution), optionally `/lookup-misp` (internal correlation), optionally `/malware-analysis`, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (vendor-authoritative classification + MITRE ATT&CK + sandbox), optionally `/lookup-crowdstrike` (Falcon Intel verdict + actor/malware attribution), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/malware-analysis`, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -48,6 +48,7 @@ request_malware_analysis: <optional bool — trigger /malware-analysis after loo
 /lookup-reversinglabs hash <value> --av-scanners --ticloud   # if $REVERSINGLABS_USER is set. Vendor-authoritative verdict + threat name + AV detection ratio. RL is the strongest single-source verdict on a hash; run it whenever available, not just when VT signal is thin.
 /lookup-crowdstrike indicator <value>                        # if $CROWDSTRIKE_CLIENT_ID is set. Falcon Intel verdict — malicious confidence + the threat actors and malware families CrowdStrike links to this hash + report refs. One API call.
 /lookup-misp search-attributes --value <value>               # if $MISP_URL + $MISP_KEY are set. Internal correlation against your own catalogued events.
+/lookup-opencti lookup <value>                               # if $OPENCTI_URL + $OPENCTI_TOKEN are set. Internal correlation against your OpenCTI knowledge base (observables + indicators in one call).
 ```
 
 **Escalation lookup** (run sequentially after the parallel batch only if the call below is warranted):

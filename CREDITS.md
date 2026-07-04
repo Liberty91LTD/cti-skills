@@ -27,6 +27,7 @@ The orchestration layer, the skill-composition pattern, the `lookup-*` integrati
 
 - **OASIS STIX 2.1 / TAXII** — OASIS Cyber Threat Intelligence Technical Committee.
 - **MISP Project** — CIRCL Luxembourg (Andras Iklody, Alexandre Dulaunoy, Christophe Vandeplas, and the wider MISP community).
+- **OpenCTI** — Filigran (founders Samuel Hassine and Julien Richard); originated at ANSSI in partnership with CERT-EU.
 - **SigmaHQ** — Florian Roth, Thomas Patzke, and the SigmaHQ contributor community.
 - **YARA** — Victor M. Alvarez (VirusTotal).
 - **OpenIOC** — originally Mandiant.
@@ -34,7 +35,7 @@ The orchestration layer, the skill-composition pattern, the `lookup-*` integrati
 
 ## Data and API providers
 
-The `lookup-*` skills wrap public and licensed services: **VirusTotal** (Google), **Shodan** (Shodan LLC, John Matherly), **Censys** (Censys, Inc., originated University of Michigan), **GreyNoise Intelligence** (Andrew Morris), **AbuseIPDB** (Marathon Studios), **AlienVault OTX** (LevelBlue), **urlscan.io** (Johannes Gilger), **MISP** communities, **ransomware.live** (Julien Mousqueton), **ReversingLabs Spectra Analyze / A1000** (ReversingLabs Inc., founders Mario Vuksan and Tomislav Pericin), and **CrowdStrike Falcon Intelligence** (CrowdStrike, Inc., founders George Kurtz, Dmitri Alperovitch, and Gregg Marston).
+The `lookup-*` skills wrap public and licensed services: **VirusTotal** (Google), **Shodan** (Shodan LLC, John Matherly), **Censys** (Censys, Inc., originated University of Michigan), **GreyNoise Intelligence** (Andrew Morris), **AbuseIPDB** (Marathon Studios), **AlienVault OTX** (LevelBlue), **urlscan.io** (Johannes Gilger), **MISP** communities, **OpenCTI** (Filigran), **ransomware.live** (Julien Mousqueton), **ReversingLabs Spectra Analyze / A1000** (ReversingLabs Inc., founders Mario Vuksan and Tomislav Pericin), and **CrowdStrike Falcon Intelligence** (CrowdStrike, Inc., founders George Kurtz, Dmitri Alperovitch, and Gregg Marston).
 
 ## Vendor research and government advisories
 
@@ -75,6 +76,7 @@ One row per skill. *Foundational source* names the framework, paper, doctrine, o
 | `lookup-censys` | Wrapper skill for Censys host + certificate lookups. | [Censys Search API v2](https://search.censys.io/) | Censys, Inc. | Andy Piazza; Katie Nickels | Data/API provider | — |
 | `lookup-greynoise` | Wrapper skill for GreyNoise scanner classification. | [GreyNoise Intelligence API](https://www.greynoise.io/) | GreyNoise Intelligence | Andy Piazza; Katie Nickels | Data/API provider | — |
 | `lookup-misp` | Two-way MISP integration for events/attributes/objects. | [MISP Project (Malware Information Sharing Platform)](https://www.misp-project.org/) | MISP Project / CIRCL (Andras Iklody, Alexandre Dulaunoy, Christophe Vandeplas) | Filigran; Andreas Sfakianakis | Foundational framework | MISP is open-source under AGPL; born at CIRCL Luxembourg. |
+| `lookup-opencti` | Two-way OpenCTI integration — GraphQL query + write for indicators/observables/entities and STIX 2.1 bundle import. | [OpenCTI (Filigran)](https://filigran.io/solutions/open-cti/) | Filigran (founders Samuel Hassine, Julien Richard); originated at ANSSI with CERT-EU | Filigran | Foundational framework | OpenCTI community edition is open-source; STIX 2.1-native platform. |
 | `lookup-otx` | Wrapper skill for AlienVault OTX pulse lookups. | [AlienVault OTX](https://otx.alienvault.com/) | AT&T Cybersecurity / LevelBlue | Andy Piazza; Katie Nickels | Data/API provider | — |
 | `lookup-ransomwarelive` | Wrapper for ransomware.live victim/group lookups. | [ransomware.live (leak-site aggregation)](https://www.ransomware.live/) | Julien Mousqueton | Andy Piazza; Recorded Future | Data/API provider | Free community resource by Julien Mousqueton; aggregates 27k+ victims, 330+ groups. |
 | `lookup-reversinglabs` | Wrapper for ReversingLabs Spectra Analyze (A1000) malware analysis, classification, sandbox, and network threat intel. | [ReversingLabs Spectra Analyze documentation](https://docs.reversinglabs.com/SpectraAnalyze/) | ReversingLabs Inc. (founders Mario Vuksan and Tomislav Pericin) | Mandiant / Google Cloud; Andy Piazza | Data/API provider | Licensed product; uses the official `reversinglabs-sdk-py3` Python SDK. |

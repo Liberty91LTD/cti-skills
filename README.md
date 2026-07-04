@@ -10,7 +10,7 @@ Imagine you're investigating something suspicious on the internet — a weird li
 
 This pack teaches Claude Code (an AI coding assistant) how to do all of that for you. You type a question in plain English, and Claude:
 
-1. **Looks the thing up** in seven trusted threat-intel databases (VirusTotal, Shodan, AbuseIPDB, and others).
+1. **Looks the thing up** in twelve trusted threat-intel sources (VirusTotal, Shodan, AbuseIPDB, and others).
 2. **Pulls together** what they all say about it.
 3. **Writes you a report** in the format real threat analysts use — with confidence ratings, sources, and a clear bottom line.
 
@@ -42,8 +42,8 @@ That's it. If you get stuck, type `/cti-setup` to fix keys, or `npx github:Liber
 
 ## What's in the pack
 
-- **66 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
-- **7 threat-intel integrations** — VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys. Each exposed as a lookup skill any other skill can chain.
+- **72 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
+- **12 threat-intel integrations** — VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys, MISP, OpenCTI, Ransomware.live, ReversingLabs, CrowdStrike Falcon Intelligence. Each exposed as a lookup skill any other skill can chain.
 - **Local MITRE ATT&CK dataset** — TTP mapping without network calls.
 - **Tradecraft vocabularies** — TLP, NATO Admiralty Scale, MISP confidence, probability yardstick. Auto-applied by the orchestrator; also invokable directly.
 - **A single orchestrator skill** that routes requests and auto-applies rigor to every output.
@@ -66,7 +66,7 @@ Then run `/cti-setup` inside Claude Code to add API keys.
 ```bash
 npx github:Liberty91LTD/cti-skills
 ```
-Copies all 66 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
+Copies all 72 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
 
 ### Git clone (for development or contribution)
 
@@ -140,7 +140,7 @@ All skills live flat under `skills/` and are user-invocable as `/<skill-name>`. 
 - **Detection engineering** — `/sigma-writing`, `/yara-writing`, `/kql-writing`
 - **Knowledge cells** — `/china-cyber-espionage`, `/russia-cyber-espionage`, `/iran-cyber-espionage`, `/dprk-cyber-espionage`, `/ransomware-ecosystem`, `/infostealers`, `/initial-access-brokers`, `/phishing-social-engineering`, `/supply-chain-threats`, `/carding-financial-fraud`, `/hacktivism`
 - **OSINT + collection** — `/osint-methodology`, `/darkweb-collection`, `/vulnerability-intelligence`
-- **Lookups** — `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` (IOC reputation + threat-actor / TTP / report intelligence), `/mitre-attack`
+- **Lookups** — `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-opencti` (two-way: knowledge-base query + write), `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` (IOC reputation + threat-actor / TTP / report intelligence), `/mitre-attack`
 - **Management** — `/pir-management`, `/stakeholder-management`, `/feedback-loops`, `/sops`, `/maturity-assessment`, `/intelligence-sharing`
 - **Methodology** — `/cti-hyperloop` (optional operating doctrine)
 
@@ -158,6 +158,7 @@ Optional. The pack degrades gracefully — skills skip enrichments for which no 
 | AlienVault OTX | `OTX_API_KEY` | 10,000 req/hour |
 | Censys | `CENSYS_API_ID` + `CENSYS_API_SECRET` | 250 queries/month |
 | MISP | `MISP_URL` + `MISP_API_KEY` | host-bound (your instance) |
+| OpenCTI | `OPENCTI_URL` + `OPENCTI_TOKEN` | host-bound (your instance) |
 | Ransomware.live | `RANSOMWARE_LIVE` | 3,000/day (PRO) |
 | ReversingLabs A1000 | `REVERSINGLABS_USER` + `REVERSINGLABS_PASSWORD` | licensed (Spectra Analyze) |
 | CrowdStrike Falcon Intelligence | `CROWDSTRIKE_CLIENT_ID` + `CROWDSTRIKE_CLIENT_SECRET` | licensed (Falcon Intelligence) |

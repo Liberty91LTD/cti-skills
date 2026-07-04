@@ -169,6 +169,7 @@ Read the event tags too: `admiralty-scale:source-reliability="b"` and `admiralty
 - `/score-source` — apply Admiralty rating before publishing
 - `/apply-tlp` — set TLP markings before publishing
 - `/intelligence-sharing` — broader sharing-model context (TAXII, ISACs, MISP communities)
+- `/lookup-opencti` — the knowledge-base sibling; MISP = community exchange, OpenCTI = internal knowledge graph
 - `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` — produce findings that MISP write commands consume
 
 ## See also

@@ -10,7 +10,7 @@ Agents should check this file on session start and warn the user if 2+ skills ha
 
 ## Pack version
 
-**cti-skills:** 1.9.0 (2026-05-30)
+**cti-skills:** 1.10.0 (2026-07-02)
 
 ## Skills
 
@@ -102,6 +102,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `lookup-otx` | 1.0.0 | 2026-04-20 |
 | `lookup-shodan` | 1.0.0 | 2026-04-20 |
 | `lookup-misp` | 1.0.0 | 2026-04-26 |
+| `lookup-opencti` | 1.0.0 | 2026-07-02 |
 | `lookup-ransomwarelive` | 1.0.0 | 2026-04-26 |
 | `lookup-reversinglabs` | 1.0.0 | 2026-05-08 |
 | `lookup-crowdstrike` | 1.0.0 | 2026-05-30 |
@@ -126,7 +127,11 @@ These remain for reference but agents should prefer the `lookup-*` skills above.
 
 ## Changelog
 
-### 1.9.0 — 2026-05-30
+### 1.10.0 — 2026-07-02
+- Added `lookup-opencti` skill — the second write-capable lookup in the pack (after `lookup-misp`) and the first GraphQL integration. Two-way bridge to an OpenCTI instance: **read** (`version` connectivity check, `lookup` — observables AND indicators for a raw IOC value in one call, global `search` across all entity types, filtered `list` of 10 entity types with FilterGroup filters + cursor pagination, `get` with relationship fan-out, `connectors` health) and **write** (`create-indicator` with auto-generated STIX pattern + companion observable, `create-observable`, `add-label` with auto-create label resolution, `add-marking` for TLP, `update` fieldPatch, `create-relationship`, `upload-stix` for STIX 2.1 bundle import with bypassValidation/analyst-workbench semantics, and a guarded `delete`). Stdlib-only Python CLI at `tools/clis/opencti.py` targeting OpenCTI ≥ 6.x. Reads `$OPENCTI_URL` + `$OPENCTI_TOKEN` (+ optional `$OPENCTI_PROXY`). Self-signed-cert support via `--insecure`; every command supports `--dry-run`. Source reliability defaults to B2, rated per the entity's `createdBy` feed/author.
+- **Wiring** — `/lookup-opencti` added to the `/cti-orchestrator` lookup catalog, the credentials-conditional parallel batch of all four investigation skills (`ip`/`domain`/`hash`/`url-investigation`), all five `ioc-enrichment-workflow` routing tables (+ enrichment-record block, rate-limit table, and push-back step alongside MISP), `indicator-pivoting` (hash tree, actor tree, routing-by-goal table), `malware-analysis` (internal correlation), `threat-actor-profiling` (internal knowledge-base check before rebuilding a profile), `campaign-tracking` (publish path), and `stix-bundle` (OpenCTI imports bundles as-is — no MISP-style TLP marking surgery). Auditor `EXTRA_COVERAGE` now enforces the composite references.
+- Registry (catalog row + Python CLI table), `scripts/setup.sh` (env vars, `--opencti-url`/`--opencti` flags, dry-run verify case), `cti-setup` services table, `.env.example`, README (catalog + key table), and CREDITS updated. README/CLAUDE.md stale skill counts corrected to 72.
+- Validated live against an OpenCTI 7.x instance (7.260701.0). Two bugs the live run surfaced are fixed: `get`'s relationship query typed the `fromOrToId` variable as `StixRef` where the 7.x schema wants `String` (and the failure sank the whole command — it now degrades to entity-without-relationships with a `relationships_note`); and `get`'s field selection lacked `Identity`/`Location`/`Tool` fragments, so targeted sectors, countries, and tools resolved without names.
 - Added `lookup-crowdstrike` skill wrapping the CrowdStrike Falcon Intelligence (Intel) API. Unlike the IOC-reputation lookups, it spans two use cases: (a) **indicator** reputation for IP/domain/hash/URL (malicious confidence, linked actors + malware families, report refs), and (b) **finished/actor intelligence** — `actor` (adversary profile: origins, target countries/industries, motivations, capability, aliases), `actors` (search by origin/target/motivation via FQL), `reports` (finished reporting by actor / free-text / latest, plus PDF download), and `ttps` (MITRE ATT&CK technique set for an actor). Plus `indicators` — browse/sweep the indicator feed for the latest malicious IOCs, filterable by confidence/type/actor/malware/recency (newest-first). SDK-backed Python CLI at `tools/clis/crowdstrike.py` with self-bootstrapping venv around `crowdstrike-falconpy`. Reads `$CROWDSTRIKE_CLIENT_ID` + `$CROWDSTRIKE_CLIENT_SECRET` (+ optional `$CROWDSTRIKE_BASE_URL` for non-US-1 clouds); FalconPy handles the OAuth2 client-credentials token exchange. Source reliability defaults to A2 with B3 downgrade rules for low/unverified indicators and sparse actor records. Added companion `crowdstrike-api` reference skill (non-invokable) holding the full Intel operation catalogue and FQL primer.
 - **IOC-path wiring** — `/lookup-crowdstrike indicator` added to `/cti-orchestrator` lookup catalog (A2, "use when configured"), the always-parallel batch of all four investigation skills (`ip`/`domain`/`hash`/`url-investigation`), all four `ioc-enrichment-workflow` routing tables, and `malware-analysis` (vendor actor attribution + ATT&CK).
 - **Actor-path wiring** — added `actor`/`ttps`/`reports` references to `threat-actor-profiling` (primary vendor feed for state-sponsored actors) and a "Live enrichment" section to each regional espionage cell (`iran`/`russia`/`china`/`dprk-cyber-espionage`) with region-appropriate actor examples, so questions like "what TTPs does Charming Kitten use?", "which actors operate from Russia?", and "latest report on Mustang Panda" auto-include a CrowdStrike response when credentials are configured.

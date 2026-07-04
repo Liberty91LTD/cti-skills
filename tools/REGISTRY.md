@@ -17,6 +17,7 @@ All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type
 | CrowdStrike | `tools/clis/crowdstrike.py` | crowdstrike-falconpy + venv | **actor + finished intel** — IOC reputation, threat-actor profiles, origin/target actor search, MITRE ATT&CK TTPs, intel reports + PDF |
 | GreyNoise | `tools/clis/greynoise.py` | pygreynoise SDK + venv | context, RIOT, similarity, timeline, GNQL search & stats, bulk quick |
 | MISP | `tools/clis/misp.py` | stdlib | **two-way** — query events/attributes/objects + write attributes, create events, upload STIX 2 bundles, tag, publish |
+| OpenCTI | `tools/clis/opencti.py` | stdlib | **two-way** — GraphQL query (lookup/search/list/get/connectors) + write indicators/observables, label, TLP-mark, relate, import STIX 2.1 bundles, guarded delete |
 | Ransomware.live | `tools/clis/ransomwarelive.py` | stdlib | leak-site victim claims, **group profiles** (TTPs, leak-site infra), per-group IOCs + YARA, ransom notes, negotiations, CSIRT contacts |
 | ReversingLabs | `tools/clis/reversinglabs.py` | reversinglabs-sdk-py3 + venv | hash classification, detailed/sandbox reports, advanced search, network URL/domain/IP intel, container/extracted-file pivot |
 | Shodan | `tools/clis/shodan.py` | shodan-python SDK + venv | search, count, facets, DNS reverse/domain, account, ports/services |
@@ -41,6 +42,7 @@ The Node and Python CLIs are complementary — Node for fast inline lookups in i
 | [GreyNoise](integrations/greynoise.md) | `/lookup-greynoise` | `GREYNOISE_API_KEY` | IP only | 50 req/day (community) | B2 |
 | [Censys](integrations/censys.md) | `/lookup-censys` | `CENSYS_PAT` (Platform) / `CENSYS_API_ID`+`CENSYS_API_SECRET` (legacy) | IP, search query, certs | 250/month | A2 |
 | [MISP](integrations/misp.md) | `/lookup-misp` | `MISP_URL` + `MISP_API_KEY` | events, attributes, objects, STIX 2 bundles | host-bound (no public limit) | B2 (varies by Org) |
+| [OpenCTI](integrations/opencti.md) | `/lookup-opencti` | `OPENCTI_URL` + `OPENCTI_TOKEN` | entities, observables, STIX 2 bundles | host-bound (no public limit) | B2 (varies by feed/author) |
 | [Ransomware.live](integrations/ransomwarelive.md) | `/lookup-ransomwarelive` | `RANSOMWARE_LIVE` | victim, group, sector, country, IOCs, YARA | 3000/day (PRO) | B2 (descriptions B3–B4) |
 | [ReversingLabs A1000](integrations/reversinglabs.md) | `/lookup-reversinglabs` | `REVERSINGLABS_USER` + `REVERSINGLABS_PASSWORD` (+ optional `REVERSINGLABS_HOST`) | hash, url, domain, ip | undocumented; 429 + Retry-After | A2 |
 | [CrowdStrike Falcon Intelligence](integrations/crowdstrike.md) | `/lookup-crowdstrike` | `CROWDSTRIKE_CLIENT_ID` + `CROWDSTRIKE_CLIENT_SECRET` (+ optional `CROWDSTRIKE_BASE_URL`) | ip, domain, hash, url, actor, report, MITRE | per-tenant; 429 + Retry-After | A2 |

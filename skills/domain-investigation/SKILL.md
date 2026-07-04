@@ -11,7 +11,7 @@ metadata:
 
 Investigate a domain or hostname end-to-end. Chain `lookup-*` skills, consolidate, prioritize follow-up IOCs, and return a rated investigation summary.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-otx`, `/lookup-ransomwarelive`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-otx`, `/lookup-ransomwarelive`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -53,6 +53,7 @@ For the ransomware.live sweep, derive an `org-candidate` from the domain by stri
 /lookup-reversinglabs domain <domain>            # if $REVERSINGLABS_USER is set. Network reputation from RL's malware-analysis corpus — files seen resolving / contacting this domain, RL classification. One API call.
 /lookup-crowdstrike indicator <domain>           # if $CROWDSTRIKE_CLIENT_ID is set. Falcon Intel view — malicious confidence, linked actors + malware families, report refs. One API call.
 /lookup-misp search-attributes --value <domain>  # if $MISP_URL + $MISP_KEY are set. Internal correlation against your own catalogued events.
+/lookup-opencti lookup <domain>                  # if $OPENCTI_URL + $OPENCTI_TOKEN are set. Internal correlation against your OpenCTI knowledge base (observables + indicators in one call).
 ```
 
 Optionally (escalation):

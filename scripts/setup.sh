@@ -13,6 +13,7 @@
 # Recognised env vars (also used at runtime by the CLIs):
 #   VIRUSTOTAL_API_KEY URLSCAN_API_KEY SHODAN_API_KEY ABUSEIPDB_API_KEY
 #   GREYNOISE_API_KEY OTX_API_KEY CENSYS_PAT MISP_URL MISP_API_KEY
+#   OPENCTI_URL OPENCTI_TOKEN
 #   RANSOMWARE_LIVE REVERSINGLABS_USER REVERSINGLABS_PASSWORD
 #   CROWDSTRIKE_CLIENT_ID CROWDSTRIKE_CLIENT_SECRET CROWDSTRIKE_BASE_URL
 
@@ -40,6 +41,8 @@ FLAG_OTX_API_KEY=""
 FLAG_CENSYS_PAT=""
 FLAG_MISP_URL=""
 FLAG_MISP_API_KEY=""
+FLAG_OPENCTI_URL=""
+FLAG_OPENCTI_TOKEN=""
 FLAG_RANSOMWARE_LIVE=""
 FLAG_REVERSINGLABS_USER=""
 FLAG_REVERSINGLABS_PASSWORD=""
@@ -49,7 +52,7 @@ FLAG_CROWDSTRIKE_CLIENT_SECRET=""
 FLAG_CROWDSTRIKE_BASE_URL=""
 
 show_help() {
-  sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'
   exit 0
 }
 
@@ -68,6 +71,8 @@ for arg in "$@"; do
     --censys=*)        FLAG_CENSYS_PAT="${arg#*=}" ;;
     --misp-url=*)      FLAG_MISP_URL="${arg#*=}" ;;
     --misp=*)          FLAG_MISP_API_KEY="${arg#*=}" ;;
+    --opencti-url=*)   FLAG_OPENCTI_URL="${arg#*=}" ;;
+    --opencti=*)       FLAG_OPENCTI_TOKEN="${arg#*=}" ;;
     --ransomwarelive=*) FLAG_RANSOMWARE_LIVE="${arg#*=}" ;;
     --reversinglabs-user=*) FLAG_REVERSINGLABS_USER="${arg#*=}" ;;
     --reversinglabs-password=*) FLAG_REVERSINGLABS_PASSWORD="${arg#*=}" ;;
@@ -92,6 +97,8 @@ SERVICES=(
   "CENSYS_PAT|Censys PAT|Personal Access Token at accounts.censys.io/settings/personal-access-tokens"
   "MISP_URL|MISP URL|base URL of your MISP instance (e.g. https://misp.example.org)"
   "MISP_API_KEY|MISP auth key|My Profile → Auth keys in your MISP instance"
+  "OPENCTI_URL|OpenCTI URL|base URL of your OpenCTI instance (e.g. https://opencti.example.org)"
+  "OPENCTI_TOKEN|OpenCTI token|API token from your OpenCTI profile"
   "RANSOMWARE_LIVE|Ransomware.live PRO|free PRO key at my.ransomware.live (3000/day)"
   "REVERSINGLABS_USER|ReversingLabs A1000 username|licensed Spectra Analyze account (ask your RL admin)"
   "REVERSINGLABS_PASSWORD|ReversingLabs A1000 password|paired with REVERSINGLABS_USER"
@@ -195,6 +202,22 @@ verify_key() {
       fi
       if python3 "$cli_path" search-events --limit 1 --dry-run >/dev/null 2>&1; then
         printf '  ✓ %-15s key present, CLI invocation OK (dry-run)\n' "$label"
+      else
+        printf '  ✗ %-15s CLI dry-run failed\n' "$label"
+      fi
+      return
+      ;;
+    OPENCTI_URL)
+      printf '  ✓ %-15s set\n' "$label"
+      return
+      ;;
+    OPENCTI_TOKEN)
+      cli_path="$REPO_ROOT/tools/clis/opencti.py"
+      if [ ! -f "$cli_path" ]; then
+        printf '  · %-15s skipped (CLI not found)\n' "$label"; return
+      fi
+      if python3 "$cli_path" version --dry-run >/dev/null 2>&1; then
+        printf '  ✓ %-15s token present, CLI invocation OK (dry-run)\n' "$label"
       else
         printf '  ✗ %-15s CLI dry-run failed\n' "$label"
       fi

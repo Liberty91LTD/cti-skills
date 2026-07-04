@@ -11,7 +11,7 @@ metadata:
 
 Investigate an IP address end-to-end. Chain multiple `lookup-*` skills, consolidate results, prioritize follow-up IOCs, and return a rated investigation summary. You invoke skills — you don't call APIs directly.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-otx`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel + sample fan-out), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-virustotal`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-otx`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel + sample fan-out), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -53,6 +53,7 @@ Invoke in parallel (agents should batch these calls):
 /lookup-reversinglabs ip <value>                 # if $REVERSINGLABS_USER is set. Network reputation from RL's malware-analysis corpus — files seen contacting this IP, RL classification. One API call, no pivot fan-out.
 /lookup-crowdstrike indicator <value>            # if $CROWDSTRIKE_CLIENT_ID is set. Falcon Intel view — malicious confidence, linked actors + malware families, report refs. One API call.
 /lookup-misp search-attributes --value <value>   # if $MISP_URL + $MISP_KEY are set. Internal correlation against your own catalogued events.
+/lookup-opencti lookup <value>                   # if $OPENCTI_URL + $OPENCTI_TOKEN are set. Internal correlation against your OpenCTI knowledge base (observables + indicators in one call).
 ```
 
 Optionally add (escalation — separate API budget):

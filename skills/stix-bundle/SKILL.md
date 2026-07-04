@@ -242,6 +242,8 @@ If you need a self-contained bundle for non-MISP consumers (offline ingest, arch
 
 If you need TLP applied inside MISP after import, do it via a `tag-event` call rather than a STIX marking — see `tools/integrations/misp.md`.
 
+**OpenCTI is not affected** — it is STIX 2.1-native and imports bundles as-is via `/lookup-opencti` `upload-stix`, inline TLP marking-definitions included. Only MISP-bound bundles need the reference-only treatment above.
+
 ## Output Location
 
 Write STIX bundles to: `data/stix-bundles/YYYY-MM-DD-<context>.json`

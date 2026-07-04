@@ -39,11 +39,12 @@ In-chat configuration of API keys for the threat-intel integrations bundled with
 | AlienVault OTX | `OTX_API_KEY` | 10k req/hour | otx.alienvault.com → settings |
 | Censys | `CENSYS_PAT` | 250 queries/month | accounts.censys.io → settings → personal-access-tokens |
 | MISP | `MISP_URL` + `MISP_API_KEY` | self-hosted / org-provided | your MISP instance → My Profile → Auth keys |
+| OpenCTI | `OPENCTI_URL` + `OPENCTI_TOKEN` | self-hosted / org-provided | your OpenCTI instance → profile → API access (token) |
 | Ransomware.live | `RANSOMWARE_LIVE` | 3000 req/day (PRO) | my.ransomware.live → free PRO key |
 | ReversingLabs A1000 | `REVERSINGLABS_USER` + `REVERSINGLABS_PASSWORD` (optional `REVERSINGLABS_HOST`) | undocumented; 429+Retry-After | licensed product — issued by your RL admin or RL account team |
 | CrowdStrike Falcon Intelligence | `CROWDSTRIKE_CLIENT_ID` + `CROWDSTRIKE_CLIENT_SECRET` (optional `CROWDSTRIKE_BASE_URL`) | per-tenant; 429+Retry-After | licensed product — Falcon console → Support and resources → API clients and keys (assign Intel read scopes) |
 
-A starter set of **VirusTotal + OTX + URLScan + AbuseIPDB** covers most IP/domain/URL/hash investigations. Shodan and GreyNoise add value for IP-focused work. Censys is optional (very tight rate limit). MISP requires both a base URL and an auth key — point it at your org's instance. Ransomware.live powers the `lookup-ransomwarelive` and `ransomware-ecosystem` skills (victim/group tracking). ReversingLabs is a licensed product — only configure if your organisation has a Spectra Analyze (A1000) account. CrowdStrike Falcon Intelligence is a licensed subscription — it powers `/lookup-crowdstrike` for IOC reputation AND threat-actor / TTP / report intelligence; configure if your org has a Falcon Intelligence licence with Intel API scopes.
+A starter set of **VirusTotal + OTX + URLScan + AbuseIPDB** covers most IP/domain/URL/hash investigations. Shodan and GreyNoise add value for IP-focused work. Censys is optional (very tight rate limit). MISP requires both a base URL and an auth key — point it at your org's instance. OpenCTI likewise takes a base URL plus an API token and powers `/lookup-opencti` (two-way: query your knowledge base + push vetted intel back). Ransomware.live powers the `lookup-ransomwarelive` and `ransomware-ecosystem` skills (victim/group tracking). ReversingLabs is a licensed product — only configure if your organisation has a Spectra Analyze (A1000) account. CrowdStrike Falcon Intelligence is a licensed subscription — it powers `/lookup-crowdstrike` for IOC reputation AND threat-actor / TTP / report intelligence; configure if your org has a Falcon Intelligence licence with Intel API scopes.
 
 ## How to write the file
 
@@ -55,13 +56,15 @@ The file is `.claude/settings.local.json`. It is gitignored. **Do not overwrite 
   --shodan=USER_PROVIDED_KEY \
   --misp-url=https://misp.example.org \
   --misp=USER_PROVIDED_KEY \
+  --opencti-url=https://opencti.example.org \
+  --opencti=USER_PROVIDED_TOKEN \
   --ransomwarelive=USER_PROVIDED_KEY \
   --reversinglabs-user=USER_PROVIDED_USERNAME \
   --reversinglabs-password=USER_PROVIDED_PASSWORD \
   --reversinglabs-host=https://a1000.reversinglabs.com
 ```
 
-(Pass only the flags for keys the user actually shared. Available flags: `--virustotal`, `--urlscan`, `--shodan`, `--abuseipdb`, `--greynoise`, `--otx`, `--censys`, `--misp-url`, `--misp`, `--ransomwarelive`, `--reversinglabs-user`, `--reversinglabs-password`, `--reversinglabs-host`.)
+(Pass only the flags for keys the user actually shared. Available flags: `--virustotal`, `--urlscan`, `--shodan`, `--abuseipdb`, `--greynoise`, `--otx`, `--censys`, `--misp-url`, `--misp`, `--opencti-url`, `--opencti`, `--ransomwarelive`, `--reversinglabs-user`, `--reversinglabs-password`, `--reversinglabs-host`, `--crowdstrike-client-id`, `--crowdstrike-client-secret`, `--crowdstrike-base-url`.)
 
 If `scripts/setup.sh` is not present (e.g. plugin-only install), do the merge yourself with this Node one-liner. Replace `KEY=VAL` pairs with the user's input:
 

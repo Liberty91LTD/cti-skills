@@ -113,6 +113,7 @@ Authoritative list of `/lookup-*` skills available in this pack. **Keep this lis
 | `/lookup-reversinglabs` | ip, domain, url, hash | **A2** | Spectra Analyze (A1000) — vendor-authoritative classification, MITRE ATT&CK, sandbox, sample fan-out. **Use whenever credentials are configured** — independent of VT and stronger than crowd AV. |
 | `/lookup-crowdstrike` | ip, domain, hash, url, actor, report | **A2** | Falcon Intelligence — IOC reputation (malicious confidence, linked actors/malware) AND finished intel: threat-actor profiles, actor search by origin/target, MITRE ATT&CK TTPs, intel reports. **Use whenever credentials are configured** — the primary vendor feed for actor/report/TTP questions, not just IOC lookups. |
 | `/lookup-misp` | any | B2 | Internal correlation against your own MISP catalogue |
+| `/lookup-opencti` | any | B2 | Two-way: correlation against your OpenCTI knowledge base (indicators, observables, actors, reports) + write-back of vetted findings |
 | `/lookup-ransomwarelive` | org-name, group | B2 (group/dates), B3 (descriptions) | Ransomware leak-site claims; treat criminal-written descriptions cautiously |
 
 When a downstream investigation skill (e.g. `/hash-investigation`) is invoked but its SKILL.md doesn't reference a lookup that obviously applies (e.g. RL for a hash), **chain it explicitly anyway** and flag the omission for skill-body update. Better to over-chain once than miss high-value signal.
