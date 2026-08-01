@@ -10,7 +10,7 @@ Imagine you're investigating something suspicious on the internet — a weird li
 
 This pack teaches Claude Code (an AI coding assistant) how to do all of that for you. You type a question in plain English, and Claude:
 
-1. **Looks the thing up** in twelve trusted threat-intel sources (VirusTotal, Shodan, AbuseIPDB, and others).
+1. **Looks the thing up** in thirteen trusted threat-intel sources (Liberty91, VirusTotal, Shodan, AbuseIPDB, and others).
 2. **Pulls together** what they all say about it.
 3. **Writes you a report** in the format real threat analysts use — with confidence ratings, sources, and a clear bottom line.
 
@@ -42,8 +42,8 @@ That's it. If you get stuck, type `/cti-setup` to fix keys, or `npx github:Liber
 
 ## What's in the pack
 
-- **72 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
-- **12 threat-intel integrations** — VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys, MISP, OpenCTI, Ransomware.live, ReversingLabs, CrowdStrike Falcon Intelligence. Each exposed as a lookup skill any other skill can chain.
+- **74 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
+- **13 threat-intel integrations** — Liberty91, VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys, MISP, OpenCTI, Ransomware.live, ReversingLabs, CrowdStrike Falcon Intelligence. Each exposed as a lookup skill any other skill can chain.
 - **Local MITRE ATT&CK dataset** — TTP mapping without network calls.
 - **Tradecraft vocabularies** — TLP, NATO Admiralty Scale, MISP confidence, probability yardstick. Auto-applied by the orchestrator; also invokable directly.
 - **A single orchestrator skill** that routes requests and auto-applies rigor to every output.
@@ -66,7 +66,7 @@ Then run `/cti-setup` inside Claude Code to add API keys.
 ```bash
 npx github:Liberty91LTD/cti-skills
 ```
-Copies all 72 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
+Copies all 74 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
 
 ### Git clone (for development or contribution)
 
@@ -128,19 +128,63 @@ Load the Iran knowledge cell.
 ```
 Set up Priority Intelligence Requirements.
 
+## What's new
+
+Two additions, both aimed at the same gap: knowing what is coming at you, and knowing whether you can stop it.
+
+### 1. Liberty91 platform integration — `/lookup-liberty91`
+
+**What it is.** The pack's only **first-party** integration. Where VirusTotal tells you whether an indicator is bad, Liberty91 tells you *what happened, who reported it, how well corroborated it is, and which of your organizations it touches*.
+
+**The idea that makes it different.** Everything else in the pack works on indicators. This works on **occurrences**. One breach covered by a vendor write-up, three news articles and a leak-site post is **one Threat Event and five Events**. You read the occurrence once, with the disagreement between sources still visible, instead of deduplicating five reports by hand.
+
+**What you get:**
+
+- **Deduplicated occurrences** with every source you are entitled to, each carrying NATO Admiralty source reliability, occurrence credibility, a verification stage, and a per-report stance (claims / corroborates / disputes). When sources disagree, the skill reports the dispute rather than averaging it away.
+- **ATT&CK techniques per occurrence, with a note on how each was actually used** in that specific event, not a generic definition. This is the single most useful field for turning "an actor targets aviation" into "here is what they did".
+- **Named actors, malware, vulnerabilities and victims** on every list row, keyed to a canonical cross-tenant catalog, so you can pivot straight from a result to the full entity record.
+- **Two-way**: push your own finished reports back in with `ingest`, and they are enriched, entity-extracted and matched into an occurrence, private to your account.
+
+**Why it matters for the pack.** It supplies the *Threat Capability* evidence that `/control-coverage-mapping` below needs, and it is the only source here that can say what is happening to **your** sector and region rather than the world in general.
+
+Setup: one key, `LIBERTY91_API_KEY`. Full reference in [`tools/integrations/liberty91.md`](tools/integrations/liberty91.md).
+
+### 2. Control coverage mapping — `/control-coverage-mapping`
+
+**What it is.** Answers "which attacker techniques do our controls actually stop, and how well?" by joining your control baseline to **9,545 control-to-technique mappings** drawn from six public sources: MITRE ATT&CK's own mitigations, and independent CTID assessments of NIST 800-53, AWS, Azure, GCP and Microsoft 365.
+
+**The problem it solves.** Control gap analysis is normally a negotiation. Someone asserts a coverage percentage, someone else disputes it, and neither can show their working. This replaces the negotiation with a table both sides can read, where every row cites its source and its score. A disagreement becomes a disagreement about a published assessment rather than about someone's confidence.
+
+**What you get.** Four lists, not three:
+
+| | |
+|---|---|
+| **Addressed strongly** | a control scored `significant` against the technique |
+| **Addressed weakly** | reached only at `partial`, `minimal`, or relevance-asserted-without-strength |
+| **Real gaps** | controls for it exist in the evidence base, yours reach none of them |
+| **Nobody's controls address this** | no control anywhere maps, or ATT&CK itself says it cannot be mitigated |
+
+That fourth list is the point. Merging it into "gaps" is the standard mistake: it pads the gap list with things no security programme could ever close, and it costs you credibility with the first competent reader.
+
+**Honesty is enforced, not encouraged.** Effectiveness scores are never synthesized. Where no source rates a control's strength, the output says "relevance asserted, no strength claim" rather than inventing a number. A vendor-specific score is never presented as a control-class score. Controls that do not map cleanly get their own section instead of being forced to the nearest-looking identifier.
+
+**Where it fits.** It supplies the **Resistance Strength** half of Vulnerability in a FAIR risk assessment. Pair it with `/lookup-liberty91` for Threat Capability and you have both halves: a technique list without controls tells you what is coming, a control list without techniques tells you what you bought. Joined, they tell you what to do next.
+
+Runs offline, stdlib only, no API key. Evidence base bundled in [`data/attack-control-mapping/`](data/attack-control-mapping/).
+
 ## Pick a skill
 
 All skills live flat under `skills/` and are user-invocable as `/<skill-name>`. Grouped here for browsing:
 
 - **Entry point** — `/cti-orchestrator` (default routing), `/cti-setup` (configure API keys)
 - **Investigation** — `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`
-- **Analysis** — `/threat-actor-profiling`, `/ach`, `/indicator-pivoting`, `/campaign-tracking`, `/malware-analysis`, `/threat-assessment`, `/horizon-scanning`, `/key-assumptions-check`, `/red-team-analysis`, `/structured-analytic-techniques`
+- **Analysis** — `/threat-actor-profiling`, `/ach`, `/indicator-pivoting`, `/campaign-tracking`, `/malware-analysis`, `/threat-assessment`, `/control-coverage-mapping` (which techniques your controls actually stop, and how well), `/horizon-scanning`, `/key-assumptions-check`, `/red-team-analysis`, `/structured-analytic-techniques`
 - **Tradecraft rigor** — `/tlp-guide`, `/source-assessment`, `/confidence-levels`, `/likelihood-language`
 - **Production** — `/intelligence-writing`, `/writing-assessments`, `/quality-control`, `/ioc-export`, `/stix-bundle`, `/ioc-enrichment-workflow`
 - **Detection engineering** — `/sigma-writing`, `/yara-writing`, `/kql-writing`
 - **Knowledge cells** — `/china-cyber-espionage`, `/russia-cyber-espionage`, `/iran-cyber-espionage`, `/dprk-cyber-espionage`, `/ransomware-ecosystem`, `/infostealers`, `/initial-access-brokers`, `/phishing-social-engineering`, `/supply-chain-threats`, `/carding-financial-fraud`, `/hacktivism`
 - **OSINT + collection** — `/osint-methodology`, `/darkweb-collection`, `/vulnerability-intelligence`
-- **Lookups** — `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-opencti` (two-way: knowledge-base query + write), `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` (IOC reputation + threat-actor / TTP / report intelligence), `/mitre-attack`
+- **Lookups** — `/lookup-liberty91` (first-party: deduplicated occurrences, threat library, IOCs — query + write), `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-opencti` (two-way: knowledge-base query + write), `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` (IOC reputation + threat-actor / TTP / report intelligence), `/mitre-attack`
 - **Management** — `/pir-management`, `/stakeholder-management`, `/feedback-loops`, `/sops`, `/maturity-assessment`, `/intelligence-sharing`
 - **Methodology** — `/cti-hyperloop` (optional operating doctrine)
 
@@ -150,13 +194,14 @@ Optional. The pack degrades gracefully — skills skip enrichments for which no 
 
 | Service | Env variable | Free tier |
 |---|---|---|
+| Liberty91 | `LIBERTY91_API_KEY` | per-key rate limit + monthly credits (your plan) |
 | VirusTotal | `VIRUSTOTAL_API_KEY` | 4 req/min, 500/day |
 | URLScan.io | `URLSCAN_API_KEY` | 100 scans/day |
 | Shodan | `SHODAN_API_KEY` | 1 req/sec |
 | AbuseIPDB | `ABUSEIPDB_API_KEY` | 1000 checks/day |
 | GreyNoise | `GREYNOISE_API_KEY` | 50 req/day |
 | AlienVault OTX | `OTX_API_KEY` | 10,000 req/hour |
-| Censys | `CENSYS_API_ID` + `CENSYS_API_SECRET` | 250 queries/month |
+| Censys | `CENSYS_PAT` (legacy: `CENSYS_API_ID` + `CENSYS_API_SECRET`) | 250 queries/month |
 | MISP | `MISP_URL` + `MISP_API_KEY` | host-bound (your instance) |
 | OpenCTI | `OPENCTI_URL` + `OPENCTI_TOKEN` | host-bound (your instance) |
 | Ransomware.live | `RANSOMWARE_LIVE` | 3,000/day (PRO) |

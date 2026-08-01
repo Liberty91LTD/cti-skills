@@ -1,8 +1,20 @@
-# API keys and local settings
+# API keys and local settings.
+# Patterns are deliberately wide: an editor- or shell-made duplicate such as
+# "settings.local copy.json" or "settings.local.json.bak" holds the same live
+# keys as the original, and the exact-name rule below would not have caught it.
 .claude/settings.local.json
+.claude/settings.local*.json
+.claude/*settings.local*
+.claude/settings.local.json.*
 .env
 .env.local
+.env.*.local
+*.env
 !.env.example
+# Never commit a key dump under any name
+**/settings.local*copy*
+**/*secrets*.json
+!**/*secrets*.example.json
 
 # User CTI artifacts — keep directory structure (.gitkeep), ignore content
 data/assessments/**

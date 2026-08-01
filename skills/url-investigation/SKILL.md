@@ -11,7 +11,7 @@ metadata:
 
 Investigate a URL end-to-end. Scan it live (URLScan), cross-reference reputation (VT, OTX), extract parent domain + resolved IP for sibling investigations.
 
-**This skill invokes:** `/lookup-urlscan`, `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/domain-investigation` and/or `/ip-investigation` for the parent/resolved infrastructure, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-urlscan`, `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/domain-investigation` and/or `/ip-investigation` for the parent/resolved infrastructure, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -57,6 +57,7 @@ This takes 45-90 seconds on first submission. While waiting, run the other looku
 ```
 /lookup-reversinglabs url <value>                # if $REVERSINGLABS_USER is set. Network reputation from RL's malware-analysis corpus — files seen requesting this URL, RL classification. One API call.
 /lookup-crowdstrike indicator <value>            # if $CROWDSTRIKE_CLIENT_ID is set. Falcon Intel view — malicious confidence, linked actors + malware families, report refs. One API call.
+/lookup-liberty91 ioc-lookup <value>             # if $LIBERTY91_API_KEY is set. First-party — run first: does your own platform already hold this URL, with what verdict, confidence and TLP?
 /lookup-misp search-attributes --value <value>   # if $MISP_URL + $MISP_KEY are set. Internal correlation against your own catalogued events.
 /lookup-opencti lookup <value>                   # if $OPENCTI_URL + $OPENCTI_TOKEN are set. Internal correlation against your OpenCTI knowledge base (observables + indicators in one call).
 ```

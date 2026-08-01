@@ -4,7 +4,7 @@ Cyber Threat Intelligence skills pack for Claude Code and other agentic IDEs. Se
 
 ## What's here
 
-- `skills/` — 72 composable CTI skills flat at the repo root per Agent Skills spec. Each is a directory with a `SKILL.md`. Canonical user-invokable interface. Works in any Agent-Skills-compatible IDE.
+- `skills/` — 74 composable CTI skills flat at the repo root per Agent Skills spec. Each is a directory with a `SKILL.md`. Canonical user-invokable interface. Works in any Agent-Skills-compatible IDE.
 - `.claude-plugin/marketplace.json` — plugin manifest, install via `/plugin marketplace add Liberty91LTD/cti-skills`.
 - `.claude/agents/` — **optional Claude-Code-specific subagents** (analyst, report-writer, quality-reviewer, osint-researcher, ioc-processor, detection-engineer). These wrap skills with model routing (Opus for deep reasoning, Sonnet for structured work) and tool permissions. The new `cti-orchestrator` lives as a skill now — the old agent was archived.
 - `.claude/settings.json` — baseline permissions.

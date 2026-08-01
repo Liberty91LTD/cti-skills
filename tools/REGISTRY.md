@@ -12,6 +12,7 @@ All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type
 | Integration | Python CLI | Pattern | Adds beyond Node CLI |
 |---|---|---|---|
 | AbuseIPDB | `tools/clis/abuseipdb.py` | stdlib | `reports`, `check-block`, `blacklist` endpoints |
+| Liberty91 | `tools/clis/liberty91.py` | stdlib | **first-party, two-way** — deduplicated Threat Events (occurrence layer) + sources/stance/Admiralty grades, canonical threat library with dated ATT&CK observations, boolean search + saved searches, IOC lookup/list/export, alert matches, organizations; writes: `ingest`, `report-generate`, org document workflow |
 | AlienVault OTX | `tools/clis/otx.py` | OTXv2 SDK + venv | full-section indicator details, pulse search, pulse get, subscribed pulses |
 | Censys | `tools/clis/censys.py` | censys-sdk + venv | **free aggregations**, certificate search/view, multi-page cursor, account info |
 | CrowdStrike | `tools/clis/crowdstrike.py` | crowdstrike-falconpy + venv | **actor + finished intel** — IOC reputation, threat-actor profiles, origin/target actor search, MITRE ATT&CK TTPs, intel reports + PDF |
@@ -34,6 +35,7 @@ The Node and Python CLIs are complementary — Node for fast inline lookups in i
 
 | API | Skill | Env variable(s) | Indicators | Rate limit (free) | Admiralty default |
 |---|---|---|---|---|---|
+| [Liberty91](integrations/liberty91.md) | `/lookup-liberty91` | `LIBERTY91_API_KEY` (+ optional `LIBERTY91_API_URL`) | IP, domain, hash, URL, actor, malware, CVE, occurrence | per-key rate limit + monthly credits | native Admiralty (B2 fallback) |
 | [VirusTotal](integrations/virustotal.md) | `/lookup-virustotal` | `VIRUSTOTAL_API_KEY` | IP, domain, hash, URL | 4 req/min, 500/day | B2 |
 | [AlienVault OTX](integrations/otx.md) | `/lookup-otx` | `OTX_API_KEY` | IP, domain, hash, URL | 10k req/hour | C3 |
 | [URLScan.io](integrations/urlscan.md) | `/lookup-urlscan` | `URLSCAN_API_KEY` | URL, domain | 100 scans/day | B2 |

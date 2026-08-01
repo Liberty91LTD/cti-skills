@@ -13,7 +13,7 @@
 # Recognised env vars (also used at runtime by the CLIs):
 #   VIRUSTOTAL_API_KEY URLSCAN_API_KEY SHODAN_API_KEY ABUSEIPDB_API_KEY
 #   GREYNOISE_API_KEY OTX_API_KEY CENSYS_PAT MISP_URL MISP_API_KEY
-#   OPENCTI_URL OPENCTI_TOKEN
+#   OPENCTI_URL OPENCTI_TOKEN LIBERTY91_API_KEY LIBERTY91_API_URL
 #   RANSOMWARE_LIVE REVERSINGLABS_USER REVERSINGLABS_PASSWORD
 #   CROWDSTRIKE_CLIENT_ID CROWDSTRIKE_CLIENT_SECRET CROWDSTRIKE_BASE_URL
 
@@ -32,6 +32,8 @@ SKIP_MITRE=0
 
 # Flag-provided keys override env vars; both override prompts.
 # Stored as plain shell vars FLAG_<ENVVAR> for bash 3.2 compatibility.
+FLAG_LIBERTY91_API_KEY=""
+FLAG_LIBERTY91_API_URL=""
 FLAG_VIRUSTOTAL_API_KEY=""
 FLAG_URLSCAN_API_KEY=""
 FLAG_SHODAN_API_KEY=""
@@ -62,6 +64,8 @@ for arg in "$@"; do
     --non-interactive) NON_INTERACTIVE=1 ;;
     --verify) VERIFY=1 ;;
     --skip-mitre) SKIP_MITRE=1 ;;
+    --liberty91=*)     FLAG_LIBERTY91_API_KEY="${arg#*=}" ;;
+    --liberty91-url=*) FLAG_LIBERTY91_API_URL="${arg#*=}" ;;
     --virustotal=*)    FLAG_VIRUSTOTAL_API_KEY="${arg#*=}" ;;
     --urlscan=*)       FLAG_URLSCAN_API_KEY="${arg#*=}" ;;
     --shodan=*)        FLAG_SHODAN_API_KEY="${arg#*=}" ;;
@@ -86,36 +90,52 @@ done
 
 # --- helpers ---------------------------------------------------------------
 
-# Service definitions: env_var | label | optional_hint
+# Service definitions: env_var | label | hint | secret|plain
+# "plain" echoes what you type: URLs, usernames and client ids are not secrets and
+# hiding them makes typos invisible.
 SERVICES=(
-  "VIRUSTOTAL_API_KEY|VirusTotal|free 500/day at virustotal.com"
-  "URLSCAN_API_KEY|URLScan.io|free 100 scans/day at urlscan.io"
-  "SHODAN_API_KEY|Shodan|free tier at account.shodan.io"
-  "ABUSEIPDB_API_KEY|AbuseIPDB|free 1000/day at abuseipdb.com"
-  "GREYNOISE_API_KEY|GreyNoise|community tier at viz.greynoise.io"
-  "OTX_API_KEY|AlienVault OTX|free 10k/hr at otx.alienvault.com"
-  "CENSYS_PAT|Censys PAT|Personal Access Token at accounts.censys.io/settings/personal-access-tokens"
-  "MISP_URL|MISP URL|base URL of your MISP instance (e.g. https://misp.example.org)"
-  "MISP_API_KEY|MISP auth key|My Profile → Auth keys in your MISP instance"
-  "OPENCTI_URL|OpenCTI URL|base URL of your OpenCTI instance (e.g. https://opencti.example.org)"
-  "OPENCTI_TOKEN|OpenCTI token|API token from your OpenCTI profile"
-  "RANSOMWARE_LIVE|Ransomware.live PRO|free PRO key at my.ransomware.live (3000/day)"
-  "REVERSINGLABS_USER|ReversingLabs A1000 username|licensed Spectra Analyze account (ask your RL admin)"
-  "REVERSINGLABS_PASSWORD|ReversingLabs A1000 password|paired with REVERSINGLABS_USER"
-  "REVERSINGLABS_HOST|ReversingLabs A1000 host|optional — defaults to https://a1000.reversinglabs.com"
-  "CROWDSTRIKE_CLIENT_ID|CrowdStrike Falcon client id|Falcon Intelligence API client (Support and resources → API clients and keys)"
-  "CROWDSTRIKE_CLIENT_SECRET|CrowdStrike Falcon client secret|paired with CROWDSTRIKE_CLIENT_ID"
-  "CROWDSTRIKE_BASE_URL|CrowdStrike cloud base URL|optional — defaults to https://api.crowdstrike.com (US-1)"
+  "LIBERTY91_API_KEY|Liberty91|first-party platform key — API Access in the Liberty91 user menu (Owner/Admin)|secret"
+  "LIBERTY91_API_URL|Liberty91 API URL|optional — defaults to https://api.liberty91.com/api/v1|plain"
+  "VIRUSTOTAL_API_KEY|VirusTotal|free 500/day at virustotal.com|secret"
+  "URLSCAN_API_KEY|URLScan.io|free 100 scans/day at urlscan.io|secret"
+  "SHODAN_API_KEY|Shodan|free tier at account.shodan.io|secret"
+  "ABUSEIPDB_API_KEY|AbuseIPDB|free 1000/day at abuseipdb.com|secret"
+  "GREYNOISE_API_KEY|GreyNoise|community tier at viz.greynoise.io|secret"
+  "OTX_API_KEY|AlienVault OTX|free 10k/hr at otx.alienvault.com|secret"
+  "CENSYS_PAT|Censys PAT|Personal Access Token at accounts.censys.io/settings/personal-access-tokens|secret"
+  "MISP_URL|MISP URL|base URL of your MISP instance (e.g. https://misp.example.org)|plain"
+  "MISP_API_KEY|MISP auth key|My Profile → Auth keys in your MISP instance|secret"
+  "OPENCTI_URL|OpenCTI URL|base URL of your OpenCTI instance (e.g. https://opencti.example.org)|plain"
+  "OPENCTI_TOKEN|OpenCTI token|API token from your OpenCTI profile|secret"
+  "RANSOMWARE_LIVE|Ransomware.live PRO|free PRO key at my.ransomware.live (3000/day)|secret"
+  "REVERSINGLABS_USER|ReversingLabs A1000 username|licensed Spectra Analyze account (ask your RL admin)|plain"
+  "REVERSINGLABS_PASSWORD|ReversingLabs A1000 password|paired with REVERSINGLABS_USER|secret"
+  "REVERSINGLABS_HOST|ReversingLabs A1000 host|optional — defaults to https://a1000.reversinglabs.com|plain"
+  "CROWDSTRIKE_CLIENT_ID|CrowdStrike Falcon client id|Falcon Intelligence API client (Support and resources → API clients and keys)|plain"
+  "CROWDSTRIKE_CLIENT_SECRET|CrowdStrike Falcon client secret|paired with CROWDSTRIKE_CLIENT_ID|secret"
+  "CROWDSTRIKE_BASE_URL|CrowdStrike cloud base URL|optional — defaults to https://api.crowdstrike.com (US-1)|plain"
 )
 
 read_secret() {
-  # $1 = prompt
-  local val
-  if [ -t 0 ] && [ -t 1 ]; then
-    read -rsp "$1" val
-    echo >&2
+  # $1 = prompt, $2 = "plain" to echo input (URLs, usernames), else hidden.
+  #
+  # This function is always called inside $( ), which makes stdout a pipe, so
+  # `[ -t 1 ]` is FALSE even in a real terminal and `read -p` would send the
+  # prompt into the captured value instead of the screen. Test stdin only, and
+  # write the prompt to stderr, which command substitution does not capture.
+  local val=""
+  if [ -t 0 ]; then
+    printf '%s' "$1" >&2
+    if [ "${2:-secret}" = "plain" ]; then
+      read -r val || true
+    else
+      read -rs val || true
+      printf '\n' >&2
+    fi
   else
-    read -r val
+    # No terminal on stdin: read a line if one is piped in, tolerate EOF so
+    # `set -e` does not abort the run on the first unanswered service.
+    read -r val || true
   fi
   printf '%s' "$val"
 }
@@ -163,34 +183,56 @@ merge_env() {
 
 resolve_key() {
   # Precedence: flag > env > prompt (interactive only)
-  local key="$1" label="$2" hint="$3"
+  local key="$1" label="$2" hint="$3" kind="${4:-secret}"
   local flag_var="FLAG_$key"
   local flag_val="${!flag_var:-}"
   if [ -n "$flag_val" ]; then
     printf '%s' "$flag_val"
-    return
+    return 0
   fi
   if [ -n "${!key:-}" ]; then
     printf '%s' "${!key}"
-    return
+    return 0
   fi
   if [ "$NON_INTERACTIVE" -eq 1 ]; then
-    return  # empty
+    return 0  # empty
   fi
-  read_secret "$label key (optional — $hint, Enter to skip): "
+  read_secret "  $label ($hint)
+    value, or Enter to skip: " "$kind"
 }
 
 verify_key() {
   # $1 = env var, $2 = label
   local key="$1" label="$2" cli="" args=""
   case "$key" in
+    LIBERTY91_API_KEY)
+      cli_path="$REPO_ROOT/tools/clis/liberty91.py"
+      if [ ! -f "$cli_path" ]; then
+        printf '  · %-15s skipped (CLI not found)\n' "$label"; return
+      fi
+      if python3 "$cli_path" quota --dry-run >/dev/null 2>&1; then
+        printf '  ✓ %-15s key present, CLI invocation OK (dry-run)\n' "$label"
+      else
+        printf '  ✗ %-15s CLI dry-run failed\n' "$label"
+      fi
+      return
+      ;;
+    LIBERTY91_API_URL)
+      printf '  ✓ %-15s set\n' "$label"
+      return
+      ;;
     VIRUSTOTAL_API_KEY) cli="virustotal"; args="ip 8.8.8.8" ;;
     URLSCAN_API_KEY)    cli="urlscan";    args="domain example.com" ;;
     SHODAN_API_KEY)     cli="shodan";     args="ip 8.8.8.8" ;;
     ABUSEIPDB_API_KEY)  cli="abuseipdb";  args="ip 8.8.8.8" ;;
     GREYNOISE_API_KEY)  cli="greynoise";  args="ip 8.8.8.8" ;;
     OTX_API_KEY)        cli="otx";        args="ip 8.8.8.8" ;;
-    CENSYS_PAT) return ;;  # platform SDK validates at runtime; no dry-run CLI yet
+    CENSYS_PAT)
+      # No dry-run CLI yet; the platform SDK validates at runtime. Still report
+      # presence rather than printing nothing, which reads as "not checked".
+      printf '  ✓ %-15s set (validated at first use)\n' "$label"
+      return
+      ;;
     MISP_URL)
       printf '  ✓ %-15s set\n' "$label"
       return
@@ -313,8 +355,15 @@ if [ "$VERIFY" -eq 1 ]; then
     ")
   fi
   for svc in "${SERVICES[@]}"; do
-    IFS='|' read -r key label _ <<< "$svc"
-    if [ -n "${!key:-}" ]; then
+    IFS='|' read -r key label _ _ <<< "$svc"
+    val="${!key:-}"
+    # misp.py accepts MISP_API_KEY or the older MISP_KEY. Honour the alias here too,
+    # otherwise a working MISP setup is reported as "not configured".
+    if [ -z "$val" ] && [ "$key" = "MISP_API_KEY" ]; then
+      val="${MISP_KEY:-}"
+      [ -n "$val" ] && label="$label (via MISP_KEY)"
+    fi
+    if [ -n "$val" ]; then
       verify_key "$key" "$label"
     else
       printf '  · %-15s not configured\n' "$label"
@@ -336,8 +385,8 @@ echo ""
 # Collect keys (newline-separated KEY=VALUE pairs for the merge_env helper)
 PAIRS=""
 for svc in "${SERVICES[@]}"; do
-  IFS='|' read -r key label hint <<< "$svc"
-  val="$(resolve_key "$key" "$label" "$hint")"
+  IFS='|' read -r key label hint kind <<< "$svc"
+  val="$(resolve_key "$key" "$label" "$hint" "${kind:-secret}")"
   if [ -n "$val" ]; then
     PAIRS+="$key=$val"$'\n'
   fi
