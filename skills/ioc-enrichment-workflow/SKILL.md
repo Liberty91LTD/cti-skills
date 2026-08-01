@@ -13,7 +13,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 
 **Seeding the queue (optional):** when you don't already have a batch but want fresh leads, `/lookup-crowdstrike indicators --malicious --since 7d [--type … | --actor …]` returns the latest high-confidence CrowdStrike IOCs (newest-first). Feed the returned indicators into the per-type routing below to enrich each. Requires CrowdStrike credentials with the Indicators read scope.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, optionally `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
+**This skill invokes:** `/lookup-liberty91`, `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, optionally `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
 
 ## Enrichment routing by IOC type
 
@@ -21,6 +21,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 
 | Order | Skill | What to extract |
 |-------|-------|----------------|
+| 0 | `/lookup-liberty91` | **First-party — run before spending third-party quota.** `ioc-lookup <ip>` for the platform's own verdict, derived confidence, effective TLP and tags; `threat-events --q <ip>` if it appears in reporting |
 | 1 | `/lookup-virustotal` | Detection ratio, community score, associated domains, last analysis results |
 | 2 | `/lookup-abuseipdb` | Abuse confidence score, report count, ISP, usage type, country |
 | 3 | `/lookup-greynoise` | Classification (benign/malicious/unknown), noise status, actor, tags |
@@ -36,6 +37,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 
 | Order | Skill | What to extract |
 |-------|-------|----------------|
+| 0 | `/lookup-liberty91` | **First-party — run first.** `ioc-lookup <domain>` for verdict, derived confidence, effective TLP and tags |
 | 1 | `/lookup-virustotal` | Detection ratio, WHOIS, DNS records, subdomains, communicating files |
 | 2 | `/lookup-urlscan` | Existing scans (search, don't re-submit by default): screenshot, page content, redirects, technologies, IPs resolved |
 | 3 | `/lookup-shodan` | DNS resolution, open ports on resolved IPs |
@@ -51,6 +53,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 
 | Order | Skill | What to extract |
 |-------|-------|----------------|
+| 0 | `/lookup-liberty91` | **First-party — run first.** `ioc-lookup <url>` for verdict, derived confidence, effective TLP and tags |
 | 1 | `/lookup-virustotal` | Detection ratio, final URL, redirections, downloaded files |
 | 2 | `/lookup-urlscan` | Existing scans first; submit fresh only if no recent capture exists. Screenshot, DOM, requests, IPs contacted, technologies |
 | 3 | `/lookup-otx` | Pulse associations, reputation |
@@ -63,6 +66,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 
 | Order | Skill | What to extract |
 |-------|-------|----------------|
+| 0 | `/lookup-liberty91` | **First-party — run first.** `ioc-lookup <hash>` for verdict, derived confidence, effective TLP; `library malware --q <family>` once VT/RL name the family |
 | 1 | `/lookup-virustotal` | Detection ratio, file type, size, names, behavioural analysis, MITRE ATT&CK tags |
 | 2 | `/lookup-reversinglabs` | **Run when configured — strongest single-source verdict.** `hash --av-scanners --ticloud` for classification + threat name + AV ratio; `report --detailed` for MITRE ATT&CK mapping, sandbox, and networkthreatintelligence (C2 indicators extracted from the sample) |
 | 3 | `/lookup-crowdstrike` | `indicator <hash>` — Falcon Intel verdict + the threat actors and malware families CrowdStrike links to this hash + report refs. **Run when configured.** |
@@ -75,6 +79,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 
 | Order | Skill | What to extract |
 |-------|-------|----------------|
+| 0 | `/lookup-liberty91` | **First-party — run first.** `ioc-lookup <email>` for verdict, derived confidence, effective TLP |
 | 1 | `/lookup-virustotal` | Associated domains and files (premium feature, may return empty on free tier) |
 | 2 | `/lookup-otx` | Pulse associations |
 | 3 | `/lookup-misp` | `search-attributes --type email --value <email>` for internal correlation |
@@ -158,6 +163,7 @@ Apply source assessment (Admiralty Scale) to the enrichment with `/score-source`
 - Source reliability: B (established tool APIs, usually reliable)
 - Information credibility: based on corroboration across tools (3+ tools agree → 1/Confirmed; 2 agree → 2/Probably true; single source → 3/Possibly true)
 - A MISP or OpenCTI hit on a previously-curated event/entity lifts credibility one step (your team has already vetted it once)
+- A Liberty91 hit brings its own Admiralty rating — use the occurrence's `credibility` band and each source's `reliability` grade verbatim instead of re-deriving them from tool agreement
 
 ### Step 5: Store
 
@@ -165,7 +171,7 @@ Write enrichment results to `data/iocs/active/YYYY-MM-DD-<context>.md` with appr
 
 ### Step 6 (optional): Push back
 
-If the enrichment confirms a previously-unknown malicious indicator, push it back into your own platform so future enrichments hit your catalogue first: `/lookup-misp add-attribute` (or `create-event` for a fresh cluster) for a MISP instance, and/or `/lookup-opencti create-indicator` (with `--score` and `--labels`) for an OpenCTI knowledge base.
+If the enrichment confirms a previously-unknown malicious indicator, push it back into your own platform so future enrichments hit your catalogue first: `/lookup-misp add-attribute` (or `create-event` for a fresh cluster) for a MISP instance, `/lookup-opencti create-indicator` (with `--score` and `--labels`) for an OpenCTI knowledge base, and/or `/lookup-liberty91 ingest` to file the finding as a report in Liberty91 (it is enriched and matched into a Threat Event for your account). Liberty91 writes are metered and publish to your account — **confirm with the user first**.
 
 ### Step 7 (optional): Pivot
 
@@ -186,6 +192,7 @@ Per-API limits live in `tools/REGISTRY.md`. Summary:
 | Censys | 250/month | Selective use only |
 | MISP | host-bound | Local; no public limit |
 | OpenCTI | host-bound | Local; no public limit |
+| Liberty91 | per-key `X-RateLimit-*` + monthly credits | 1 credit per lookup; watch `_meta.credits_remaining`, and note a `429` may mean credits, not rate |
 | ransomware.live (PRO) | 3000/day | Plenty for bulk org-candidate sweeps |
 | ReversingLabs (A1000) | undocumented; 429 + `Retry-After` | Back off on 429. Each `--pivot` entry on the `ip` op is a separate call — fan out deliberately. |
 
@@ -201,7 +208,7 @@ To configure missing keys, point the user at `/cti-setup`.
 
 ## Related skills
 
-- `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, `/lookup-ransomwarelive` — the underlying lookups
+- `/lookup-liberty91`, `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, `/lookup-ransomwarelive` — the underlying lookups
 - `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` — single-seed first-hop chains; this workflow is the bulk-list equivalent
 - `/indicator-pivoting` — when an enrichment opens new pivot candidates
 - `/score-source`, `/apply-tlp`, `/confidence-language` — apply rigor to each finished enrichment record

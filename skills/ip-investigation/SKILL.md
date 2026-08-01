@@ -11,7 +11,7 @@ metadata:
 
 Investigate an IP address end-to-end. Chain multiple `lookup-*` skills, consolidate results, prioritize follow-up IOCs, and return a rated investigation summary. You invoke skills — you don't call APIs directly.
 
-**This skill invokes:** `/lookup-virustotal`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-otx`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel + sample fan-out), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-virustotal`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-otx`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel + sample fan-out), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -41,6 +41,7 @@ tlp_ceiling: <optional — CLEAR/GREEN/AMBER/AMBER+STRICT/RED, default AMBER>
 Invoke in parallel (agents should batch these calls):
 
 ```
+/lookup-liberty91 ioc-lookup <value>   # FIRST-PARTY, if $LIBERTY91_API_KEY is set — run first: is this already in your own platform, with what verdict, confidence and TLP?
 /lookup-greynoise ip <value>    # FAST — filter out noise early
 /lookup-virustotal ip <value>   # reputation aggregate
 /lookup-abuseipdb ip <value>    # abuse reports

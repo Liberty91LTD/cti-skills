@@ -103,6 +103,7 @@ Authoritative list of `/lookup-*` skills available in this pack. **Keep this lis
 
 | Skill | Indicator types | Default Admiralty | Notes |
 |---|---|---|---|
+| `/lookup-liberty91` | ip, domain, hash, url, actor, malware, CVE, occurrence | **native Admiralty** | **First-party — check before spending third-party quota.** Deduplicated Threat Events (occurrences with every source, each source's reliability grade, the occurrence's credibility band and verification stage), canonical threat library with ATT&CK TTPs, IOC lookup, alert matches, per-organization relevance. Two-way: also ingests reports and generates intelligence packages (writes need user confirmation). Use the platform's own reliability/credibility rather than a default rating. |
 | `/lookup-virustotal` | ip, domain, hash, url | B2 | Crowd-sourced AV aggregate; default first call |
 | `/lookup-otx` | ip, domain, hash, url | C3 | AlienVault community pulses; cheap and unconstrained |
 | `/lookup-abuseipdb` | ip | B2 | Abuse-report history; IP-only |

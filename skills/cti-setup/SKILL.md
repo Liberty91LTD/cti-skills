@@ -31,6 +31,7 @@ In-chat configuration of API keys for the threat-intel integrations bundled with
 
 | Service | Env variable | Free tier | Signup |
 |---|---|---|---|
+| Liberty91 (first-party) | `LIBERTY91_API_KEY` (optional `LIBERTY91_API_URL`) | per-key rate limit + monthly credits on your plan | Liberty91 platform → user menu → API Access (Owner/Admin only; the secret is shown once) |
 | VirusTotal | `VIRUSTOTAL_API_KEY` | 4/min, 500/day | virustotal.com → profile → API key |
 | URLScan.io | `URLSCAN_API_KEY` | 100 scans/day | urlscan.io → user settings |
 | Shodan | `SHODAN_API_KEY` | 1 req/sec | account.shodan.io |
@@ -44,6 +45,8 @@ In-chat configuration of API keys for the threat-intel integrations bundled with
 | ReversingLabs A1000 | `REVERSINGLABS_USER` + `REVERSINGLABS_PASSWORD` (optional `REVERSINGLABS_HOST`) | undocumented; 429+Retry-After | licensed product — issued by your RL admin or RL account team |
 | CrowdStrike Falcon Intelligence | `CROWDSTRIKE_CLIENT_ID` + `CROWDSTRIKE_CLIENT_SECRET` (optional `CROWDSTRIKE_BASE_URL`) | per-tenant; 429+Retry-After | licensed product — Falcon console → Support and resources → API clients and keys (assign Intel read scopes) |
 
+If the user has a Liberty91 account, configure `LIBERTY91_API_KEY` first — it is the pack's first-party source and `/lookup-liberty91` runs before third-party lookups, so it saves other services' quota. Keys are `l91_live_` (production) or `l91_test_` (development); an empty scope list on the key grants all read scopes, which is the right default for enrichment. Set `LIBERTY91_API_URL` only to point at a non-production host.
+
 A starter set of **VirusTotal + OTX + URLScan + AbuseIPDB** covers most IP/domain/URL/hash investigations. Shodan and GreyNoise add value for IP-focused work. Censys is optional (very tight rate limit). MISP requires both a base URL and an auth key — point it at your org's instance. OpenCTI likewise takes a base URL plus an API token and powers `/lookup-opencti` (two-way: query your knowledge base + push vetted intel back). Ransomware.live powers the `lookup-ransomwarelive` and `ransomware-ecosystem` skills (victim/group tracking). ReversingLabs is a licensed product — only configure if your organisation has a Spectra Analyze (A1000) account. CrowdStrike Falcon Intelligence is a licensed subscription — it powers `/lookup-crowdstrike` for IOC reputation AND threat-actor / TTP / report intelligence; configure if your org has a Falcon Intelligence licence with Intel API scopes.
 
 ## How to write the file
@@ -52,6 +55,7 @@ The file is `.claude/settings.local.json`. It is gitignored. **Do not overwrite 
 
 ```bash
 ./scripts/setup.sh --non-interactive \
+  --liberty91=USER_PROVIDED_KEY \
   --virustotal=USER_PROVIDED_KEY \
   --shodan=USER_PROVIDED_KEY \
   --misp-url=https://misp.example.org \
@@ -64,7 +68,7 @@ The file is `.claude/settings.local.json`. It is gitignored. **Do not overwrite 
   --reversinglabs-host=https://a1000.reversinglabs.com
 ```
 
-(Pass only the flags for keys the user actually shared. Available flags: `--virustotal`, `--urlscan`, `--shodan`, `--abuseipdb`, `--greynoise`, `--otx`, `--censys`, `--misp-url`, `--misp`, `--opencti-url`, `--opencti`, `--ransomwarelive`, `--reversinglabs-user`, `--reversinglabs-password`, `--reversinglabs-host`, `--crowdstrike-client-id`, `--crowdstrike-client-secret`, `--crowdstrike-base-url`.)
+(Pass only the flags for keys the user actually shared. Available flags: `--liberty91`, `--liberty91-url`, `--virustotal`, `--urlscan`, `--shodan`, `--abuseipdb`, `--greynoise`, `--otx`, `--censys`, `--misp-url`, `--misp`, `--opencti-url`, `--opencti`, `--ransomwarelive`, `--reversinglabs-user`, `--reversinglabs-password`, `--reversinglabs-host`, `--crowdstrike-client-id`, `--crowdstrike-client-secret`, `--crowdstrike-base-url`.)
 
 If `scripts/setup.sh` is not present (e.g. plugin-only install), do the merge yourself with this Node one-liner. Replace `KEY=VAL` pairs with the user's input:
 
