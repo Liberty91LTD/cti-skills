@@ -1,0 +1,46 @@
+control_ref,control_name,framework,mapping_key,implementation_status,owner,mapping_note
+POL-01,Information Security Policy,NIST SP 800-53 rev5,PL-01,implemented,CISO,"UNMAPPED: CTID's 800-53 mapping contains no PL family; governance controls are not mapped to techniques"
+IAM-01,Joiner/mover/leaver account lifecycle,NIST SP 800-53 rev5,AC-02,implemented,IT Identity,
+IAM-02,Role-based access enforcement,NIST SP 800-53 rev5,AC-03,implemented,IT Identity,
+IAM-03,Least privilege on admin tiers,NIST SP 800-53 rev5,AC-06,partial,IT Identity,Tier-0 complete; application admin roles outstanding
+IAM-04,Separation of duties for privileged change,NIST SP 800-53 rev5,AC-05,partial,IT Identity,
+IAM-05,Multifactor authentication (workforce),Microsoft 365 security,EID-MFA-E3,implemented,IT Identity,Entra ID MFA enforced for all staff
+IAM-06,Conditional Access policy set,Microsoft 365 security,EID-CA-E3,implemented,IT Identity,Device and location conditions
+IAM-07,Phishing-resistant passwordless authentication,Microsoft 365 security,EID-PWLA-E3,planned,IT Identity,FIDO2 pilot Q4
+IAM-08,Privileged Identity Management,Microsoft 365 security,EID-PIM-E5,partial,IT Identity,Eligible-role JIT on Entra roles only
+IAM-09,Authenticator and credential management,NIST SP 800-53 rev5,IA-05,implemented,IT Identity,
+IAM-10,Organisational identification and authentication,NIST SP 800-53 rev5,IA-02,implemented,IT Identity,
+IAM-11,Identity threat detection,Microsoft 365 security,DEF-ID-E5,implemented,SecOps,Defender for Identity on all DCs
+EML-01,Anti-malware scanning on mail flow,Microsoft 365 security,EOP-AMW-E3,implemented,SecOps,Exchange Online Protection
+EML-02,Safe Attachments detonation,Microsoft 365 security,DEF-SATT-E3,implemented,SecOps,
+EML-03,Safe Links URL rewriting,Microsoft 365 security,DEF-SLNK-E3,implemented,SecOps,
+EML-04,Anti-spoofing and inbound authentication,Microsoft 365 security,DEF-ASP-E3,implemented,SecOps,DMARC at p=quarantine
+EML-05,Advanced anti-phishing (impersonation),Microsoft 365 security,DEF-AAPH-E5,implemented,SecOps,
+EML-06,Zero Hour Auto Purge,Microsoft 365 security,DEF-ZHAP-E3,implemented,SecOps,
+EML-07,Quarantine policy and release workflow,Microsoft 365 security,DEF-QUAR-E3,implemented,SecOps,
+EDR-01,Endpoint detection and response,Microsoft 365 security,,implemented,SecOps,"UNMAPPED: Defender for Endpoint P2 deployed, but CTID's M365 sheet scores Defender for Office/Identity/Cloud Apps and Entra ID only, not Defender for Endpoint"
+EDR-02,Malicious code protection,NIST SP 800-53 rev5,SI-03,implemented,SecOps,
+EDR-03,Attack surface reduction rules,Microsoft 365 security,,partial,SecOps,"UNMAPPED: audit mode on roughly 40% of estate; no CTID row for ASR"
+EDR-04,Adaptive application control,Microsoft 365 security,DEF-AACI-E3,partial,IT Ops,Servers only
+NET-01,Boundary protection,NIST SP 800-53 rev5,SC-07,implemented,Network,
+NET-02,Information flow enforcement between zones,NIST SP 800-53 rev5,AC-04,partial,Network,Corporate and airport-operations segmentation incomplete
+NET-03,Remote access control,NIST SP 800-53 rev5,AC-17,implemented,Network,ZTNA for third-party access
+LOG-01,System monitoring and alerting,NIST SP 800-53 rev5,SI-04,implemented,SOC,24x7 via Sentinel SOC Partners
+LOG-02,Continuous monitoring programme,NIST SP 800-53 rev5,CA-07,implemented,SOC,
+LOG-03,Security alerting workflow,Microsoft 365 security,DEF-SECA-E3,implemented,SOC,
+LOG-04,Advanced threat hunting,Microsoft 365 security,DEF-ATH-E5,partial,SOC,Ad hoc; no hunt calendar
+LOG-05,Audit solutions,Microsoft 365 security,PUR-AUS-E5,implemented,SOC,
+CFG-01,Baseline configuration,NIST SP 800-53 rev5,CM-02,implemented,IT Ops,CIS L1 on Windows estate
+CFG-02,Configuration settings enforcement,NIST SP 800-53 rev5,CM-06,implemented,IT Ops,Intune
+CFG-03,Least functionality and application allowlisting,NIST SP 800-53 rev5,CM-07,partial,IT Ops,Allowlisting on servers only
+CFG-04,System component inventory,NIST SP 800-53 rev5,CM-08,implemented,IT Ops,
+VUL-01,Vulnerability monitoring and scanning,NIST SP 800-53 rev5,RA-05,implemented,SecOps,Monthly authenticated scans
+VUL-02,Flaw remediation SLA,NIST SP 800-53 rev5,SI-02,partial,IT Ops,Critical 14d met; high 30d slipping
+BKP-01,System backup,NIST SP 800-53 rev5,CP-09,implemented,IT Ops,Rubrik immutable snapshots
+BKP-02,Contingency plan,NIST SP 800-53 rev5,CP-02,partial,Business Continuity,Annual tabletop only
+AWR-01,Security awareness training,NIST SP 800-53 rev5,AT-02,implemented,HR and CISO,"UNMAPPED: CTID's 800-53 mapping contains no AT family. ATT&CK native mitigation M1017 User Training is the nearest evidence, at coverage-only strength"
+IRP-01,Incident handling,NIST SP 800-53 rev5,IR-04,implemented,SOC,"UNMAPPED: CTID's 800-53 mapping contains no IR family. M365 DEF-IR-E5 is scored if Defender E5 incident response is in scope"
+DCS-01,Departure Control System access segregation,,,implemented,Airport IT,"UNMAPPED: vendor-managed platform, no framework mapping supplied by the customer"
+MRO-01,AMOS maintenance system change control,,,implemented,Engineering IT,"UNMAPPED: vendor-managed platform, no framework mapping supplied by the customer"
+SIT-01,SITA network link monitoring,,,implemented,Network,"UNMAPPED: carrier-managed, no framework mapping supplied by the customer"
+CRW-01,Crew tablet MDM baseline,,,partial,Flight Ops IT,"UNMAPPED: no framework mapping supplied by the customer"
