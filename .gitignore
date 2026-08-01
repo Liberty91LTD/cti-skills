@@ -45,3 +45,6 @@ mitre-attack/*.json
 tools/clis/.venv-*/
 tools/clis/__pycache__/
 *.pyc
+
+# Playwright MCP screenshot/console artifacts
+.playwright-mcp/
