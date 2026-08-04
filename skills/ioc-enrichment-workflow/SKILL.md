@@ -13,7 +13,7 @@ This workflow defines how to enrich raw indicators of compromise by routing them
 
 **Seeding the queue (optional):** when you don't already have a batch but want fresh leads, `/lookup-crowdstrike indicators --malicious --since 7d [--type … | --actor …]` returns the latest high-confidence CrowdStrike IOCs (newest-first). Feed the returned indicators into the per-type routing below to enrich each. Requires CrowdStrike credentials with the Indicators read scope.
 
-**This skill invokes:** `/lookup-liberty91`, `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, optionally `/lookup-ransomwarelive`; then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
+**This skill invokes:** `/lookup-liberty91`, `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, optionally `/lookup-ransomwarelive`, optionally `/lookup-sentinel` (exposure sweep of the confirmed-malicious subset against your own telemetry); then `/score-source`, `/apply-tlp`, `/confidence-language`. For deeper graph traversal, hands off to `/indicator-pivoting`.
 
 ## Enrichment routing by IOC type
 
@@ -173,6 +173,10 @@ Write enrichment results to `data/iocs/active/YYYY-MM-DD-<context>.md` with appr
 
 If the enrichment confirms a previously-unknown malicious indicator, push it back into your own platform so future enrichments hit your catalogue first: `/lookup-misp add-attribute` (or `create-event` for a fresh cluster) for a MISP instance, `/lookup-opencti create-indicator` (with `--score` and `--labels`) for an OpenCTI knowledge base, and/or `/lookup-liberty91 ingest` to file the finding as a report in Liberty91 (it is enriched and matched into a Threat Event for your account). Liberty91 writes are metered and publish to your account — **confirm with the user first**.
 
+### Step 6b (optional): Sweep your own telemetry
+
+If `$SENTINEL_WORKSPACE_ID` + app credentials are set, take the **confirmed-malicious subset** (not the whole raw list) and chain `/lookup-sentinel` for a batch exposure sweep — one `let`-bound `dynamic` list per IOC type, run only against tables that skill confirms exist in the workspace. This answers the question enrichment cannot: *did any of these touch us?* Hits become incident leads (route to the matching `/*-investigation`); a clean sweep is reported as "not observed in collected telemetry over <window>", never as "not compromised".
+
 ### Step 7 (optional): Pivot
 
 If the enrichment surfaces strong cluster candidates (cert siblings, JARM matches, communicating files), hand off to `/indicator-pivoting` for the next hop.
@@ -209,6 +213,7 @@ To configure missing keys, point the user at `/cti-setup`.
 ## Related skills
 
 - `/lookup-liberty91`, `/lookup-virustotal`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-shodan`, `/lookup-otx`, `/lookup-censys`, `/lookup-urlscan`, `/lookup-misp`, `/lookup-opencti`, `/lookup-reversinglabs`, `/lookup-crowdstrike`, `/lookup-ransomwarelive` — the underlying lookups
+- `/lookup-sentinel` — batch exposure sweep of confirmed-malicious IOCs against your own Sentinel workspace (step 6b)
 - `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation` — single-seed first-hop chains; this workflow is the bulk-list equivalent
 - `/indicator-pivoting` — when an enrichment opens new pivot candidates
 - `/score-source`, `/apply-tlp`, `/confidence-language` — apply rigor to each finished enrichment record

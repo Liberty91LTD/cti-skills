@@ -11,7 +11,7 @@ metadata:
 
 Investigate a domain or hostname end-to-end. Chain `lookup-*` skills, consolidate, prioritize follow-up IOCs, and return a rated investigation summary.
 
-**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-virustotal`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-otx`, `/lookup-ransomwarelive`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-virustotal`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-otx`, `/lookup-ransomwarelive`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/lookup-sentinel` (exposure check in your own telemetry), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -125,6 +125,10 @@ pivot_candidates:
 3. **Newly-registered-domain clusters** (if created_date <30 days + similar TLD/pattern)
 4. **Communicating files from VT** (medium)
 5. **Passive DNS neighbors** (low-medium)
+
+### 4b. Exposure check — was it seen in OUR environment? (if Sentinel is configured)
+
+If `$SENTINEL_WORKSPACE_ID` + app credentials are set and the verdict is malicious or suspicious, chain `/lookup-sentinel` to sweep the domain across the workspace's *available* tables (`DeviceNetworkEvents` RemoteUrl, `DnsEvents`, `CommonSecurityLog`, `EmailUrlInfo`, … — that skill discovers what exists before querying). Report hits with first/last seen and affected devices/accounts; report a miss as "not observed in collected telemetry over <window>", never "not compromised".
 
 ### 5. Apply rigor
 

@@ -10,7 +10,7 @@ Agents should check this file on session start and warn the user if 2+ skills ha
 
 ## Pack version
 
-**cti-skills:** 1.13.0 (2026-08-01)
+**cti-skills:** 1.14.0 (2026-08-04)
 
 ## Skills
 
@@ -77,7 +77,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `intelligence-writing` | 1.0.0 | 2026-04-20 |
 | `ioc-enrichment-workflow` | 2.1.0 | 2026-05-14 |
 | `ioc-export` | 1.0.0 | 2026-04-20 |
-| `kql-writing` | 1.0.0 | 2026-04-20 |
+| `kql-writing` | 1.1.0 | 2026-08-04 |
 | `likelihood-language` | 1.0.0 | 2026-04-20 |
 | `sigma-writing` | 1.0.0 | 2026-04-20 |
 | `stix-bundle` | 1.0.0 | 2026-04-20 |
@@ -108,6 +108,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `lookup-ransomwarelive` | 1.0.0 | 2026-04-26 |
 | `lookup-reversinglabs` | 1.0.0 | 2026-05-08 |
 | `lookup-crowdstrike` | 1.0.0 | 2026-05-30 |
+| `lookup-sentinel` | 1.0.0 | 2026-08-04 |
 | `lookup-urlscan` | 1.0.0 | 2026-04-20 |
 | `lookup-virustotal` | 1.0.0 | 2026-04-20 |
 | `mitre-attack` | 1.0.0 | 2026-04-20 |
@@ -128,6 +129,14 @@ These remain for reference but agents should prefer the `lookup-*` skills above.
 | `virustotal-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-virustotal` |
 
 ## Changelog
+
+### 1.14.0 — 2026-08-04
+- **New skill `lookup-sentinel` (1.0.0)** — hunt in the organisation's **own Microsoft Sentinel workspace**: IOC exposure sweeps ("was this indicator seen in our environment?"), behavioural ATT&CK TTP hunts, freeform KQL, and table inventory. The pack's first telemetry-side integration: every other lookup asks the world about an indicator; this one asks your logs whether it touched you.
+- **Workspace-adaptive by design.** No two Sentinel workspaces ingest the same tables (availability follows deployed connectors — Defender for Endpoint brings `Device*`, Entra ID brings `SigninLogs`, AMA/CEF brings `CommonSecurityLog`). The skill's cardinal rule: discover first (`tables` via the metadata endpoint, `ingestion` via the Usage table, `probe` for ground-truth per-table row counts), then generate KQL **only against tables verified present and populated** — never a query that fails on a missing table, and never a hunt that silently "succeeds" against telemetry the environment doesn't collect. When neither preferred nor fallback tables exist, the deliverable is a **telemetry-gap finding**, stated as such. Fallback ladders are documented per IOC type (6 rows) and per behaviour family (8 rows, e.g. no EDR → `SecurityEvent` 4688, which itself needs command-line auditing — the caveat travels with the fallback).
+- **Stdlib-only Python CLI** at `tools/clis/sentinel.py`, read-only by construction (query + schema only; no incidents, no analytics rules, no watchlists). Commands: `check`, `tables [--filter]`, `ingestion [--days]`, `probe T1,T2 [--days]`, `schema <Table>`, `query '<kql>' [--timespan] [--max-rows] [--file]`. Every query carries a server-side ISO-8601 timespan (default P7D) so there is no unbounded path; row output is capped with an explicit `truncated` flag + total count; per-status hints on 401 (expired secret) / 403 (missing role or unpropagated assignment) / 404 (name-vs-GUID confusion) / 429 (Retry-After surfaced). OAuth2 client-credentials against Entra ID; `SENTINEL_TENANT_ID` / `SENTINEL_CLIENT_ID` / `SENTINEL_CLIENT_SECRET` / `SENTINEL_WORKSPACE_ID`, with `AZURE_TENANT_ID`/`AZURE_CLIENT_ID`/`AZURE_CLIENT_SECRET` accepted as fallbacks and `SENTINEL_API_BASE`/`SENTINEL_LOGIN_BASE` overrides for sovereign clouds.
+- **Access documented end-to-end** in `tools/integrations/sentinel.md`: the four-value Azure walkthrough (app registration → client secret → **Log Analytics Reader** role assignment on the workspace → Workspace ID from the Overview blade), least-privilege guidance (Reader role, workspace-scoped, nothing here needs write), connector→table availability matrix, documented API limits (200 requests/30s, 500k rows / 64 MB per response, per-GB billing on basic-tier tables), and the Admiralty rationale: **A2** — reliability A because it is your own primary telemetry, credibility 2 not 1 because absence is bounded by connector coverage/retention and logs are themselves an adversary target (T1070/T1562). A miss is always reported as "not observed in collected telemetry over <window>", never "not compromised".
+- **Wiring** — `/lookup-sentinel` added to the `/cti-orchestrator` routing table + lookup catalog (flagged "exposure scoping, not enrichment"); a post-verdict **exposure check** step in all four investigation skills (`ip`/`domain`/`hash`/`url-investigation` — sweep a malicious/suspicious indicator through the workspace's confirmed tables); `ioc-enrichment-workflow` step 6b (batch sweep of the confirmed-malicious subset with `let`-bound lists); `kql-writing` → **1.1.0** with a "Running against a live workspace" section separating portable rule authoring (canonical table names + connector prerequisite in the header) from live hunting (verify tables first via `/lookup-sentinel`). Auditor `EXTRA_COVERAGE` now enforces the four investigation-skill references.
+- Registry (catalog row + Python CLI table), `scripts/setup.sh` (env vars, `--sentinel-*` flags, dry-run verify case), `cti-setup` services table + four-value setup prose, `.env.example`, README (integration count, lookup list, key table, What's new), CREDITS, and CLAUDE.md/AGENTS.md skill counts updated.
 
 ### 1.13.0 — 2026-08-01
 - **New skill `control-coverage-mapping` (1.0.0)** — joins a control baseline to ATT&CK techniques against a bundled evidence base of 9,545 control-to-technique rows from six public sources (ATT&CK v19.1 native mitigations; CTID Mappings Explorer for NIST 800-53 rev5, AWS, Azure, GCP, M365). Supplies the **Resistance Strength** node of FAIR Vulnerability, pairing with `/lookup-liberty91` for Threat Capability. Ships `tools/clis/map_controls.py` (stdlib only, no API key) and `data/attack-control-mapping/` (JSON export so nothing needs Excel, plus the source workbook and METHODOLOGY for provenance).

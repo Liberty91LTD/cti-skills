@@ -49,10 +49,10 @@ COMPOSITE_COVERAGE = {
 # their REGISTRY indicator types don't map to ip/domain/hash/url directly. Hand
 # maintained — re-evaluate when adding a new lookup of the same shape.
 EXTRA_COVERAGE = {
-    "ip-investigation": {"lookup-misp", "lookup-opencti"},
-    "domain-investigation": {"lookup-misp", "lookup-opencti", "lookup-ransomwarelive"},
-    "hash-investigation": {"lookup-misp", "lookup-opencti"},
-    "url-investigation": {"lookup-misp", "lookup-opencti"},
+    "ip-investigation": {"lookup-misp", "lookup-opencti", "lookup-sentinel"},
+    "domain-investigation": {"lookup-misp", "lookup-opencti", "lookup-ransomwarelive", "lookup-sentinel"},
+    "hash-investigation": {"lookup-misp", "lookup-opencti", "lookup-sentinel"},
+    "url-investigation": {"lookup-misp", "lookup-opencti", "lookup-sentinel"},
     "indicator-pivoting": {"lookup-misp", "lookup-opencti", "lookup-ransomwarelive"},
 }
 

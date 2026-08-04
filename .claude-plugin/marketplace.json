@@ -7,14 +7,14 @@
   },
   "metadata": {
     "description": "Cyber Threat Intelligence skills for Claude Code and AI agents. Threat actor profiling, IOC investigation, OSINT, detection engineering (SIGMA/YARA/KQL), intelligence writing, and self-updating knowledge cells on nation-state and cybercrime threats.",
-    "version": "1.13.0"
+    "version": "1.14.0"
   },
   "plugins": [
     {
       "name": "cti-skills",
       "source": "./",
       "description": "Cyber Threat Intelligence skills pack — threat actor profiling, IOC investigation, detection engineering, intelligence writing, and self-updating knowledge cells.",
-      "version": "1.13.0",
+      "version": "1.14.0",
       "author": {
         "name": "Liberty91 Ltd",
         "email": "contact@liberty91.com"
@@ -39,6 +39,8 @@
         "urlscan",
         "misp",
         "opencti",
+        "sentinel",
+        "azure",
         "stix",
         "ransomware",
         "ransomware.live",

@@ -11,7 +11,7 @@ metadata:
 
 Investigate an IP address end-to-end. Chain multiple `lookup-*` skills, consolidate results, prioritize follow-up IOCs, and return a rated investigation summary. You invoke skills — you don't call APIs directly.
 
-**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-virustotal`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-otx`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel + sample fan-out), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-virustotal`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-otx`, optionally `/lookup-censys`, optionally `/lookup-reversinglabs` (network threat-intel + sample fan-out), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/lookup-sentinel` (exposure check in your own telemetry), then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -118,6 +118,10 @@ Rank pivot candidates by investigative value:
 5. **Generic ASN/org neighbors** (low)
 
 Return the top 3-5 candidates to the invoking skill or orchestrator for optional deep-dive via `/domain-investigation`, `/hash-investigation`, or `/indicator-pivoting`.
+
+### 5b. Exposure check — was it seen in OUR environment? (if Sentinel is configured)
+
+If `$SENTINEL_WORKSPACE_ID` + app credentials are set and the verdict is malicious or suspicious, chain `/lookup-sentinel` to sweep the IP across the workspace's *available* tables (`DeviceNetworkEvents`, `CommonSecurityLog`, `SigninLogs`, … — that skill discovers what exists before querying). Report hits with first/last seen and affected devices/accounts; report a miss as "not observed in collected telemetry over <window>", never "not compromised". Skip for benign-noise verdicts.
 
 ### 6. Apply rigor
 

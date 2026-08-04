@@ -11,7 +11,7 @@ metadata:
 
 Investigate a file hash end-to-end. Chain lookups, surface malware family attribution, prioritize infrastructure pivots, and decide whether deeper malware analysis is warranted.
 
-**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (vendor-authoritative classification + MITRE ATT&CK + sandbox), optionally `/lookup-crowdstrike` (Falcon Intel verdict + actor/malware attribution), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/malware-analysis`, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (vendor-authoritative classification + MITRE ATT&CK + sandbox), optionally `/lookup-crowdstrike` (Falcon Intel verdict + actor/malware attribution), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/lookup-sentinel` (exposure check in your own telemetry), optionally `/malware-analysis`, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -117,6 +117,10 @@ If detection ratio is high and malware family is known, the lookup may be suffic
 Also invoke `/malware-analysis` if:
 - User explicitly asked for analysis (`request_malware_analysis: true`)
 - This is part of a targeted incident response, not routine IOC triage
+
+### 6b. Exposure check — was it seen in OUR environment? (if Sentinel is configured)
+
+If `$SENTINEL_WORKSPACE_ID` + app credentials are set and the verdict is malicious or suspicious, chain `/lookup-sentinel` to sweep the hash across the workspace's *available* tables (`DeviceFileEvents`, `DeviceProcessEvents`, `DeviceImageLoadEvents`, `EmailAttachmentInfo`, … — that skill discovers what exists before querying). Report hits with first/last seen and affected devices; report a miss as "not observed in collected telemetry over <window>", never "not compromised".
 
 ### 7. Apply rigor
 

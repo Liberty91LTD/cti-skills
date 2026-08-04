@@ -34,6 +34,7 @@ Activate on any of these user intents:
 | "Write a threat assessment on X" | `/threat-assessment` + `/writing-assessments` + `/intelligence-writing` |
 | "Enrich this IOC list" | `/ioc-enrichment-workflow` → appropriate `lookup-*` skills → `/ioc-export` |
 | "Write detection rules for X" | `/sigma-writing` / `/yara-writing` / `/kql-writing` |
+| "Did this IOC hit our environment" / "hunt for X in our Sentinel" / "search our logs for T1059" | `/lookup-sentinel` (exposure sweep / TTP hunt against the org's own workspace) |
 | "What's the current X landscape" | relevant knowledge cell (e.g., `/ransomware-ecosystem`) + `/horizon-scanning` |
 | "Run ACH" / "hypothesis analysis" | `/ach` |
 | Direct invocation `/skill-name` | bypass this orchestrator, invoke directly |
@@ -116,6 +117,7 @@ Authoritative list of `/lookup-*` skills available in this pack. **Keep this lis
 | `/lookup-misp` | any | B2 | Internal correlation against your own MISP catalogue |
 | `/lookup-opencti` | any | B2 | Two-way: correlation against your OpenCTI knowledge base (indicators, observables, actors, reports) + write-back of vetted findings |
 | `/lookup-ransomwarelive` | org-name, group | B2 (group/dates), B3 (descriptions) | Ransomware leak-site claims; treat criminal-written descriptions cautiously |
+| `/lookup-sentinel` | KQL, TTP hunt, IOC sweep | **A2** | **Your own Microsoft Sentinel telemetry — exposure scoping, not enrichment.** Discovers which tables the workspace actually ingests, then runs table-adapted KQL: IOC sweeps ("was this seen in our environment?") and ATT&CK TTP hunts. Chain after external lookups on a malicious verdict. A miss = "not observed in collected telemetry", never "not compromised". Read-only. |
 
 When a downstream investigation skill (e.g. `/hash-investigation`) is invoked but its SKILL.md doesn't reference a lookup that obviously applies (e.g. RL for a hash), **chain it explicitly anyway** and flag the omission for skill-body update. Better to over-chain once than miss high-value signal.
 

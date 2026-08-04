@@ -10,7 +10,7 @@ Imagine you're investigating something suspicious on the internet — a weird li
 
 This pack teaches Claude Code (an AI coding assistant) how to do all of that for you. You type a question in plain English, and Claude:
 
-1. **Looks the thing up** in thirteen trusted threat-intel sources (Liberty91, VirusTotal, Shodan, AbuseIPDB, and others).
+1. **Looks the thing up** in fourteen trusted threat-intel sources (Liberty91, VirusTotal, Shodan, AbuseIPDB, and others) — and, if you connect your Microsoft Sentinel, in your own logs too.
 2. **Pulls together** what they all say about it.
 3. **Writes you a report** in the format real threat analysts use — with confidence ratings, sources, and a clear bottom line.
 
@@ -42,8 +42,8 @@ That's it. If you get stuck, type `/cti-setup` to fix keys, or `npx github:Liber
 
 ## What's in the pack
 
-- **74 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
-- **13 threat-intel integrations** — Liberty91, VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys, MISP, OpenCTI, Ransomware.live, ReversingLabs, CrowdStrike Falcon Intelligence. Each exposed as a lookup skill any other skill can chain.
+- **75 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
+- **14 threat-intel integrations** — Liberty91, VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys, MISP, OpenCTI, Ransomware.live, ReversingLabs, CrowdStrike Falcon Intelligence, Microsoft Sentinel. Each exposed as a lookup skill any other skill can chain.
 - **Local MITRE ATT&CK dataset** — TTP mapping without network calls.
 - **Tradecraft vocabularies** — TLP, NATO Admiralty Scale, MISP confidence, probability yardstick. Auto-applied by the orchestrator; also invokable directly.
 - **A single orchestrator skill** that routes requests and auto-applies rigor to every output.
@@ -66,7 +66,7 @@ Then run `/cti-setup` inside Claude Code to add API keys.
 ```bash
 npx github:Liberty91LTD/cti-skills
 ```
-Copies all 74 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
+Copies all 75 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
 
 ### Git clone (for development or contribution)
 
@@ -130,7 +130,21 @@ Set up Priority Intelligence Requirements.
 
 ## What's new
 
-Two additions, both aimed at the same gap: knowing what is coming at you, and knowing whether you can stop it.
+Three additions along one arc: knowing what is coming at you, knowing whether you can stop it — and now, knowing whether it already reached you.
+
+### 0. Microsoft Sentinel hunting — `/lookup-sentinel`
+
+**What it is.** Every other integration in this pack asks the world about an indicator. This one asks **your own telemetry**: has this IOC been seen in our environment? Is this ATT&CK technique's behaviour in our logs? It connects to your Microsoft Sentinel workspace (read-only) and turns intelligence findings into exposure answers.
+
+**The idea that makes it different.** No two Sentinel environments have the same tables — availability follows the connectors you've deployed. So the skill **discovers before it hunts**: it inventories which tables your workspace actually ingests, probes the candidates, and only then generates KQL, restricted to tables that verifiably exist. No queries that fail on missing tables; no hunts that silently "succeed" against telemetry you don't collect. When your environment *can't* observe a technique, it tells you that — a telemetry-gap finding is often the most valuable line in the report.
+
+**What you get:**
+
+- **IOC exposure sweeps** — hand it the malicious subset from an investigation or `/ioc-enrichment-workflow` and it sweeps IPs, domains, hashes, URLs, and accounts across every relevant table your workspace has, with fallback ladders when the preferred table is absent.
+- **Behavioural TTP hunts** — from a MITRE ATT&CK technique to table-adapted KQL, composed with `/kql-writing`'s per-technique patterns and `/mitre-attack`'s local dataset.
+- **Honest misses** — a clean sweep is reported as "not observed in collected telemetry over this window", never "not compromised", with retention and connector coverage stated.
+
+Setup: four values from the Azure portal (app registration + a read-only role on the workspace) — the walkthrough is in [`tools/integrations/sentinel.md`](tools/integrations/sentinel.md).
 
 ### 1. Liberty91 platform integration — `/lookup-liberty91`
 
@@ -184,7 +198,7 @@ All skills live flat under `skills/` and are user-invocable as `/<skill-name>`. 
 - **Detection engineering** — `/sigma-writing`, `/yara-writing`, `/kql-writing`
 - **Knowledge cells** — `/china-cyber-espionage`, `/russia-cyber-espionage`, `/iran-cyber-espionage`, `/dprk-cyber-espionage`, `/ransomware-ecosystem`, `/infostealers`, `/initial-access-brokers`, `/phishing-social-engineering`, `/supply-chain-threats`, `/carding-financial-fraud`, `/hacktivism`
 - **OSINT + collection** — `/osint-methodology`, `/darkweb-collection`, `/vulnerability-intelligence`
-- **Lookups** — `/lookup-liberty91` (first-party: deduplicated occurrences, threat library, IOCs — query + write), `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-opencti` (two-way: knowledge-base query + write), `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` (IOC reputation + threat-actor / TTP / report intelligence), `/mitre-attack`
+- **Lookups** — `/lookup-liberty91` (first-party: deduplicated occurrences, threat library, IOCs — query + write), `/lookup-virustotal`, `/lookup-otx`, `/lookup-urlscan`, `/lookup-shodan`, `/lookup-abuseipdb`, `/lookup-greynoise`, `/lookup-censys`, `/lookup-misp` (two-way: query + write), `/lookup-opencti` (two-way: knowledge-base query + write), `/lookup-ransomwarelive`, `/lookup-reversinglabs`, `/lookup-crowdstrike` (IOC reputation + threat-actor / TTP / report intelligence), `/lookup-sentinel` (hunt your own Sentinel workspace: IOC exposure sweeps + ATT&CK TTP hunts, table-adaptive KQL), `/mitre-attack`
 - **Management** — `/pir-management`, `/stakeholder-management`, `/feedback-loops`, `/sops`, `/maturity-assessment`, `/intelligence-sharing`
 - **Methodology** — `/cti-hyperloop` (optional operating doctrine)
 
@@ -207,6 +221,7 @@ Optional. The pack degrades gracefully — skills skip enrichments for which no 
 | Ransomware.live | `RANSOMWARE_LIVE` | 3,000/day (PRO) |
 | ReversingLabs A1000 | `REVERSINGLABS_USER` + `REVERSINGLABS_PASSWORD` | licensed (Spectra Analyze) |
 | CrowdStrike Falcon Intelligence | `CROWDSTRIKE_CLIENT_ID` + `CROWDSTRIKE_CLIENT_SECRET` | licensed (Falcon Intelligence) |
+| Microsoft Sentinel | `SENTINEL_TENANT_ID` + `SENTINEL_CLIENT_ID` + `SENTINEL_CLIENT_SECRET` + `SENTINEL_WORKSPACE_ID` | your Azure tenancy (read-only app registration) |
 
 Three ways to configure:
 

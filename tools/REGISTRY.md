@@ -5,7 +5,7 @@ External threat-intelligence integrations in the `cti-skills` pack. Each has:
 - An **integration guide** (`tools/integrations/<api>.md`) — auth setup, rate limits, Admiralty defaults
 - A **CLI** (`tools/clis/<api>.js`) — zero-dependency Node.js wrapper the skill shells out to
 
-All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type> <value> [--dry-run]`. They read API keys from environment variables (set via `./scripts/setup.sh` or your shell rc). _Exception: ReversingLabs and CrowdStrike ship Python-only — their auth requires a token exchange the official SDK handles (ReversingLabs token / CrowdStrike OAuth2), and there is no upstream Node SDK._
+All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type> <value> [--dry-run]`. They read API keys from environment variables (set via `./scripts/setup.sh` or your shell rc). _Exception: ReversingLabs, CrowdStrike, and Microsoft Sentinel ship Python-only — RL/CS auth requires a token exchange the official SDK handles, and Sentinel's query surface (KQL in, tables out) doesn't fit the `<type> <value>` pattern._
 
 **Python CLIs with richer endpoint coverage** are now provided for every integration:
 
@@ -18,6 +18,7 @@ All Node CLIs share the same invocation pattern: `node tools/clis/<api>.js <type
 | CrowdStrike | `tools/clis/crowdstrike.py` | crowdstrike-falconpy + venv | **actor + finished intel** — IOC reputation, threat-actor profiles, origin/target actor search, MITRE ATT&CK TTPs, intel reports + PDF |
 | GreyNoise | `tools/clis/greynoise.py` | pygreynoise SDK + venv | context, RIOT, similarity, timeline, GNQL search & stats, bulk quick |
 | MISP | `tools/clis/misp.py` | stdlib | **two-way** — query events/attributes/objects + write attributes, create events, upload STIX 2 bundles, tag, publish |
+| Microsoft Sentinel | `tools/clis/sentinel.py` | stdlib | **workspace-adaptive hunting** — table discovery (metadata + Usage-based ingestion), per-table probes, schema inspection, arbitrary KQL with server-side timespan bounds. Read-only; Python-only (no Node CLI) |
 | OpenCTI | `tools/clis/opencti.py` | stdlib | **two-way** — GraphQL query (lookup/search/list/get/connectors) + write indicators/observables, label, TLP-mark, relate, import STIX 2.1 bundles, guarded delete |
 | Ransomware.live | `tools/clis/ransomwarelive.py` | stdlib | leak-site victim claims, **group profiles** (TTPs, leak-site infra), per-group IOCs + YARA, ransom notes, negotiations, CSIRT contacts |
 | ReversingLabs | `tools/clis/reversinglabs.py` | reversinglabs-sdk-py3 + venv | hash classification, detailed/sandbox reports, advanced search, network URL/domain/IP intel, container/extracted-file pivot |
@@ -48,6 +49,7 @@ The Node and Python CLIs are complementary — Node for fast inline lookups in i
 | [Ransomware.live](integrations/ransomwarelive.md) | `/lookup-ransomwarelive` | `RANSOMWARE_LIVE` | victim, group, sector, country, IOCs, YARA | 3000/day (PRO) | B2 (descriptions B3–B4) |
 | [ReversingLabs A1000](integrations/reversinglabs.md) | `/lookup-reversinglabs` | `REVERSINGLABS_USER` + `REVERSINGLABS_PASSWORD` (+ optional `REVERSINGLABS_HOST`) | hash, url, domain, ip | undocumented; 429 + Retry-After | A2 |
 | [CrowdStrike Falcon Intelligence](integrations/crowdstrike.md) | `/lookup-crowdstrike` | `CROWDSTRIKE_CLIENT_ID` + `CROWDSTRIKE_CLIENT_SECRET` (+ optional `CROWDSTRIKE_BASE_URL`) | ip, domain, hash, url, actor, report, MITRE | per-tenant; 429 + Retry-After | A2 |
+| [Microsoft Sentinel](integrations/sentinel.md) | `/lookup-sentinel` | `SENTINEL_TENANT_ID` + `SENTINEL_CLIENT_ID` + `SENTINEL_CLIENT_SECRET` + `SENTINEL_WORKSPACE_ID` | KQL query, TTP hunt, IOC sweep, tables | 200 queries/30s; 429 + Retry-After | A2 (your own telemetry) |
 
 Plus one local reference:
 

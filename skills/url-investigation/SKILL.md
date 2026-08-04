@@ -11,7 +11,7 @@ metadata:
 
 Investigate a URL end-to-end. Scan it live (URLScan), cross-reference reputation (VT, OTX), extract parent domain + resolved IP for sibling investigations.
 
-**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-urlscan`, `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/domain-investigation` and/or `/ip-investigation` for the parent/resolved infrastructure, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
+**This skill invokes:** `/lookup-liberty91` (first-party — run first), `/lookup-urlscan`, `/lookup-virustotal`, `/lookup-otx`, optionally `/lookup-reversinglabs` (network threat-intel from RL malware corpus), optionally `/lookup-crowdstrike` (IOC reputation + actor/malware links), optionally `/lookup-misp` and/or `/lookup-opencti` (internal correlation), optionally `/lookup-sentinel` (exposure check in your own telemetry), optionally `/domain-investigation` and/or `/ip-investigation` for the parent/resolved infrastructure, then `/source-assessment`, `/tlp-guide`, `/confidence-levels`.
 
 ## When to invoke
 
@@ -116,6 +116,10 @@ If the URL is malicious / phishing / suspicious AND the user's request was open-
 - `/ip-investigation` on the resolved IP
 
 Do NOT auto-chain if the verdict is clean/benign or the user's request was narrow ("just scan this URL").
+
+### 5b. Exposure check — was it seen in OUR environment? (if Sentinel is configured)
+
+If `$SENTINEL_WORKSPACE_ID` + app credentials are set and the verdict is malicious or suspicious, chain `/lookup-sentinel` to sweep the URL (and its domain) across the workspace's *available* tables (`DeviceNetworkEvents` RemoteUrl, `EmailUrlInfo`, `UrlClickEvents`, `CommonSecurityLog`, … — that skill discovers what exists before querying). `UrlClickEvents` hits mean a user actually clicked — escalate those first. Report a miss as "not observed in collected telemetry over <window>", never "not compromised".
 
 ### 6. Apply rigor
 

@@ -3,7 +3,7 @@ name: kql-writing
 description: Use when the user asks for a KQL query, a Microsoft Sentinel / Defender / Azure Log Analytics detection or hunt, or wants to translate a finding from `/hash-investigation` / `/malware-analysis` into KQL. Format spec + writing guide.
 user-invocable: true
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # KQL Writing Guide — Microsoft Sentinel
@@ -142,6 +142,15 @@ DeviceEvents
 - Add `project` to select only needed columns (reduces result size)
 - Test queries on small time windows first before expanding
 - Include comments explaining detection logic
+
+## Running against a live workspace
+
+This skill *authors* queries. To **run** them against a real Microsoft Sentinel workspace — or to hunt interactively — chain `/lookup-sentinel`. Two rules apply the moment a query targets live data:
+
+1. **Verify table availability first.** The table references in this guide (and in any published hunting query) assume connectors the target environment may not have. `/lookup-sentinel` discovers which tables the workspace actually ingests (`tables` / `ingestion` / `probe`) and adapts — e.g. no `DeviceProcessEvents` (no Defender for Endpoint) means falling back to `SecurityEvent` EventID 4688, which itself requires command-line auditing. Never ship a hunt referencing unverified tables.
+2. **A query that runs is not a query that saw.** When a fallback table has weaker fidelity (or the preferred table is absent entirely), state what the environment could not observe alongside the results.
+
+For portable analytics rules meant for *any* environment, keep the canonical table names from this guide and document the connector prerequisite in the rule header comment.
 
 ## Output Location
 

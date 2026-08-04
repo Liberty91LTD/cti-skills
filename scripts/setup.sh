@@ -16,6 +16,7 @@
 #   OPENCTI_URL OPENCTI_TOKEN LIBERTY91_API_KEY LIBERTY91_API_URL
 #   RANSOMWARE_LIVE REVERSINGLABS_USER REVERSINGLABS_PASSWORD
 #   CROWDSTRIKE_CLIENT_ID CROWDSTRIKE_CLIENT_SECRET CROWDSTRIKE_BASE_URL
+#   SENTINEL_TENANT_ID SENTINEL_CLIENT_ID SENTINEL_CLIENT_SECRET SENTINEL_WORKSPACE_ID
 
 set -euo pipefail
 
@@ -52,9 +53,13 @@ FLAG_REVERSINGLABS_HOST=""
 FLAG_CROWDSTRIKE_CLIENT_ID=""
 FLAG_CROWDSTRIKE_CLIENT_SECRET=""
 FLAG_CROWDSTRIKE_BASE_URL=""
+FLAG_SENTINEL_TENANT_ID=""
+FLAG_SENTINEL_CLIENT_ID=""
+FLAG_SENTINEL_CLIENT_SECRET=""
+FLAG_SENTINEL_WORKSPACE_ID=""
 
 show_help() {
-  sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
   exit 0
 }
 
@@ -84,6 +89,10 @@ for arg in "$@"; do
     --crowdstrike-client-id=*) FLAG_CROWDSTRIKE_CLIENT_ID="${arg#*=}" ;;
     --crowdstrike-client-secret=*) FLAG_CROWDSTRIKE_CLIENT_SECRET="${arg#*=}" ;;
     --crowdstrike-base-url=*) FLAG_CROWDSTRIKE_BASE_URL="${arg#*=}" ;;
+    --sentinel-tenant-id=*)    FLAG_SENTINEL_TENANT_ID="${arg#*=}" ;;
+    --sentinel-client-id=*)    FLAG_SENTINEL_CLIENT_ID="${arg#*=}" ;;
+    --sentinel-client-secret=*) FLAG_SENTINEL_CLIENT_SECRET="${arg#*=}" ;;
+    --sentinel-workspace-id=*) FLAG_SENTINEL_WORKSPACE_ID="${arg#*=}" ;;
     *) echo "Unknown argument: $arg" >&2; echo "Run with --help for usage." >&2; exit 2 ;;
   esac
 done
@@ -114,6 +123,10 @@ SERVICES=(
   "CROWDSTRIKE_CLIENT_ID|CrowdStrike Falcon client id|Falcon Intelligence API client (Support and resources → API clients and keys)|plain"
   "CROWDSTRIKE_CLIENT_SECRET|CrowdStrike Falcon client secret|paired with CROWDSTRIKE_CLIENT_ID|secret"
   "CROWDSTRIKE_BASE_URL|CrowdStrike cloud base URL|optional — defaults to https://api.crowdstrike.com (US-1)|plain"
+  "SENTINEL_TENANT_ID|Sentinel tenant id|Entra ID → Overview → Directory (tenant) ID|plain"
+  "SENTINEL_CLIENT_ID|Sentinel client id|Entra ID → App registrations → your app → Application (client) ID|plain"
+  "SENTINEL_CLIENT_SECRET|Sentinel client secret|app registration → Certificates & secrets (value shown once)|secret"
+  "SENTINEL_WORKSPACE_ID|Sentinel workspace id|Log Analytics workspace → Overview → Workspace ID|plain"
 )
 
 read_secret() {
@@ -315,6 +328,22 @@ verify_key() {
       ;;
     CROWDSTRIKE_BASE_URL)
       printf '  ✓ %-15s set\n' "$label"
+      return
+      ;;
+    SENTINEL_TENANT_ID|SENTINEL_CLIENT_ID|SENTINEL_WORKSPACE_ID)
+      printf '  ✓ %-15s set\n' "$label"
+      return
+      ;;
+    SENTINEL_CLIENT_SECRET)
+      cli_path="$REPO_ROOT/tools/clis/sentinel.py"
+      if [ ! -f "$cli_path" ]; then
+        printf '  · %-15s skipped (CLI not found)\n' "$label"; return
+      fi
+      if python3 "$cli_path" check --dry-run >/dev/null 2>&1; then
+        printf '  ✓ %-15s creds present, CLI invocation OK (dry-run)\n' "$label"
+      else
+        printf '  ✗ %-15s CLI dry-run failed\n' "$label"
+      fi
       return
       ;;
   esac
