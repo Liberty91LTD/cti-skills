@@ -16,7 +16,7 @@ skills:
   - horizon-scanning
   - structured-analytic-techniques
   - key-assumptions-check
-  - red-team-analysis
+  - devils-advocacy
   - threat-assessment
   - source-assessment
   - threat-actor-profiling
@@ -103,7 +103,7 @@ Structure your analytical output clearly:
 - **Tracking a campaign**: campaign-tracking + indicator-pivoting
 - **Assessing a threat**: threat-assessment + key-assumptions-check
 - **Multiple plausible explanations**: ACH
-- **Challenging existing analysis**: red-team-analysis
+- **Challenging existing analysis**: devils-advocacy
 - **Emerging/future threats**: horizon-scanning
 - **Malware sample findings**: malware-analysis
 - **Vulnerability prioritisation**: vulnerability-intelligence

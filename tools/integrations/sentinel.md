@@ -124,12 +124,10 @@ Documented Log Analytics query API limits (public cloud):
 
 **Source reliability: A** — this is your own organisation's telemetry, collected by your own pipeline: a primary source, not a vendor's judgement.
 
-**Information credibility: 2** as a default, not 1, for two structural reasons:
+**Information credibility: 1 for a positive hit.** A hit is a first-party observation: you saw the indicator in your own environment. It is graded A1 and enters the claim table as evidence (grading rubric rule R12 in `/quality-of-information-check`). Two limits apply:
 
-1. **Absence is not evidence of absence.** A miss can mean the table isn't onboarded, the connector was down, retention already dropped the window, or the activity simply wasn't logged at that layer. Report misses as "not observed in collected telemetry over <window>", never "did not occur".
-2. **Logs are a target.** Defence evasion (ATT&CK T1070, T1562) includes tampering with exactly this evidence. A sophisticated-intrusion investigation should treat gaps in expected telemetry as a finding.
-
-A *positive* hit corroborated across independent tables (e.g. the same C2 IP in `DeviceNetworkEvents` and `CommonSecurityLog`) can reasonably be raised to A1.
+1. **Absence is not evidence of absence.** A miss can mean the table isn't onboarded, the connector was down, retention already dropped the window, or the activity simply wasn't logged at that layer. Report misses as "not observed in collected telemetry over <window>", never "did not occur". A miss is never a graded item.
+2. **Logs are a target.** Defence evasion (ATT&CK T1070, T1562) includes tampering with exactly this evidence. Where tampering is suspected, grade the hit A2 and flag it. A sophisticated-intrusion investigation should treat gaps in expected telemetry as a finding.
 
 ## Testing your credentials
 

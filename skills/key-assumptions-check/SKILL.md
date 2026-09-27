@@ -3,7 +3,7 @@ name: key-assumptions-check
 description: Use when surfacing the assumptions underlying an analytical judgment, the user asks "what are we assuming?" / "are these assumptions still valid?", or before publishing a high-impact assessment. Standard SAT applied during major assessments.
 user-invocable: true
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Key Assumptions Check
@@ -23,14 +23,34 @@ Brainstorm every assumption underlying the assessment. Include:
 - Assumptions about the target environment
 - Assumptions about timing or sequencing
 
-### Step 3: Evaluate Each Assumption
+### Step 3: Walk the Claim Table (when one exists)
+If the assessment was built on graded evidence items from `/quality-of-information-check`, go through the claim table row by row. Assumptions are usually hiding in judgements that the analysis treats as observations. If there is no claim table, skip this step and leave the Claim column as "n/a".
 
-| Assumption | Importance | Confidence | Status |
-|-----------|:---:|:---:|:---:|
-| [Assumption 1] | High | High | Validated |
-| [Assumption 2] | High | Low | **FLAG** |
-| [Assumption 3] | Medium | Medium | Monitor |
-| [Assumption 4] | Low | High | Accepted |
+For each claim, compare its `claim_type` with how the analytical line uses it:
+
+| In the claim table | How the analysis uses it | Assumption to record |
+|---|---|---|
+| `assessment` | Stated as fact, or as a premise for a further judgement | That the source's judgement about intent, capability or future behaviour is correct |
+| `attribution` | Actor named without the source's hedge | That the attribution holds. Quote `stated_confidence` verbatim |
+| `actor_claim` | Scale, victim or data figures repeated as fact | That the actor is telling the truth |
+| Any type, flagged `caveats_dropped_in_chain` | Outlet's stronger wording used | That the claim is as strong as the outlet made it, not as the primary wrote it |
+| Any type, flagged `single_source` or with corroboration `unchecked` | Relied on without qualification | That the one primary is right |
+| Any type, flagged `stale` or `superseded` | Used as current | That nothing has changed since publication |
+
+Rules:
+- Every `assessment` and `attribution` claim with `load_bearing: true` gets a row in the matrix, even when the assumption looks safe.
+- Carry the `claim_id` into the matrix. One claim can produce more than one assumption, and an assumption can rest on several claims.
+- Do not regrade claims here. The grade informs the Confidence column: credibility 3 or worse on a claim used as fact is Low or Medium confidence, never High.
+- Assumptions from Step 2 that trace to no claim are kept, with "none" in the Claim column. These have no evidence behind them at all, which is worth stating.
+
+### Step 4: Evaluate Each Assumption
+
+| Assumption | Claim | Importance | Confidence | Status |
+|-----------|:---:|:---:|:---:|:---:|
+| [Assumption 1] | C01 | High | High | Validated |
+| [Assumption 2] | C04 | High | Low | **FLAG** |
+| [Assumption 3] | none | Medium | Medium | Monitor |
+| [Assumption 4] | C02, C06 | Low | High | Accepted |
 
 **Importance**: How much does the conclusion depend on this assumption?
 - **High**: If wrong, the conclusion changes significantly
@@ -42,10 +62,10 @@ Brainstorm every assumption underlying the assessment. Include:
 - **Medium**: Some evidence, but not fully validated
 - **Low**: Little or no evidence; assumed by default
 
-### Step 4: Flag Critical Assumptions
+### Step 5: Flag Critical Assumptions
 Any assumption that is **High Importance + Low Confidence** is critical. These are the assumptions most likely to invalidate your analysis.
 
-### Step 5: Determine Impact
+### Step 6: Determine Impact
 For each flagged assumption:
 - What would the conclusion be if this assumption is wrong?
 - Can this assumption be validated through additional collection?
@@ -60,12 +80,12 @@ For each flagged assumption:
 [The assessment being checked]
 
 ### Assumptions Matrix
-| # | Assumption | Importance | Confidence | Status |
-|---|-----------|:---:|:---:|:---:|
-| 1 | ... | H/M/L | H/M/L | ... |
+| # | Assumption | Claim | Claim type (grade) | Importance | Confidence | Status |
+|---|-----------|:---:|:---:|:---:|:---:|:---:|
+| 1 | ... | C04 | attribution (C3) | H/M/L | H/M/L | ... |
 
 ### Flagged Assumptions (High Importance + Low/Medium Confidence)
-1. **[Assumption]**: If wrong, [impact on conclusion]. Collection gap: [what would validate this].
+1. **[Assumption]** (C04): If wrong, [impact on conclusion]. Collection gap: [what would validate this].
 
 ### Impact on Assessment
 [Does the assumptions check change the confidence level? Should the conclusion be qualified?]

@@ -1,0 +1,173 @@
+[
+  {
+    "name": "anchor missing",
+    "claim_id": "C02",
+    "set": {
+      "anchor.sentence": ""
+    },
+    "rule": "anchor"
+  },
+  {
+    "name": "anchor paraphrased, not verbatim",
+    "claim_id": "C02",
+    "set": {
+      "anchor.sentence": "Initial access in every case came from exploiting CVE-2026-0001."
+    },
+    "rule": "anchor"
+  },
+  {
+    "name": "claim type outside the five values",
+    "claim_id": "C02",
+    "set": {
+      "claim_type": "fact"
+    },
+    "rule": "schema"
+  },
+  {
+    "name": "attribution graded credibility 1 on a single primary",
+    "claim_id": "C04",
+    "set": {
+      "grading.information_credibility": 1
+    },
+    "rule": "R4"
+  },
+  {
+    "name": "credibility 1 without corroboration",
+    "claim_id": "C02",
+    "set": {
+      "grading.information_credibility": 1
+    },
+    "rule": "R5"
+  },
+  {
+    "name": "corroboration asserted without basis",
+    "claim_id": "C02",
+    "set": {
+      "corroboration.independent_primaries": 3,
+      "flags": []
+    },
+    "rule": "corroboration"
+  },
+  {
+    "name": "press-originated claim graded above D",
+    "claim_id": "C09",
+    "set": {
+      "grading.source_reliability": "B"
+    },
+    "rule": "R6"
+  },
+  {
+    "name": "press-originated claim made load-bearing",
+    "claim_id": "C09",
+    "set": {
+      "load_bearing": true
+    },
+    "rule": "R6"
+  },
+  {
+    "name": "caveat dropped in chain but not flagged",
+    "claim_id": "C04",
+    "set": {
+      "flags": [
+        "single_source",
+        "commercial_interest"
+      ]
+    },
+    "rule": "R7"
+  },
+  {
+    "name": "undisclosed access graded A",
+    "claim_id": "C02",
+    "set": {
+      "primary_source.access": "undisclosed"
+    },
+    "rule": "R8"
+  },
+  {
+    "name": "sample analysis graded A",
+    "claim_id": "C03",
+    "set": {
+      "primary_source.access": "sample_analysis"
+    },
+    "rule": "R8"
+  },
+  {
+    "name": "unresolved primary graded above D",
+    "claim_id": "C02",
+    "set": {
+      "primary_source.url": null,
+      "flags": [
+        "single_source",
+        "unresolved_provenance"
+      ]
+    },
+    "rule": "R1"
+  },
+  {
+    "name": "actor claim graded above F",
+    "claim_id": "C02",
+    "set": {
+      "claim_type": "actor_claim",
+      "flags": [
+        "single_source",
+        "actor_sourced"
+      ]
+    },
+    "rule": "R3"
+  },
+  {
+    "name": "actor claim about data volume not graded 6",
+    "claim_id": "C02",
+    "set": {
+      "claim_type": "actor_claim",
+      "claim": "The actor claims to have taken 400GB of data.",
+      "grading.source_reliability": "F",
+      "grading.information_credibility": 3,
+      "flags": [
+        "single_source",
+        "actor_sourced"
+      ]
+    },
+    "rule": "R2"
+  },
+  {
+    "name": "track record modifier outside Tier 1",
+    "claim_id": "C02",
+    "set": {
+      "grading.track_record_applied": "boundary_up"
+    },
+    "rule": "R10"
+  },
+  {
+    "name": "single_source flag missing",
+    "claim_id": "C02",
+    "set": {
+      "flags": []
+    },
+    "rule": "flags"
+  },
+  {
+    "name": "rationale missing",
+    "claim_id": "C02",
+    "set": {
+      "grading.rationale": ""
+    },
+    "rule": "schema"
+  },
+  {
+    "name": "invented confidence field left empty",
+    "claim_id": "C02",
+    "set": {
+      "primary_source.stated_confidence": ""
+    },
+    "rule": "schema"
+  },
+  {
+    "name": "provenance basis missing on item",
+    "claim_id": "C02",
+    "set": {
+      "provenance_basis": null
+    },
+    "rule": "schema"
+  }
+]

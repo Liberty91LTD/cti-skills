@@ -3,12 +3,23 @@ name: campaign-tracking
 description: Use when documenting a named campaign across time and victims, the user asks to start or update a campaign record, or another skill identified a multi-incident cluster that warrants formal tracking. Provides the template (timeline, attribution, victimology, attack chain, Diamond Model mapping, IOC clusters) and the lifecycle from active to historical.
 user-invocable: true
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Campaign Tracking
 
 A campaign is a coordinated set of malicious activities carried out by a threat actor against specific targets over a defined period.
+
+## Sourcing Before Tracking
+
+A campaign record is built from claims, and each claim belongs to the source that originated it. Before any report feeds the record:
+
+1. **Resolve provenance.** Run `/source-provenance` on every ingested report or article. Record the primary, the chain and the `provenance_basis` (platform-resolved, script-resolved or model-judged).
+2. **Dedupe by primary, not by URL.** Five outlets covering one vendor report are one source and produce one timeline row, not five. List the outlets as "via". Count corroboration by independent primaries with separate access only.
+3. **Grade per claim.** Run `/quality-of-information-check` on the primary (it calls `/claim-extraction`). The intrusion, the vector, the attribution and the actor's own figures carry different grades.
+4. **Store the grade with the entity.** Every timeline row, attack chain row, attribution statement and victim count carries the primary that supports it and the grade of the supporting claim.
+
+Actor claims about victim count or data volume are F6 until an independent primary corroborates them. Record them as actor-claimed, not as findings. Grades follow the fixed rubric in `/quality-of-information-check` (`references/grading-rubric.md`). Your own telemetry and SOC alerts are primaries in their own right, name them as such.
 
 ## Campaign Template
 
@@ -25,34 +36,41 @@ A campaign is a coordinated set of malicious activities carried out by a threat 
 | **Last observed** | YYYY-MM-DD |
 | **Attribution** | [Actor — with confidence level] |
 | **Motivation** | [Espionage / Financial / Destruction / Hacktivism] |
+| **Independent primaries** | [Count of originating sources with separate access, and basis] |
+| **Provenance basis** | [platform-resolved / script-resolved / model-judged (worst of the sources used)] |
+| **Alias source** | [user / liberty91 / none] |
 
 ### Timeline
-| Date | Event | Source |
-|------|-------|--------|
-| YYYY-MM-DD | Initial delivery emails sent | Internal telemetry |
-| YYYY-MM-DD | First successful compromise | Vendor report (B2) |
-| YYYY-MM-DD | Lateral movement detected | SOC alert |
-| YYYY-MM-DD | Data exfiltration observed | Network forensics |
+| Date | Event | Primary | Grade |
+|------|-------|---------|-------|
+| YYYY-MM-DD | Initial delivery emails sent | Internal telemetry | A2 |
+| YYYY-MM-DD | First successful compromise | [Vendor, report title] | B2 |
+| YYYY-MM-DD | Lateral movement detected | SOC alert | A2 |
+| YYYY-MM-DD | Data exfiltration observed | Network forensics | A2 |
 
 ### Attribution
 [Assessment of who is behind this campaign, with confidence level. Reference threat actor profile if available.]
 
+| Attribution statement | Primary | Stated confidence (verbatim) | Grade | Independent primaries |
+|-----------------------|---------|------------------------------|-------|-----------------------|
+| [Campaign is linked to X] | [Org, report title, date] | ["moderate confidence" / not stated] | [e.g., B3] | [Count, and basis] |
+
 ### Victimology
 - **Sectors targeted**: [List]
 - **Geographies**: [Countries/regions]
-- **Number of known victims**: [Count with confidence]
+- **Number of known victims**: [Count with confidence, primary and grade. Mark actor-claimed figures as such]
 - **Selection criteria**: [How were targets chosen? Opportunistic vs targeted?]
 - **Common characteristics**: [What do victims have in common?]
 
 ### Attack Chain (Kill Chain / ATT&CK)
-| Phase | Technique (ATT&CK) | Details |
-|-------|-------------------|---------|
-| Reconnaissance | T1598 Phishing for Information | Targeted LinkedIn messages to identify employees |
-| Initial Access | T1566.001 Spearphishing Attachment | Malicious Word doc with macro |
-| Execution | T1059.001 PowerShell | Macro downloads PowerShell stager |
-| Persistence | T1547.001 Registry Run Keys | Run key added for backdoor |
-| C2 | T1071.001 Application Layer Protocol | HTTPS to legitimate cloud service |
-| Exfiltration | T1567.002 Exfiltration to Cloud Storage | Data uploaded to attacker-controlled cloud |
+| Phase | Technique (ATT&CK) | Details | Primary | Grade |
+|-------|-------------------|---------|---------|-------|
+| Reconnaissance | T1598 Phishing for Information | Targeted LinkedIn messages to identify employees | [Org, date] | [e.g., B2] |
+| Initial Access | T1566.001 Spearphishing Attachment | Malicious Word doc with macro | [Org, date] | [e.g., A2] |
+| Execution | T1059.001 PowerShell | Macro downloads PowerShell stager | [Org, date] | [e.g., A2] |
+| Persistence | T1547.001 Registry Run Keys | Run key added for backdoor | [Org, date] | [e.g., A2] |
+| C2 | T1071.001 Application Layer Protocol | HTTPS to legitimate cloud service | [Org, date] | [e.g., B2] |
+| Exfiltration | T1567.002 Exfiltration to Cloud Storage | Data uploaded to attacker-controlled cloud | [Org, date] | [e.g., B2] |
 
 ### Diamond Model
 | Vertex | Details |
@@ -97,9 +115,13 @@ A campaign is a coordinated set of malicious activities carried out by a threat 
 [What we still don't know about this campaign]
 
 ### Sources
-| Date | Source | Reliability | Key Finding |
-|------|--------|-------------|-------------|
+One row per primary. Outlets that carried the primary go in "Via".
+
+| Date | Primary source | Via | Access | Reliability | Key Finding |
+|------|----------------|-----|--------|-------------|-------------|
 ```
+
+Reliability in the Sources table is the primary's reliability letter. The credibility digit belongs to each claim, so the full grade sits on the timeline, attribution and attack chain rows.
 
 ## Campaign Linking
 Campaigns may be related. Document relationships:
@@ -108,6 +130,8 @@ Campaigns may be related. Document relationships:
 - **Same TTPs**: Identical techniques across campaigns
 - **Same victimology**: Same sector/geography targeting
 - **Temporal overlap**: Concurrent operations
+
+Linking on infrastructure, hashes and CVEs compares values directly and needs no name matching. Linking reports that use different actor or malware names needs an alias source: your own alias file (`skills/quality-of-information-check/references/aliases.yml`, user-maintained, loaded when present, `alias_source: user`) or the Liberty91 Threat Library via `/lookup-liberty91` when `LIBERTY91_API_KEY` is set (`alias_source: liberty91`). With neither, names are not matched across vendors (`alias_source: none`), differently named reporting does not count as corroboration, and the campaign record says so, naming both options. Do not match names from memory.
 
 ## Campaign Lifecycle Management
 1. **Detection**: Initial indicators or vendor report triggers campaign tracking
@@ -125,4 +149,5 @@ Campaigns may be related. Document relationships:
 - **Publish the campaign as a sharable artefact** — `/lookup-misp create-event` writes the cluster into your MISP instance; `/stix-bundle` produces the STIX 2.1 representation; `/lookup-opencti upload-stix` imports that bundle into your OpenCTI knowledge base (or `create-relationship` to link indicators to an existing campaign entity); `/lookup-liberty91 ingest` files the campaign write-up as a report in Liberty91, where it is enriched and matched into a Threat Event for your account (metered — confirm with the user first)
 - **Seed and update the timeline from occurrences** — `/lookup-liberty91 threat-events --technique <Txxxx> --target-sector <s> --occurred-after <date>` for candidate incidents, and `entity threat-actors <id> --section threat-events` once the actor is attributed. Each occurrence is already deduplicated across its reporting, so the timeline doesn't need re-collapsing; carry its `verification` stage and `credibility` band into the campaign record rather than restating them as your own judgement
 - **Actor attribution** — `/threat-actor-profiling` consumes the campaign output to build / update an actor profile
+- **Provenance and grading** — `/source-provenance` on every ingested report, `/claim-extraction` to split it into typed claims, `/quality-of-information-check` for per-claim grades. `/source-assessment` remains the reference for the Admiralty scale itself.
 - **Apply rigor to the campaign report** — `/score-source`, `/apply-tlp`, `/confidence-language`, `/likelihood-language`, `/intelligence-writing`

@@ -1,14 +1,60 @@
 ---
 name: writing-assessments
-description: Use when the user asks to write a threat / risk / vulnerability assessment, or wants the appropriate template for each type. Distinct structures and section ordering per assessment kind.
+description: Use when the user asks to write a threat / risk / vulnerability assessment, or wants the appropriate template for each type. Distinct structures and section ordering per assessment kind. Requires graded evidence items from /quality-of-information-check and runs that skill first when handed raw URLs or text. Confidence is capped by the weakest load-bearing claim.
 user-invocable: true
 metadata:
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # Writing Assessments
 
 Three types of assessments, each with distinct purpose and structure. Do not conflate them.
+
+## Precondition: Graded Evidence Only
+
+Reporting used as evidence must arrive as graded evidence items, one per claim, as produced by `/quality-of-information-check` (the QoI JSON or its claim table). The schema is in `skills/quality-of-information-check/references/evidence-item-schema.md`.
+
+- Handed a QoI output: proceed.
+- Handed raw URLs, articles, vendor reports or pasted text: invoke `/quality-of-information-check` first, passing the assessment question so it can mark which claims are load-bearing. Build the assessment from its output.
+- Handed a mix: grade the ungraded material before starting.
+- If `/quality-of-information-check` cannot be run, or the user asks to skip it, do not write the assessment. Tell the user: "I can't write this assessment yet. Its confidence level is set by the weakest claim the conclusion depends on, and this evidence has not been graded. Give me the URLs or report text and I will run /quality-of-information-check first, or hand me an existing QoI output."
+
+Three kinds of input are not reports. They are handled differently from each other:
+
+| Input | What it is | How it is treated |
+|---|---|---|
+| **First-party observation**: a hit in the organisation's own telemetry (`/lookup-sentinel`, EDR, internal incident records) | The best-graded evidence there is | An evidence item graded **A1**, `claim_type: observation`, `access: telemetry`, source "user environment", `provenance_basis: first-party` (rubric rule R12). It participates fully, can be load-bearing, and can raise the ceiling. A miss is not evidence of absence and is not an item |
+| **KEV listing** | A claim by CISA that exploitation has been observed | Evidence. Graded like any government claim through `/quality-of-information-check` |
+| **CVSS and EPSS** | Attributes of a CVE | Not claims and not evidence about the event. They do not enter the claim table and have no effect on the ceiling. List them in Sources as reference data |
+
+## Confidence Ceiling: The Weakest Link
+
+The confidence level of the assessment cannot exceed what the weakest load-bearing claim supports. Apply the table below to every item with `load_bearing: true`. The lowest result is the ceiling, and the claim that produced it is the weakest link. This is the claim named in `event_qoi_summary.weakest_link`, which uses the same bands.
+
+| Weakest load-bearing claim | Maximum confidence |
+|---|---|
+| Credibility 1, with reliability A or B | **High** |
+| Credibility 2, or credibility 1 with reliability C | **Moderate** |
+| Credibility 3 | **Low** |
+| Credibility 4, 5 or 6 | **No confidence level.** State the gap |
+
+Reliability D, E or F lowers the result by one level, so a D3 or F3 claim carrying the conclusion gives no confidence level.
+
+Why the threshold for High is credibility 1: high confidence is for judgments resting on high-quality information from more than one source. Credibility 2 is, by the rubric's own definition, a single primary with direct access and no independent confirmation. Credibility 1 is the independently confirmed grade.
+
+Where a numeric score is required, it stays inside the band for that level in `/confidence-levels`: 80 to 100 for High, 60 to 79 for Moderate, 40 to 59 for Low.
+
+When the ceiling is "no confidence level", do not publish a judgment with a confidence label. Write what is known, state that the claim the conclusion depends on cannot carry it, and say what collection would change that.
+
+Rules:
+- This is a ceiling, not a target. Weak analytical logic or untested assumptions lower confidence further. Nothing raises it above the ceiling.
+- Claims flagged `press_originated` and claims with `load_bearing: false` cannot carry the conclusion. If the conclusion needs one of them, the user must promote it, and it then counts as the weakest link.
+- To raise the ceiling, corroborate the weakest link or rewrite the conclusion so it no longer depends on that claim. Do not drop the claim from Sources to get a higher level.
+- State the weakest link in the confidence rationale, by `claim_id` and grade:
+
+> "Confidence: low. The weakest load-bearing claim is C04 (attribution, A3): a single primary stating moderate confidence, corroboration unchecked. Core observations are A2, which would support moderate. Independent confirmation of the attribution would raise the ceiling."
+
+This applies to all three assessment types below.
 
 ## Threat Assessment
 
@@ -49,7 +95,7 @@ Three types of assessments, each with distinct purpose and structure. Do not con
 | **Negligible** | No credible intent, minimal capability, or no meaningful opportunity. |
 
 ### Example assessment statement
-> "We assess the threat level from APT41 to European pharmaceutical companies as **HIGH** (confidence: high). APT41 has demonstrated intent through active reconnaissance (observed since November 2025), possesses advanced capability including zero-day exploitation, and the sector presents significant opportunity due to widespread legacy VPN infrastructure."
+> "We assess the threat level from APT41 to European pharmaceutical companies as **HIGH** (confidence: moderate). APT41 has demonstrated intent through active reconnaissance (observed since November 2025), possesses advanced capability including zero-day exploitation, and the sector presents significant opportunity due to widespread legacy VPN infrastructure. The weakest load-bearing claim is C03 (observation, B2): the reconnaissance activity, reported by a single primary from its own telemetry."
 
 ## Risk Assessment
 
@@ -135,9 +181,25 @@ Use a risk matrix:
 ## General Assessment Writing Rules
 
 1. **Always state the assessment explicitly** — "We assess that..." not "It appears that..."
-2. **Always include confidence level** — Per confidence-levels skill
+2. **Always include confidence level** — Per confidence-levels skill, never above the weakest-link ceiling, with the weakest link named in the rationale
 3. **Always use likelihood language** — Per likelihood-language skill for future-looking statements
 4. **Always identify key assumptions** — What must be true for this assessment to hold?
 5. **Always separate facts from judgments** — Per intelligence-writing skill
 6. **Never hedge-stack** — Pick one likelihood band, don't combine ("likely or highly likely")
 7. **Always include temporal scope** — "Over the next 12 months" not "in the future"
+8. **Always cite the primary** — Sources name the originating organisation, not the outlet that carried the story
+
+## Sources Section (all assessment types)
+
+Every assessment ends with this section, filled from the graded evidence items.
+
+```markdown
+### Sources
+**Provenance basis**: [platform-resolved / script-resolved / model-judged (unverified)]
+
+| claim_id | Claim | claim_type | Primary (org, title, date) | Grade | Independent primaries (basis) | Flags |
+|----------|-------|------------|----------------------------|:---:|:---:|-------|
+| C01 | [claim] | observation | [Vendor], "[Report title]", YYYY-MM-DD | A2 | 1 (unchecked) | single_source |
+
+[Cite the primary, not the outlet that carried it. Several outlets covering one primary are one source. First-party observations appear in the table as graded items. CVSS and EPSS are listed separately as reference data.]
+```

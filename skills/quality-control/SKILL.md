@@ -1,9 +1,9 @@
 ---
 name: quality-control
-description: Peer review checklist and quality standards for intelligence products. Loaded by the quality-reviewer agent.
+description: Peer review checklist and quality standards for intelligence products, plus schema validation for graded evidence items and claim tables from /quality-of-information-check and /claim-extraction. Rejects outputs that break the evidence schema or the grading caps. Loaded by the quality-reviewer agent.
 user-invocable: false
 metadata:
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # Quality Control Standards
@@ -15,6 +15,66 @@ metadata:
 3. Products with CRITICAL issues are returned for revision
 4. Products with 3+ MAJOR issues are returned for revision
 5. MINOR issues are noted but don't block publication
+6. Evidence validation runs before the checklist. A product that fails it is returned without being scored.
+
+## Evidence Validation
+
+This is the enforcement point for `/claim-extraction` and `/quality-of-information-check` output, and for any product built on it (`/ach`, `/threat-assessment`, `/writing-assessments`). The schema is in `skills/quality-of-information-check/references/evidence-item-schema.md`. The caps are rules R1 to R12 in `skills/quality-of-information-check/references/grading-rubric.md`.
+
+Two passes, in this order.
+
+### Pass 1: Script check
+
+```bash
+python3 skills/quality-of-information-check/scripts/validate_evidence.py <qoi.json> [--source-text <file>]
+```
+
+- Exit 0: valid. Go to Pass 2.
+- Exit 1: violations, listed on stdout as JSON. Each one is a CRITICAL issue. Return the output for revision with the list attached. Do not fix grades or anchors yourself.
+- Pass `--source-text` whenever the source document text is available, so anchors can be checked against it.
+- If the script cannot be run, say so in the review and do every check in the table below by hand. Do not report the script check as passed.
+
+### Pass 2: Reviewer check
+
+The script covers what can be checked mechanically. The reviewer then reads the claim table against the source and confirms each rule below. Any failure is CRITICAL and the output is rejected.
+
+| # | Reject when | How to check |
+|---|---|---|
+| V1 | An anchor is missing | Every item has `anchor.sentence` and `anchor.location`, non-empty |
+| V2 | Anchor text is not present verbatim in the source | Find `anchor.sentence` in the source text, character for character. A paraphrase fails |
+| V3 | A claim contains two assertions | One subject, one assertion. A compound "and" joining two facts that could be graded differently fails |
+| V4 | `claim_type` is not one of the five values | `observation`, `attribution`, `assessment`, `actor_claim`, `victim_disclosure`. `press_originated` is a flag, not a type |
+| V5 | A grade exceeds a cap | Rules R1 to R12. See the table below |
+| V6 | Corroboration is asserted without basis | `independent_primaries` of 2 or more needs a `basis` other than `unchecked` and a `sources` entry for each additional primary. The same applies to any "corroborated by" wording in the rationale or the product text |
+| V7 | `provenance_basis` is absent | Present on every item and in the output header, with one of `platform-resolved`, `script-resolved`, `model-judged` |
+| V8 | Claim count is outside five to twelve for a primary | Count claims per primary document. Claims from attributed quotes in an article are additional and not counted. Allowed outside the range only when the user asked for it, and the output says so |
+
+Cap checks for V5:
+
+| Rule | Fails when |
+|---|---|
+| R1 | Provenance unresolved and reliability is not D, credibility is better than 3, or `unresolved_provenance` is not flagged |
+| R2 | Actor claim about scale, victim count or data volume, uncorroborated, graded other than F6, or `actor_sourced` is not flagged |
+| R3 | `actor_claim` with reliability other than F, or credibility better than 3 without corroboration |
+| R4 | `attribution` with credibility 1 and fewer than 2 independent primaries |
+| R5 | Credibility 1 with fewer than 2 independent primaries, or with `basis: unchecked` |
+| R6 | `press_originated` with reliability other than D, credibility better than 3, or `load_bearing: true` without a recorded user promotion |
+| R7 | A hop has `fidelity: caveats_dropped` or `embellished` and the claim uses the outlet's wording, or `caveats_dropped_in_chain` is not flagged |
+| R8 | Primary access `undisclosed` and reliability better than C |
+| R9 | Older than 180 days on a fast-moving topic and `stale` is not flagged |
+| R10 | `track_record_applied` is anything other than `none` when `provenance_basis` is not `platform-resolved` |
+| R11 | Grade imported from a STIX or MISP confidence value and `derived_from_confidence` is not flagged |
+| R12 | A first-party observation that is not `claim_type: observation`, `access: telemetry`, reliability A and `provenance_basis: first-party`, or `provenance_basis: first-party` on anything that is not the user's own telemetry. CVSS or EPSS entered as an evidence item |
+
+Also reject (CRITICAL) when reliability is above what the primary's stated access supports (the access table in the rubric), when `stated_confidence` is paraphrased rather than verbatim or "not stated", or when a rationale grades the organisation's name instead of access, corroboration and stated confidence.
+
+### Products built on graded evidence
+
+| Product | Reject (CRITICAL) when |
+|---|---|
+| `/ach` output | A non-diagnostic row is scored. The heaviest inconsistent item per hypothesis is not reported. No `provenance_basis` in the header. A matrix row has no `claim_id`, `claim_type` or grade. A `press_originated` or non-load-bearing item is treated as a linchpin without a recorded promotion. A linchpin that is `single_source` or credibility 6 is not called out |
+| Assessments | Confidence is above the weakest-link ceiling defined in `/threat-assessment` (High needs every load-bearing claim at credibility 1; credibility 2 caps at Moderate; 3 at Low; 4 to 6 means no confidence level). A confidence label is given where the ceiling is "no confidence level". The weakest link is not named in the confidence rationale. Sources lack the primary, the grade or `provenance_basis` |
+| Any product | Evidence from reporting appears that is not in the graded claim table |
 
 ## Peer Review Checklist
 
@@ -35,14 +95,17 @@ metadata:
 - [ ] Intelligence gaps acknowledged
 
 ### C. Sourcing (Weight: 20%)
-- [ ] All sources assessed with Admiralty Scale
-- [ ] Source ratings justified and reasonable
-- [ ] Source diversity (not single-source unless noted)
-- [ ] Derivative vs independent sources distinguished
-- [ ] No unattributed claims
+- [ ] Every claim cites its primary (the originating organisation), not the outlet that carried it
+- [ ] Admiralty grade given per claim, not per outlet or per event
+- [ ] Grade rationale references access, corroboration and stated confidence
+- [ ] Corroboration counted by independent primaries with separate access. Several outlets covering one primary count as one source
+- [ ] Single-source claims flagged as such
+- [ ] Outlets recorded as chain hops with transmission fidelity, caveats restored to the primary's wording
+- [ ] `provenance_basis` stated in the product
+- [ ] No unattributed claims. Unresolved provenance is stated, not guessed
 
 ### D. Mandated Language (Weight: 20%)
-- [ ] Confidence levels on all assessments (with rationale)
+- [ ] Confidence levels on all assessments (with rationale naming the weakest load-bearing claim)
 - [ ] Likelihood language on all predictions (with percentage ranges)
 - [ ] No hedge-stacking
 - [ ] No vague probabilistic language without probability band
@@ -78,6 +141,6 @@ Calculate weighted score (0-10):
 
 ## Issue Severity
 
-- **CRITICAL**: Factual error in key finding, missing TLP on sensitive content, unsupported primary conclusion, potential harm if published as-is
+- **CRITICAL**: Factual error in key finding, missing TLP on sensitive content, unsupported primary conclusion, potential harm if published as-is, any Evidence Validation failure (script violation or V1 to V8)
 - **MAJOR**: Missing confidence level on assessment, vague likelihood language on prediction, missing source assessment on key evidence, logical flaw in reasoning, missing key section
 - **MINOR**: Grammar/formatting, style inconsistency, minor Admiralty rating disagreement, non-essential section could be improved

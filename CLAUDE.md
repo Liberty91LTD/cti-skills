@@ -4,7 +4,7 @@ Cyber Threat Intelligence skills pack for Claude Code and other agentic IDEs. Se
 
 ## What's here
 
-- `skills/` — 75 composable CTI skills flat at the repo root per Agent Skills spec. Each is a directory with a `SKILL.md`. Canonical user-invokable interface. Works in any Agent-Skills-compatible IDE.
+- `skills/` — 78 composable CTI skills flat at the repo root per Agent Skills spec. Each is a directory with a `SKILL.md`. Canonical user-invokable interface. Works in any Agent-Skills-compatible IDE.
 - `.claude-plugin/marketplace.json` — plugin manifest, install via `/plugin marketplace add Liberty91LTD/cti-skills`.
 - `.claude/agents/` — **optional Claude-Code-specific subagents** (analyst, report-writer, quality-reviewer, osint-researcher, ioc-processor, detection-engineer). These wrap skills with model routing (Opus for deep reasoning, Sonnet for structured work) and tool permissions. The new `cti-orchestrator` lives as a skill now — the old agent was archived.
 - `.claude/settings.json` — baseline permissions.
@@ -26,10 +26,13 @@ Cyber Threat Intelligence skills pack for Claude Code and other agentic IDEs. Se
 
 Opt-in. Skills with `metadata.tradecraft: true` in frontmatter produce outputs marked with TLP, Admiralty source ratings, MISP confidence, and probability yardstick language. The orchestrator auto-applies these to finished products. See `/apply-tlp`, `/score-source`, `/confidence-language`, `/likelihood-language`.
 
+One gate, since 2.0: `/ach`, `/threat-assessment` and `/writing-assessments` require graded evidence and run `/quality-of-information-check` first. Provenance is resolved by `skills/source-provenance/scripts/resolve_provenance.py` or the Liberty91 platform, never reconstructed from memory. `skills/source-provenance/references/source-types.md` classifies sources and must never carry reliability ratings.
+
 ## Before committing
 
 ```bash
 ./validate-skills.sh
+python3 tests/provenance/run_tests.py
 ```
 
 If it prints errors, fix them. If it warns about skill body size, move detail into `references/` subdirectories. Update `VERSIONS.md` when you ship changes.

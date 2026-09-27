@@ -1,0 +1,49 @@
+# Alias file for cross-vendor name matching.
+#
+# Copy this file to aliases.yml in the same directory and maintain it yourself.
+# aliases.yml is gitignored. /quality-of-information-check loads it when present
+# and labels every match made with it as alias_source: user.
+#
+# The pack ships the mechanism only, not the mappings. Which vendor cluster equals
+# which is an analytical judgement that changes over time, and it is yours to make.
+# With a LIBERTY91_API_KEY the Threat Library is used instead (alias_source: liberty91).
+# With neither, names are not matched across vendors and corroboration for
+# name-based claims stays at 1, unchecked.
+#
+# Hashes, CVE identifiers, IP addresses and domains match exactly and do not
+# need entries here.
+#
+# Fields:
+#   canonical   the name you use
+#   aliases     other vendors' names for what you judge to be the same thing
+#   note        optional: basis for the mapping, date, caveats
+#
+# An alias may appear under one canonical name only. Where two vendor clusters
+# overlap but are not the same, do not alias them: list them separately and say
+# so in the note.
+#
+# The entries below are invented, to show the format.
+
+actor:
+  - canonical: Crimson Heron
+    aliases:
+      - TEMP.Embers
+      - Group 0417
+      - Storm-9901
+    note: >
+      Storm-9901 merged on the basis of the vendor's own statement of 2026-03-02.
+      Group 0417 is a partial overlap in one vendor's reporting; treated as the
+      same for corroboration, reviewed quarterly.
+
+malware:
+  - canonical: Embers
+    aliases:
+      - EMBERLOADER
+      - Backdoor.Cinder
+    note: Same family by code comparison published by two vendors.
+
+tool:
+  - canonical: QuietDump
+    aliases:
+      - credtool-q
+    note: Custom credential dumper.

@@ -114,7 +114,7 @@ function listSkills() {
        'ransomware-ecosystem', 'carding-financial-fraud', 'infostealers', 'phishing-social-engineering',
        'supply-chain-threats', 'hacktivism', 'initial-access-brokers'].includes(s)),
     'Analytical': skills.filter((s) =>
-      ['ach', 'horizon-scanning', 'key-assumptions-check', 'red-team-analysis', 'source-assessment',
+      ['ach', 'horizon-scanning', 'key-assumptions-check', 'devils-advocacy', 'source-assessment',
        'structured-analytic-techniques', 'threat-assessment', 'threat-actor-profiling', 'campaign-tracking',
        'malware-analysis', 'indicator-pivoting', 'vulnerability-intelligence'].includes(s)),
     'Production': skills.filter((s) =>

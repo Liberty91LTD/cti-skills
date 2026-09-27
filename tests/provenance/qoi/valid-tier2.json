@@ -1,0 +1,627 @@
+{
+  "qoi_version": "1.0",
+  "assessed_at": "2026-09-27",
+  "provenance_basis": "script-resolved",
+  "question": "Who is behind the intrusions at regional water utilities?",
+  "documents": [
+    {
+      "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+      "role": "article"
+    },
+    {
+      "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+      "role": "primary"
+    }
+  ],
+  "evidence_items": [
+    {
+      "claim_id": "C04",
+      "claim": "Vendor assesses with moderate confidence that the activity was conducted by Crimson Heron.",
+      "claim_type": "attribution",
+      "load_bearing": true,
+      "anchor": {
+        "document_url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "sentence": "We assess with moderate confidence that this activity was conducted by Crimson Heron.",
+        "location": "paragraph 8"
+      },
+      "primary_source": {
+        "org": "Northwind Security",
+        "type": "vendor",
+        "title": "Crimson Heron targets regional water utilities",
+        "date_published": "2026-09-18",
+        "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "access": "ir_engagement",
+        "stated_confidence": "We assess with moderate confidence that this activity was conducted by Crimson Heron.",
+        "interest": "commercial"
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "caveats_dropped",
+          "notes": "Article: 'has been attributed to Crimson Heron'. Primary: 'We assess with moderate confidence'. Confidence statement dropped."
+        },
+        {
+          "org": "Northwind Security",
+          "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+          "date_published": "2026-09-18",
+          "fidelity": "faithful",
+          "notes": "primary"
+        }
+      ],
+      "grading": {
+        "source_reliability": "A",
+        "information_credibility": 3,
+        "rationale": "Findings come from three incident response engagements, which supports reliability A. Attribution is an analytical judgement stated with moderate confidence from a single primary; R4 caps it at 2 and the stated moderate confidence places it at 3. Graded on the primary's wording (R7).",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "unchecked",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "unknown",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source",
+        "caveats_dropped_in_chain",
+        "commercial_interest"
+      ],
+      "provenance_basis": "script-resolved"
+    },
+    {
+      "claim_id": "C01",
+      "claim": "The vendor identified a previously undocumented backdoor, Embers, in three incident response engagements between June and August 2026.",
+      "claim_type": "observation",
+      "load_bearing": false,
+      "anchor": {
+        "document_url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "sentence": "During three incident response engagements between June and August 2026, we identified a previously undocumented backdoor we call Embers.",
+        "location": "paragraph 2"
+      },
+      "primary_source": {
+        "org": "Northwind Security",
+        "type": "vendor",
+        "title": "Crimson Heron targets regional water utilities",
+        "date_published": "2026-09-18",
+        "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "access": "ir_engagement",
+        "stated_confidence": "We assess with moderate confidence that this activity was conducted by Crimson Heron.",
+        "interest": "commercial"
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "embellished",
+          "notes": "Article: 'across the region'. Primary reports three engagements. Scope widened."
+        },
+        {
+          "org": "Northwind Security",
+          "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+          "date_published": "2026-09-18",
+          "fidelity": "faithful",
+          "notes": "primary"
+        }
+      ],
+      "grading": {
+        "source_reliability": "A",
+        "information_credibility": 2,
+        "rationale": "Northwind states the finding comes from three incident response engagements; single primary with direct access, corroboration unchecked.",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "unchecked",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "2026-06",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source",
+        "caveats_dropped_in_chain"
+      ],
+      "provenance_basis": "script-resolved"
+    },
+    {
+      "claim_id": "C02",
+      "claim": "In all three cases initial access was through exploitation of CVE-2026-0001 in an internet-facing remote access gateway.",
+      "claim_type": "observation",
+      "load_bearing": false,
+      "anchor": {
+        "document_url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "sentence": "In all three cases, initial access was obtained through exploitation of CVE-2026-0001 in an internet-facing remote access gateway.",
+        "location": "paragraph 3"
+      },
+      "primary_source": {
+        "org": "Northwind Security",
+        "type": "vendor",
+        "title": "Crimson Heron targets regional water utilities",
+        "date_published": "2026-09-18",
+        "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "access": "ir_engagement",
+        "stated_confidence": "We assess with moderate confidence that this activity was conducted by Crimson Heron.",
+        "interest": "commercial"
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "faithful",
+          "notes": "Article repeats the claim without change."
+        },
+        {
+          "org": "Northwind Security",
+          "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+          "date_published": "2026-09-18",
+          "fidelity": "faithful",
+          "notes": "primary"
+        }
+      ],
+      "grading": {
+        "source_reliability": "A",
+        "information_credibility": 2,
+        "rationale": "Northwind states the finding comes from three incident response engagements; single primary with direct access, corroboration unchecked.",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "unchecked",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "2026-06",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source"
+      ],
+      "provenance_basis": "script-resolved"
+    },
+    {
+      "claim_id": "C03",
+      "claim": "Embers uses HTTPS command and control with a hard-coded server list that included 203.0.113.42 and 198.51.100.17 in the vendor's samples.",
+      "claim_type": "observation",
+      "load_bearing": false,
+      "anchor": {
+        "document_url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "sentence": "Embers communicates with its command and control server over HTTPS, using a hard-coded list that in our samples included 203.0.113.42 and 198.51.100.17.",
+        "location": "paragraph 5"
+      },
+      "primary_source": {
+        "org": "Northwind Security",
+        "type": "vendor",
+        "title": "Crimson Heron targets regional water utilities",
+        "date_published": "2026-09-18",
+        "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "access": "ir_engagement",
+        "stated_confidence": "We assess with moderate confidence that this activity was conducted by Crimson Heron.",
+        "interest": "commercial"
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "faithful",
+          "notes": "Article repeats the claim without change."
+        },
+        {
+          "org": "Northwind Security",
+          "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+          "date_published": "2026-09-18",
+          "fidelity": "faithful",
+          "notes": "primary"
+        }
+      ],
+      "grading": {
+        "source_reliability": "A",
+        "information_credibility": 2,
+        "rationale": "From the vendor's own samples recovered in its engagements. Lookups found one OTX pulse citing the same report, which is the same source; no independent primary.",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "lookups",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "unknown",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source"
+      ],
+      "provenance_basis": "script-resolved"
+    },
+    {
+      "claim_id": "C05",
+      "claim": "The intruders collected network diagrams and credentials, and the vendor did not observe data destruction or manipulation of control systems.",
+      "claim_type": "observation",
+      "load_bearing": false,
+      "anchor": {
+        "document_url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "sentence": "We did not observe data destruction or manipulation of control systems. The intruders collected network diagrams and credentials.",
+        "location": "paragraph 11"
+      },
+      "primary_source": {
+        "org": "Northwind Security",
+        "type": "vendor",
+        "title": "Crimson Heron targets regional water utilities",
+        "date_published": "2026-09-18",
+        "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "access": "ir_engagement",
+        "stated_confidence": "We assess with moderate confidence that this activity was conducted by Crimson Heron.",
+        "interest": "commercial"
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "faithful",
+          "notes": "Article repeats the claim without change."
+        },
+        {
+          "org": "Northwind Security",
+          "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+          "date_published": "2026-09-18",
+          "fidelity": "faithful",
+          "notes": "primary"
+        }
+      ],
+      "grading": {
+        "source_reliability": "A",
+        "information_credibility": 2,
+        "rationale": "Northwind states the finding comes from three incident response engagements; single primary with direct access, corroboration unchecked.",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "unchecked",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "2026-06",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source"
+      ],
+      "provenance_basis": "script-resolved"
+    },
+    {
+      "claim_id": "C06",
+      "claim": "Vendor believes the objective is pre-positioning.",
+      "claim_type": "assessment",
+      "load_bearing": false,
+      "anchor": {
+        "document_url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "sentence": "We believe the objective is pre-positioning, and that the group is likely to target additional utilities in the region over the coming months.",
+        "location": "paragraph 12"
+      },
+      "primary_source": {
+        "org": "Northwind Security",
+        "type": "vendor",
+        "title": "Crimson Heron targets regional water utilities",
+        "date_published": "2026-09-18",
+        "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "access": "ir_engagement",
+        "stated_confidence": "We assess with moderate confidence that this activity was conducted by Crimson Heron.",
+        "interest": "commercial"
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "faithful",
+          "notes": "Article repeats the claim without change."
+        },
+        {
+          "org": "Northwind Security",
+          "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+          "date_published": "2026-09-18",
+          "fidelity": "faithful",
+          "notes": "primary"
+        }
+      ],
+      "grading": {
+        "source_reliability": "A",
+        "information_credibility": 3,
+        "rationale": "A judgement about intent from a primary with direct access; single primary, no stated confidence level beyond 'we believe'.",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "unchecked",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "unknown",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source"
+      ],
+      "provenance_basis": "script-resolved"
+    },
+    {
+      "claim_id": "C07",
+      "claim": "Vendor judges the group is likely to target additional utilities in the region over the coming months.",
+      "claim_type": "assessment",
+      "load_bearing": false,
+      "anchor": {
+        "document_url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "sentence": "We believe the objective is pre-positioning, and that the group is likely to target additional utilities in the region over the coming months.",
+        "location": "paragraph 12"
+      },
+      "primary_source": {
+        "org": "Northwind Security",
+        "type": "vendor",
+        "title": "Crimson Heron targets regional water utilities",
+        "date_published": "2026-09-18",
+        "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+        "access": "ir_engagement",
+        "stated_confidence": "We assess with moderate confidence that this activity was conducted by Crimson Heron.",
+        "interest": "commercial"
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "faithful",
+          "notes": "Article repeats the claim without change."
+        },
+        {
+          "org": "Northwind Security",
+          "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+          "date_published": "2026-09-18",
+          "fidelity": "faithful",
+          "notes": "primary"
+        }
+      ],
+      "grading": {
+        "source_reliability": "A",
+        "information_credibility": 3,
+        "rationale": "A judgement about future behaviour from a primary with direct access; single primary, hedged as 'likely'.",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "unchecked",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "unknown",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source"
+      ],
+      "provenance_basis": "script-resolved"
+    },
+    {
+      "claim_id": "C08",
+      "claim": "Northwind's head of incident response states that two of the three utilities were unaware of the intrusion until the vendor told them.",
+      "claim_type": "observation",
+      "load_bearing": false,
+      "anchor": {
+        "document_url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+        "sentence": "“What worries us is how quiet they were. Two of the three utilities had no idea until we told them,” said Dana Reyes, head of incident response at Northwind.",
+        "location": "article, paragraph 4"
+      },
+      "primary_source": {
+        "org": "Northwind Security",
+        "type": "vendor",
+        "title": null,
+        "date_published": "2026-09-19",
+        "url": null,
+        "access": "statement",
+        "stated_confidence": "not stated",
+        "interest": "commercial"
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "faithful",
+          "notes": "Direct quotation."
+        }
+      ],
+      "grading": {
+        "source_reliability": "B",
+        "information_credibility": 2,
+        "rationale": "Attributed quote from a named person at the primary organisation; access is a statement to the press, which supports reliability B. Consistent with the report; single primary.",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "unchecked",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "unknown",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source"
+      ],
+      "provenance_basis": "script-resolved"
+    },
+    {
+      "claim_id": "C09",
+      "claim": "Attacks on water infrastructure have been rising sharply this year.",
+      "claim_type": "assessment",
+      "load_bearing": false,
+      "anchor": {
+        "document_url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+        "sentence": "Attacks on water infrastructure have been rising sharply this year.",
+        "location": "article, paragraph 7"
+      },
+      "primary_source": {
+        "org": null,
+        "type": "press",
+        "title": null,
+        "date_published": null,
+        "url": null,
+        "access": "undisclosed",
+        "stated_confidence": "not stated",
+        "interest": null
+      },
+      "chain": [
+        {
+          "org": "News Outlet",
+          "url": "https://news-outlet.example/2026/09/state-hackers-water-utilities",
+          "date_published": "2026-09-19",
+          "fidelity": "unresolved",
+          "notes": "No source given."
+        }
+      ],
+      "grading": {
+        "source_reliability": "D",
+        "information_credibility": 3,
+        "rationale": "Unattributed assertion by the journalist with no primary behind it; R6 applies.",
+        "track_record_applied": "none"
+      },
+      "corroboration": {
+        "independent_primaries": 1,
+        "basis": "unchecked",
+        "sources": [
+          {
+            "org": "Northwind Security",
+            "url": "https://northwind-security.example/research/crimson-heron-water-utilities",
+            "date": "2026-09-18"
+          }
+        ],
+        "alias_source": "none"
+      },
+      "recency": {
+        "date_observed": "unknown",
+        "date_published": "2026-09-18",
+        "age_days": 9,
+        "superseded_by": null
+      },
+      "flags": [
+        "single_source",
+        "press_originated",
+        "unresolved_provenance"
+      ],
+      "provenance_basis": "script-resolved"
+    }
+  ],
+  "event_qoi_summary": {
+    "claims_graded": 9,
+    "independent_primaries": 1,
+    "most_recent_observation": "2026-08",
+    "grade_range": "A2 to D3",
+    "summary_line": "core facts A2, attribution A3 on a single primary, trend statement press-originated",
+    "weakest_link": "C04",
+    "provenance_basis": "script-resolved"
+  },
+  "gaps": [
+    "No independent confirmation of the attribution.",
+    "The national cyber agency advisory mentioned in the article has not been traced.",
+    "Actor names were not matched across vendors: no aliases.yml and no LIBERTY91_API_KEY.",
+    "The report does not name the utilities, so victim disclosures cannot be looked for."
+  ],
+  "deception_screen": {
+    "mom": "Attribution rests on infrastructure patterns and tool reuse, both reproducible by another actor. The vendor has a commercial interest.",
+    "pop": "Not established in this run.",
+    "moses": "Evidence comes from the vendor's own engagements; low manipulability.",
+    "eve": "Consistent. The basis for attribution is stated.",
+    "flags_raised": []
+  },
+  "next_steps": [
+    "Run /source-provenance on the national cyber agency advisory.",
+    "Check 203.0.113.42 and 198.51.100.17 in /lookup-misp and /lookup-opencti."
+  ],
+  "model_judgements": [
+    "claim_type",
+    "fidelity",
+    "rationale",
+    "deception_screen",
+    "gaps"
+  ]
+}

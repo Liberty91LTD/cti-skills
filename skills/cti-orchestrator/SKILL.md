@@ -1,8 +1,8 @@
 ---
 name: cti-orchestrator
-description: Use as the default entry point for any CTI request that doesn't name a specific skill. Activates when a user asks to investigate an indicator, profile a threat actor, write an assessment, enrich IOCs, or build detection rules. Routes to the right investigation or analysis skill, then auto-applies rigor skills (source rating, TLP, confidence, likelihood) on the output.
+description: Use as the default entry point for any CTI request that doesn't name a specific skill. Activates when a user asks to investigate an indicator, profile a threat actor, write an assessment, enrich IOCs, or build detection rules, and when a user asks where a report or article comes from, how reliable it is, to grade a source, check a report, or split a report into claims, or pastes a bare article URL. Routes to the right investigation, provenance, grading or analysis skill, then auto-applies rigor skills (source rating, TLP, confidence, likelihood) on the output.
 metadata:
-  version: 1.0.0
+  version: 2.0.0
   tags: [orchestrator, entry-point]
   tradecraft: true
 ---
@@ -28,6 +28,9 @@ Activate on any of these user intents:
 | "What's this domain doing" / "investigate example.com" | `/domain-investigation` |
 | "Check this hash" / "is d41d8cd98f... malicious" | `/hash-investigation` |
 | "Scan this URL" / "what does this link do" | `/url-investigation` |
+| "Where does this come from" / "how reliable is this" / "grade this source" / "check this report" | `/quality-of-information-check` |
+| A bare URL to an article or report, no other instruction | `/source-provenance` + a short `/quality-of-information-check` (see "Bare URLs" below) |
+| "Split this report into claims" | `/claim-extraction` |
 | "Profile APT28" / "tell me about this actor" | `/threat-actor-profiling` |
 | "Track this campaign" | `/campaign-tracking` |
 | "Analyze this malware sample" | `/malware-analysis` |
@@ -40,6 +43,22 @@ Activate on any of these user intents:
 | Direct invocation `/skill-name` | bypass this orchestrator, invoke directly |
 
 If the request is ambiguous, ask one clarifying question. Don't guess.
+
+### Bare URLs: document or indicator?
+
+A URL with no instruction is either something to read (an article or report) or something to scan (an indicator). Decide from what is in the message. Do not fetch the URL to find out.
+
+| Signal | Treat as | Route to |
+|---|---|---|
+| Defanged (`hxxp://`, `[.]`), or the user calls it suspicious, phishing, a link from an email, or an IOC | Indicator | `/url-investigation` |
+| Arrives in a list with other indicators (IPs, hashes, domains) | Indicator | `/url-investigation` |
+| Raw IP host, or a path ending in an executable, script or archive file | Indicator | `/url-investigation` |
+| The user calls it an article, report, blog, advisory or write-up, or asks what it says | Document | `/source-provenance` + short QoI |
+| Path reads as a publication (a headline slug, `/blog/`, `/news/`, `/research/`, `/advisories/`, a dated path) on a host that presents as a publisher, vendor or government site | Document | `/source-provenance` + short QoI |
+
+If the signals conflict or none apply, ask one question: "Do you want me to read this as a report and trace where it comes from, or scan it as a possibly malicious link?" Never fetch a URL that might be an indicator through the provenance fetcher.
+
+A short QoI is the `/quality-of-information-check` header, the graded claim table and the event aggregate. Offer the full run (gaps, deception screen, next steps) as a follow-up.
 
 ## Routing logic
 
@@ -62,7 +81,10 @@ For analytical or production-shaped requests:
 user request
   ↓ check active PIRs (if present under data/pirs/active/) for priority alignment
   ↓
-invoke the relevant analytical skill(s): /threat-assessment, /ach, /structured-analytic-techniques, /red-team-analysis, /key-assumptions-check, /horizon-scanning
+if the work rests on reports, articles or URLs: /quality-of-information-check first
+  (for /ach, the hypotheses are written from the question before the evidence is graded)
+  ↓
+invoke the relevant analytical skill(s): /threat-assessment, /ach, /structured-analytic-techniques, /devils-advocacy, /key-assumptions-check, /horizon-scanning
   ↓
 if writing a product: /intelligence-writing, /writing-assessments
   ↓
@@ -73,13 +95,15 @@ auto-apply rigor
 return to user
 ```
 
+`/ach`, `/threat-assessment` and `/writing-assessments` refuse ungraded evidence. Pass them the QoI output (graded evidence items), not raw URLs or text, and carry `provenance_basis` through to the final product. If the user asks to skip grading, these three skills will not run. Say so and offer the QoI run.
+
 ## Auto-rigor pipeline
 
 After the primary skill(s) complete, apply these rigor skills to the output **without asking the user**. They're non-negotiable for any intelligence product.
 
-1. **`/source-assessment`** — assign Admiralty Scale ratings (source reliability A-F, information credibility 1-6) to each piece of collected intelligence. Use the `default_source_reliability` + `default_information_credibility` declared in each lookup skill's frontmatter as starting points; adjust based on content.
+1. **`/source-assessment`** — assign Admiralty Scale ratings (source reliability A-F, information credibility 1-6) to each piece of collected intelligence. Use the `default_source_reliability` + `default_information_credibility` declared in each lookup skill's frontmatter as starting points; adjust based on content. This step covers lookup results and single items. Documents, articles and reports are graded per claim by `/quality-of-information-check`, which resolves them to the primary first. Do not assign one Admiralty rating to a whole article or to the outlet that published it, and do not regrade claims that arrive with a QoI grade.
 2. **`/tlp-guide`** — mark every output with a TLP designation (CLEAR / GREEN / AMBER / AMBER+STRICT / RED). Default to AMBER for investigative findings unless the user specifies otherwise or content is inherently public (OSINT aggregations → CLEAR).
-3. **`/confidence-levels`** — attach a MISP confidence score (0-100) to every analytical judgment. Justify based on source ratings and corroboration.
+3. **`/confidence-levels`** — attach a confidence level (High, Moderate or Low, with a 0-100 score) to every analytical judgment. It cannot exceed what the weakest load-bearing claim supports. Where the evidence supports no judgment, give no level and state the gap.
 4. **`/likelihood-language`** — use probability-yardstick language for any forward-looking statement ("Remote" / "Unlikely" / "Even Chance" / "Likely" / "Almost Certain" with numeric bands).
 
 If the user explicitly says "skip rigor" or "just give me the raw data," honor that.
@@ -117,7 +141,7 @@ Authoritative list of `/lookup-*` skills available in this pack. **Keep this lis
 | `/lookup-misp` | any | B2 | Internal correlation against your own MISP catalogue |
 | `/lookup-opencti` | any | B2 | Two-way: correlation against your OpenCTI knowledge base (indicators, observables, actors, reports) + write-back of vetted findings |
 | `/lookup-ransomwarelive` | org-name, group | B2 (group/dates), B3 (descriptions) | Ransomware leak-site claims; treat criminal-written descriptions cautiously |
-| `/lookup-sentinel` | KQL, TTP hunt, IOC sweep | **A2** | **Your own Microsoft Sentinel telemetry — exposure scoping, not enrichment.** Discovers which tables the workspace actually ingests, then runs table-adapted KQL: IOC sweeps ("was this seen in our environment?") and ATT&CK TTP hunts. Chain after external lookups on a malicious verdict. A miss = "not observed in collected telemetry", never "not compromised". Read-only. |
+| `/lookup-sentinel` | KQL, TTP hunt, IOC sweep | **A1** (hits) | **Your own Microsoft Sentinel telemetry — exposure scoping, not enrichment.** Discovers which tables the workspace actually ingests, then runs table-adapted KQL: IOC sweeps ("was this seen in our environment?") and ATT&CK TTP hunts. Chain after external lookups on a malicious verdict. A hit is a first-party observation and the top of the scale. A miss = "not observed in collected telemetry", never "not compromised", and is not evidence. Read-only. |
 
 When a downstream investigation skill (e.g. `/hash-investigation`) is invoked but its SKILL.md doesn't reference a lookup that obviously applies (e.g. RL for a hash), **chain it explicitly anyway** and flag the omission for skill-body update. Better to over-chain once than miss high-value signal.
 
@@ -145,5 +169,6 @@ Downstream skills follow the same contract when they chain further skills.
 - `tools/REGISTRY.md` — external API catalog
 - Investigation skills: `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`
 - Analytical skills: `/threat-actor-profiling`, `/ach`, `/threat-assessment`, `/campaign-tracking`, `/malware-analysis`
+- Provenance and grading: `/source-provenance`, `/claim-extraction`, `/quality-of-information-check`
 - Rigor skills: `/source-assessment`, `/tlp-guide`, `/confidence-levels`, `/likelihood-language`
 - Production skills: `/intelligence-writing`, `/writing-assessments`, `/quality-control`

@@ -1,9 +1,9 @@
 ---
 name: stix-bundle
-description: STIX 2.1 bundle creation reference. Object types, relationships, and JSON templates for structured threat intelligence sharing.
+description: STIX 2.1 bundle creation reference. Object types, relationships, and JSON templates for structured threat intelligence sharing. Includes the per-claim mapping of Admiralty grades from /quality-of-information-check to STIX confidence, and the reverse mapping on import.
 user-invocable: false
 metadata:
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # STIX 2.1 Bundle Creation
@@ -46,7 +46,7 @@ Represents a pattern that can be used to detect suspicious activity.
       "phase_name": "command-and-control"
     }
   ],
-  "confidence": 85,
+  "confidence": 70,
   "labels": ["malicious-activity"],
   "object_marking_refs": ["marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"]
 }
@@ -174,9 +174,11 @@ Represents a pattern that can be used to detect suspicious activity.
   "relationship_type": "uses",
   "source_ref": "threat-actor--<UUID>",
   "target_ref": "malware--<UUID>",
-  "confidence": 85
+  "confidence": 70
 }
 ```
+
+`confidence` on an SRO grades the relationship itself, the claim that the source uses, targets or is attributed to the target. See [Confidence and source grading](#confidence-and-source-grading) for how the value is derived.
 
 ### Common Relationship Types
 
@@ -191,6 +193,108 @@ Represents a pattern that can be used to detect suspicious activity.
 | indicator | indicates | malware, threat-actor, campaign |
 | malware | targets | identity, vulnerability |
 | malware | uses | attack-pattern |
+
+## Confidence and source grading
+
+Grades are exported **per claim, never per event**. Each evidence item from `/quality-of-information-check` (schema: `skills/quality-of-information-check/references/evidence-item-schema.md`) carries its own `source_reliability` and `information_credibility`, and each lands on the one STIX object that expresses that claim. Do not stamp one value across every object in a bundle, and do not put `confidence` on the bundle itself. A bundle is a container and has no such property.
+
+### Information credibility to `confidence`
+
+STIX 2.1 Appendix A (Confidence Scales), Admiralty Credibility table. Section 3.2 of the spec makes the Appendix A mappings normative, so use these values and no others.
+
+| Information credibility | `confidence` on export | Range read on import |
+|---|---|---|
+| 1 Confirmed by other sources | 90 | 80 to 100 |
+| 2 Probably true | 70 | 60 to 79 |
+| 3 Possibly true | 50 | 40 to 59 |
+| 4 Doubtful | 30 | 20 to 39 |
+| 5 Improbable | 10 | 0 to 19 |
+| 6 Truth cannot be judged | omit the property | property absent |
+
+Credibility 6 means the property is left out. It is never written as 0, which would read as credibility 5.
+
+### Which object carries it
+
+| Claim | Object that carries `confidence` |
+|---|---|
+| Any observable on its own (`domain-name`, `ipv4-addr`, `file`, `url`, `email-addr`) | None. SCOs never carry `confidence`. An observable is a fact about the world, not a claim. |
+| "This observable is malicious" or "this pattern detects X" | The Indicator. One Indicator per distinct assertion, so the same IP asserted as C2 by one primary and as a scanner by another is two Indicators with separate grades. |
+| Relational claims: `indicates`, `based-on`, `uses`, `attributed-to`, `targets`, `exploits` | The Relationship. For "X was seen at Y", the Sighting. |
+| Other SDOs (`threat-actor`, `intrusion-set`, `malware`, `campaign`) | Only when the claim is the entity's own existence as a distinct thing, for example a vendor asserting a new cluster. Otherwise leave it off and grade the relationships. |
+
+An attribution is a Relationship (`attributed-to`), so its grade goes there and not on the Threat Actor. A well-known actor object with `confidence: 50` wrongly says the actor's existence is in doubt.
+
+### Source reliability and the primary source
+
+STIX has no reliability property. On the same object that carries `confidence`:
+
+- `x_liberty91_source_reliability`: the letter `A` to `F`, graded on the primary source.
+- An `external_references` entry for the primary source (`source_name`, `url`, and `description` with the report title and date). Cite the primary, not the outlet that relayed it.
+- When the grade was read from a confidence value rather than assessed, `x_liberty91_derived_from_confidence: true`.
+
+Reliability is still written when credibility is 6 and `confidence` is omitted, for example `F` on an uncorroborated actor claim.
+
+**OpenCTI.** Reliability belongs to the source, so set it on the primary source's Organization entity, which has a native A to F reliability field, and link the object to that Organization as its author (`created_by_ref`). The custom property still travels in the bundle for other consumers.
+
+### Worked example
+
+Two claims from one vendor report: an observation graded A2 and an attribution graded B3.
+
+```json
+[
+  {
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--<UUID>",
+    "created": "2026-09-27T00:00:00.000Z",
+    "modified": "2026-09-27T00:00:00.000Z",
+    "name": "C2 domain observed in incident response",
+    "pattern": "[domain-name:value = 'update-check.example.net']",
+    "pattern_type": "stix",
+    "valid_from": "2026-09-20T00:00:00.000Z",
+    "confidence": 70,
+    "x_liberty91_source_reliability": "A",
+    "external_references": [
+      {
+        "source_name": "Example Vendor",
+        "description": "Primary source. Intrusion report, 2026-09-22",
+        "url": "https://vendor.example.com/blog/intrusion-report"
+      }
+    ]
+  },
+  {
+    "type": "relationship",
+    "spec_version": "2.1",
+    "id": "relationship--<UUID>",
+    "created": "2026-09-27T00:00:00.000Z",
+    "modified": "2026-09-27T00:00:00.000Z",
+    "relationship_type": "attributed-to",
+    "source_ref": "campaign--<UUID>",
+    "target_ref": "threat-actor--<UUID>",
+    "confidence": 50,
+    "x_liberty91_source_reliability": "B",
+    "external_references": [
+      {
+        "source_name": "Example Vendor",
+        "description": "Primary source. Intrusion report, 2026-09-22",
+        "url": "https://vendor.example.com/blog/intrusion-report"
+      }
+    ]
+  }
+]
+```
+
+The `domain-name` SCO and the `threat-actor` SDO, if included, carry neither `confidence` nor the reliability property.
+
+### Report objects
+
+A Report groups many claims, so it has no grade of its own. Where a consumer needs a value, write the **weakest link**: the `confidence` of the lowest-graded load-bearing claim (`event_qoi_summary.weakest_link`), with `x_liberty91_confidence_basis: "weakest_link"`. Never an average. If the weakest link is credibility 6, omit `confidence` and keep the basis property. This value exists for interoperability only. Analysis consumes the per-claim grades.
+
+### Import direction
+
+Reading a bundle from elsewhere, map `confidence` back with the ranges in the table above, absent property = 6. Set the `derived_from_confidence` flag on every imported item. The number tells you what the producer thought, not how they knew, so `/quality-of-information-check` re-grades the item when a primary is available (rubric rule R11). Read reliability from `x_liberty91_source_reliability` when present. Otherwise it is `F`, cannot be judged. Do not infer it from the producer's name.
+
+MISP tagging for the same grades is in `/ioc-export`.
 
 ## TLP Marking Definitions (Standard UUIDs)
 

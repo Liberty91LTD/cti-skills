@@ -42,10 +42,11 @@ That's it. If you get stuck, type `/cti-setup` to fix keys, or `npx github:Liber
 
 ## What's in the pack
 
-- **75 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
+- **78 skills** covering analytical tradecraft, CTI methodology, detection engineering, intelligence production, and living knowledge cells on China, Russia, Iran, DPRK cyber espionage, ransomware, infostealers, initial access brokers, and more.
 - **14 threat-intel integrations** — Liberty91, VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys, MISP, OpenCTI, Ransomware.live, ReversingLabs, CrowdStrike Falcon Intelligence, Microsoft Sentinel. Each exposed as a lookup skill any other skill can chain.
 - **Local MITRE ATT&CK dataset** — TTP mapping without network calls.
 - **Tradecraft vocabularies** — TLP, NATO Admiralty Scale, MISP confidence, probability yardstick. Auto-applied by the orchestrator; also invokable directly.
+- **Enforced evidence grading** — provenance resolved by script or platform, claims anchored to source sentences, grades from a published rubric with hard caps. Hypothesis testing and assessments run on graded evidence only.
 - **A single orchestrator skill** that routes requests and auto-applies rigor to every output.
 
 ## Install
@@ -66,7 +67,7 @@ Then run `/cti-setup` inside Claude Code to add API keys.
 ```bash
 npx github:Liberty91LTD/cti-skills
 ```
-Copies all 75 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
+Copies all 78 skills + tool integrations + plugin manifest into the current directory. Use `--target <dir>` to install elsewhere, or `npx github:Liberty91LTD/cti-skills list` to browse skills first.
 
 ### Git clone (for development or contribution)
 
@@ -99,6 +100,18 @@ The script merges keys into `.claude/settings.local.json` non-destructively — 
 - **Direct copy**: copy the `skills/` directory into your project. Each skill is self-contained.
 - **Cursor, Codex, Windsurf, other Agent-Skills-compatible IDEs**: clone the repo into your agent skills directory per your IDE's documentation. The orchestrator is itself a skill — no Claude-specific subagent required.
 
+## Harnesses
+
+The pack is plain Agent Skills files. Any harness that loads skills, can run a shell command and read files, and calls tools reliably will run it.
+
+| Harness | Notes |
+|---|---|
+| Claude Code | Plugin install, above. Optional subagents in `.claude/agents/`. |
+| Codex, Cursor, Windsurf, OpenCode, Goose | Clone into the agent's skills directory. The orchestrator is itself a skill. |
+| Hermes Agent and other self-improving harnesses | Loads the pack. Enable write approval, or disable skill self-modification, for the `cti-skills` directory, so the tradecraft skills stay stable and reviewable. |
+| Local models | Claude Code with `ANTHROPIC_BASE_URL` pointed at Ollama, Codex with `--oss`, and similar. See the FAQ for what to expect. |
+| Headless | `claude -p` with an allowlist of tools, for scheduled or triggered runs. |
+
 ## Try it
 
 Once installed:
@@ -114,9 +127,14 @@ Profile APT28
 Routes to `/threat-actor-profile` — produces an actor card with aliases, targeting, TTPs, attribution confidence.
 
 ```
+How reliable is this? https://example-news-site.com/2026/09/some-article
+```
+Routes to `/quality-of-information-check` — traces the article to its originating source, splits the report into claims, and grades each claim on the Admiralty scale with a rationale.
+
+```
 /ach
 ```
-Direct-invoke Analysis of Competing Hypotheses.
+Direct-invoke Analysis of Competing Hypotheses. Hand it URLs or text and it grades the evidence first.
 
 ```
 /iran-cyber-espionage
@@ -128,7 +146,29 @@ Load the Iran knowledge cell.
 ```
 Set up Priority Intelligence Requirements.
 
-## What's new
+## What's new in 2.0
+
+### Quality of Information Check — `/quality-of-information-check`
+
+**Grade the evidence before you reason about it.** `/quality-of-information-check` resolves any article back to its originating source, splits the report into individual claims, and grades each claim on the Admiralty scale with a stated rationale. Five outlets citing one vendor report count as one source. Caveats the press dropped in transmission are restored. Anything that cannot be traced to a primary is capped, not guessed. `/ach` and `/threat-assessment` now refuse to run on ungraded evidence.
+
+Works on any URL, with no API key: the skill resolves the chain for the article you gave it and tells you exactly what it could not verify. Platform-resolved provenance, where a Liberty91 key returns the chain and the count of independent sources across the whole deduplicated event, is built into the skills and switches on when the platform serves those fields.
+
+Cross-vendor name matching (APT28 to Sednit, UNC to named group) uses your own alias file, or the Liberty91 Threat Library with an API key.
+
+New to this? [How evidence grading works, in plain English](docs/how-evidence-grading-works.md) explains it without the jargon.
+
+**Three skills, usable separately:**
+
+- **`/source-provenance`** — where did this actually come from? A script follows the article's links and named attributions to the originating document and returns the chain, the primary's own access and confidence language, and every hop it could not resolve.
+- **`/claim-extraction`** — what does this report actually claim? Five to twelve atomic claims, typed as observation, attribution, assessment, actor claim or victim disclosure, each anchored to the exact source sentence.
+- **`/quality-of-information-check`** — the two above, plus transmission fidelity, corroboration counted by independent primaries, a fixed grading rubric, a deception screen, and machine-readable output.
+
+**What changed for existing users.** `/ach`, `/threat-assessment` and `/writing-assessments` require graded evidence. Hand them a URL and they run the check first. An assessment's confidence can no longer exceed what its weakest load-bearing claim supports, and a hit in your own telemetry counts as the strongest evidence there is. `/red-team-analysis` is now `/devils-advocacy`, which is what it always did. STIX and MISP exports carry grades per claim. Details in [VERSIONS.md](VERSIONS.md).
+
+Every output is labelled `platform-resolved`, `script-resolved` or `model-judged`, and the label travels into whatever is built on it.
+
+## Earlier additions
 
 Three additions along one arc: knowing what is coming at you, knowing whether you can stop it — and now, knowing whether it already reached you.
 
@@ -192,8 +232,8 @@ All skills live flat under `skills/` and are user-invocable as `/<skill-name>`. 
 
 - **Entry point** — `/cti-orchestrator` (default routing), `/cti-setup` (configure API keys)
 - **Investigation** — `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`
-- **Analysis** — `/threat-actor-profiling`, `/ach`, `/indicator-pivoting`, `/campaign-tracking`, `/malware-analysis`, `/threat-assessment`, `/control-coverage-mapping` (which techniques your controls actually stop, and how well), `/horizon-scanning`, `/key-assumptions-check`, `/red-team-analysis`, `/structured-analytic-techniques`
-- **Tradecraft rigor** — `/tlp-guide`, `/source-assessment`, `/confidence-levels`, `/likelihood-language`
+- **Analysis** — `/threat-actor-profiling`, `/ach`, `/indicator-pivoting`, `/campaign-tracking`, `/malware-analysis`, `/threat-assessment`, `/control-coverage-mapping` (which techniques your controls actually stop, and how well), `/horizon-scanning`, `/key-assumptions-check`, `/devils-advocacy`, `/structured-analytic-techniques`
+- **Tradecraft rigor** — `/quality-of-information-check` (grade every claim before you reason from it), `/source-provenance` (trace an article to its originating source), `/claim-extraction` (split a report into typed, anchored claims), `/tlp-guide`, `/source-assessment`, `/confidence-levels`, `/likelihood-language`
 - **Production** — `/intelligence-writing`, `/writing-assessments`, `/quality-control`, `/ioc-export`, `/stix-bundle`, `/ioc-enrichment-workflow`
 - **Detection engineering** — `/sigma-writing`, `/yara-writing`, `/kql-writing`
 - **Knowledge cells** — `/china-cyber-espionage`, `/russia-cyber-espionage`, `/iran-cyber-espionage`, `/dprk-cyber-espionage`, `/ransomware-ecosystem`, `/infostealers`, `/initial-access-brokers`, `/phishing-social-engineering`, `/supply-chain-threats`, `/carding-financial-fraud`, `/hacktivism`
@@ -233,6 +273,23 @@ Keys are merged into `.claude/settings.local.json` (gitignored). The pack degrad
 
 To verify keys are wired up: `./scripts/setup.sh --verify` (or ask Claude to verify after `/cti-setup`).
 
+## FAQ
+
+**How do you keep the LLM from doing the analysis?**
+Three ways. Provenance resolution is deterministic: a script (or the Liberty91 pipeline) follows the links and classifies sources from a maintained table, so the chain is data, not a model's recollection. Claims are extracted with a fixed schema and anchored to the exact source sentence, so every extraction is checkable. Grading follows a published rubric with hard caps, and `/quality-control` rejects outputs that violate the schema. What remains model judgement (fidelity, rationale, deception screen) is labelled as such in every output. ACH and threat assessments will not run on ungraded evidence.
+
+**How do you know the skill works?**
+`tests/provenance/` holds the resolver's expected chains and nineteen rubric violations the validator must reject. They run offline in CI. The same directory records a live run on 30 URLs and what resolved.
+
+**Does the source-types table rate vendors?**
+No. It records what an organisation is (vendor, government, press, actor) and how it typically gets its information (telemetry, incident response, sample analysis). Reliability is computed per claim from access, corroboration and the source's own confidence language, never from a stored opinion about the organisation. PRs adding ratings are not merged.
+
+**Does this work with local models?**
+Yes. The skills are plain Agent Skills files and the harness matters more than the model. Claude Code pointed at Ollama (`ANTHROPIC_BASE_URL`), Codex with `--oss`, OpenCode, Goose and similar all load the pack. Practical floor is a 20 to 30B class model; the analytical skills degrade first as models get smaller, the lookup wrappers and knowledge cells degrade least. Note that a local model does not mean local data: the lookup skills still call external APIs. The fully offline subset is the knowledge cells, control coverage mapping, detection writing, intelligence production, and now provenance resolution and QoI on documents you already have. We have not benchmarked local models ourselves; results as issues are welcome.
+
+**Can I use this in Hermes Agent or another self-improving harness?**
+Yes, the pack loads in any Agent Skills-compatible harness. We recommend enabling write approval or disabling skill self-modification for the `cti-skills` directory. The tradecraft skills are meant to be stable and reviewable, and self-improvement loops are typically not gated on whether a run was actually correct.
+
 ## Acknowledgements
 
 This pack codifies established Cyber Threat Intelligence tradecraft into composable agent skills. It rests on decades of public scholarship, open standards, free training material from CTI educators, and vendor research that the community publishes openly. The full per-skill credits live in **[`CREDITS.md`](CREDITS.md)**.
@@ -245,7 +302,7 @@ Forks and PRs welcome from anyone. Merges reserved to Liberty91 Ltd maintainers.
 
 ## Status
 
-Version 1.0.0 — see [VERSIONS.md](VERSIONS.md) for per-skill versions and changelog.
+Version 2.0.0 — see [VERSIONS.md](VERSIONS.md) for per-skill versions and changelog.
 
 ## License
 

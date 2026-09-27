@@ -23,6 +23,7 @@ Thanks for taking a look. This pack is open to community contributions. Forks an
 - Changes that hardcode credentials or exfiltrate data to external services
 - Skills that require paid tools without free-tier alternatives (exception: if the skill is optional and clearly marked)
 - Skills with prompts designed to extract outputs that violate Claude's usage policies
+- Reliability opinions, track-record notes or ratings for a named organisation, anywhere in the pack. `skills/source-provenance/references/source-types.md` records type, access profile and interest only; its contribution rules are at the top of that file
 
 ## Skill anatomy
 
