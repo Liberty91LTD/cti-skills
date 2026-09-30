@@ -1,9 +1,9 @@
 ---
 name: stix-bundle
-description: STIX 2.1 bundle creation reference. Object types, relationships, and JSON templates for structured threat intelligence sharing.
+description: STIX 2.1 bundle creation reference. Object types, relationships, and JSON templates for structured threat intelligence sharing. Includes the per-claim mapping of evidence grades (access level and claim support) from /quality-of-information-check to STIX confidence, and the reverse mapping on import.
 user-invocable: false
 metadata:
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # STIX 2.1 Bundle Creation
@@ -46,7 +46,7 @@ Represents a pattern that can be used to detect suspicious activity.
       "phase_name": "command-and-control"
     }
   ],
-  "confidence": 85,
+  "confidence": 70,
   "labels": ["malicious-activity"],
   "object_marking_refs": ["marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"]
 }
@@ -174,9 +174,11 @@ Represents a pattern that can be used to detect suspicious activity.
   "relationship_type": "uses",
   "source_ref": "threat-actor--<UUID>",
   "target_ref": "malware--<UUID>",
-  "confidence": 85
+  "confidence": 70
 }
 ```
+
+`confidence` on an SRO grades the relationship itself, the claim that the source uses, targets or is attributed to the target. See [Confidence and source grading](#confidence-and-source-grading) for how the value is derived.
 
 ### Common Relationship Types
 
@@ -191,6 +193,123 @@ Represents a pattern that can be used to detect suspicious activity.
 | indicator | indicates | malware, threat-actor, campaign |
 | malware | targets | identity, vulnerability |
 | malware | uses | attack-pattern |
+
+## Confidence and source grading
+
+Grades are exported **per claim, never per event**. Each evidence item from `/quality-of-information-check` (schema: `skills/quality-of-information-check/references/evidence-item-schema.md`) carries its own `grading.access_level` and `grading.claim_support`, and each lands on the one STIX object that expresses that claim. Do not stamp one value across every object in a bundle, and do not put `confidence` on the bundle itself. A bundle is a container and has no such property.
+
+The evidence grade is not the Admiralty scale. It is two words, access level and claim support, and it is never written or exported as an Admiralty letter or number. Admiralty ratings apply to lookup results and single items; the evidence grade applies to claims from documents; neither is converted into the other.
+
+### Claim support to `confidence`
+
+STIX `confidence` comes from claim support. The values are the pack's own mapping, chosen to sit inside the bands of `/confidence-levels` (High 80 to 100, Moderate 60 to 79, Low 40 to 59). Use these values and no others.
+
+| Claim support | `confidence` on export |
+|---|---|
+| established | 90 |
+| firm | 70 |
+| tentative | 50 |
+| disputed | 30 |
+| unverified | omit the property |
+
+Unverified means the property is left out. It is never written as 0.
+
+### Which object carries it
+
+| Claim | Object that carries `confidence` |
+|---|---|
+| Any observable on its own (`domain-name`, `ipv4-addr`, `file`, `url`, `email-addr`) | None. SCOs never carry `confidence`. An observable is a fact about the world, not a claim. |
+| "This observable is malicious" or "this pattern detects X" | The Indicator. One Indicator per distinct assertion, so the same IP asserted as C2 by one primary and as a scanner by another is two Indicators with separate grades. |
+| Relational claims: `indicates`, `based-on`, `uses`, `attributed-to`, `targets`, `exploits` | The Relationship. For "X was seen at Y", the Sighting. |
+| Other SDOs (`threat-actor`, `intrusion-set`, `malware`, `campaign`) | Only when the claim is the entity's own existence as a distinct thing, for example a vendor asserting a new cluster. Otherwise leave it off and grade the relationships. |
+
+An attribution is a Relationship (`attributed-to`), so its grade goes there and not on the Threat Actor. A well-known actor object with `confidence: 50` wrongly says the actor's existence is in doubt.
+
+### Access level and the primary source
+
+STIX has no property for how the source knows. On the same object that carries `confidence`:
+
+- `x_liberty91_access_level`: the word, one of `direct`, `limited`, `indirect`, `untraced`, `adversary`.
+- `x_liberty91_claim_support`: the word, one of `established`, `firm`, `tentative`, `disputed`, `unverified`.
+- An `external_references` entry for the primary source (`source_name`, `url`, and `description` with the report title and date). Cite the primary, not the outlet that relayed it.
+- When the grade was read from a confidence value rather than assessed, `x_liberty91_derived_from_confidence: true`.
+
+Both custom properties are still written when claim support is unverified and `confidence` is omitted, for example `adversary` and `unverified` on an uncorroborated actor claim.
+
+**OpenCTI.** Do not write the evidence grade into an Organization's native reliability field. That field is a track-record rating of the source, and the evidence grade belongs to the claim. Put the two words in the labels or the description of the object that expresses the claim. The custom properties still travel in the bundle for other consumers.
+
+### Worked example
+
+Two claims from one vendor report: an observation graded direct, firm and an attribution graded direct, tentative.
+
+```json
+[
+  {
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--<UUID>",
+    "created": "2026-09-27T00:00:00.000Z",
+    "modified": "2026-09-27T00:00:00.000Z",
+    "name": "C2 domain observed in incident response",
+    "pattern": "[domain-name:value = 'update-check.example.net']",
+    "pattern_type": "stix",
+    "valid_from": "2026-09-20T00:00:00.000Z",
+    "confidence": 70,
+    "x_liberty91_access_level": "direct",
+    "x_liberty91_claim_support": "firm",
+    "external_references": [
+      {
+        "source_name": "Example Vendor",
+        "description": "Primary source. Intrusion report, 2026-09-22",
+        "url": "https://vendor.example.com/blog/intrusion-report"
+      }
+    ]
+  },
+  {
+    "type": "relationship",
+    "spec_version": "2.1",
+    "id": "relationship--<UUID>",
+    "created": "2026-09-27T00:00:00.000Z",
+    "modified": "2026-09-27T00:00:00.000Z",
+    "relationship_type": "attributed-to",
+    "source_ref": "campaign--<UUID>",
+    "target_ref": "threat-actor--<UUID>",
+    "confidence": 50,
+    "x_liberty91_access_level": "direct",
+    "x_liberty91_claim_support": "tentative",
+    "external_references": [
+      {
+        "source_name": "Example Vendor",
+        "description": "Primary source. Intrusion report, 2026-09-22",
+        "url": "https://vendor.example.com/blog/intrusion-report"
+      }
+    ]
+  }
+]
+```
+
+The `domain-name` SCO and the `threat-actor` SDO, if included, carry neither `confidence` nor the two grade properties.
+
+### Report objects
+
+A Report groups many claims, so it has no grade of its own. Where a consumer needs a value, write the **weakest link**: the `confidence` of the lowest-graded load-bearing claim (`event_qoi_summary.weakest_link`), with `x_liberty91_confidence_basis: "weakest_link"`. Never an average. If the weakest link is unverified, omit `confidence` and keep the basis property. This value exists for interoperability only. Analysis consumes the per-claim grades.
+
+### Import direction
+
+Reading a bundle from elsewhere, turn `confidence` into claim support with this table.
+
+| `confidence` read on import | Claim support |
+|---|---|
+| 60 to 100 | firm |
+| 40 to 59 | tentative |
+| 1 to 39 | disputed |
+| absent or 0 | unverified |
+
+An imported value never gives `established`. That level needs counted independent primaries (rubric rule R5), and a number cannot show them. Access level for an imported item is `indirect` unless the primary is resolved. Do not infer it from the producer's name. Set the `derived_from_confidence` flag on every imported item. The number tells you what the producer thought, not how they knew, so `/quality-of-information-check` re-grades the item when a primary is available (rubric rule R11).
+
+An Admiralty rating that arrives on imported data is kept as that party's Admiralty rating and shown as such. It is not converted into an evidence grade.
+
+MISP tagging for the same grades is in `/ioc-export`.
 
 ## TLP Marking Definitions (Standard UUIDs)
 

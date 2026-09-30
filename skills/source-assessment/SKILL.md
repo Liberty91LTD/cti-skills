@@ -3,12 +3,28 @@ name: source-assessment
 description: Use when rating a source with the NATO Admiralty Scale, the user asks "is this reliable?" / "rate this source", or the tradecraft pipeline calls for source assessment before publishing. Reliability A-F, credibility 1-6.
 user-invocable: true
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Source & Information Assessment — NATO Admiralty Scale
 
-Every piece of intelligence entering this platform MUST be assessed using the Admiralty Scale. This is non-negotiable. Tag every item with a two-character code (e.g., B2).
+Every piece of intelligence entering this platform MUST be assessed using the Admiralty Scale. This is non-negotiable. Tag every item with a two-character code (e.g., B2). Claims from documents are the exception: they carry the evidence grade instead, see below.
+
+## How this differs from the evidence grade
+
+The pack uses two instruments. They are not the same and neither is converted into the other.
+
+- **Admiralty reliability is the source's track record**: how often it has been right before. The evidence grade's **access level** is how the source knows the particular thing claimed.
+- **Admiralty is a letter and a number** (B2). **The evidence grade is two words**, access level then claim support ("direct, firm").
+- **Documents, articles and reports are graded per claim** by `/quality-of-information-check` with the evidence grade. Lookup results and single items are rated here, on the Admiralty scale.
+
+## Scope of This Skill
+
+This skill is the reference for the Admiralty scale itself: what the letters and digits mean and how to apply them to a single item, such as a lookup result, a feed entry or a tip.
+
+Documents, articles and reports are graded per claim by `/quality-of-information-check`, using its fixed rubric (`references/grading-rubric.md` in that skill). That grade is the evidence grade, not an Admiralty rating. It resolves the article to its originating source first, then grades each claim on the chain it arrived through. One report usually contains claims of different standing, so one grade for the whole report is wrong.
+
+The pack does not store reliability opinions about named organisations. Where the guides and examples below name a vendor or agency, they illustrate a kind of access and track record. They are not standing grades for that organisation. In one report the same organisation can publish an observation that `/quality-of-information-check` grades "direct, firm" and an attribution it grades "direct, tentative".
 
 ## Source Reliability
 
@@ -25,12 +41,14 @@ How trustworthy is the **source** based on its track record?
 
 ### Source Reliability Decision Guide
 
-- **A**: National CERTs, established security vendors (Mandiant, CrowdStrike, Microsoft), peer-reviewed research, direct forensic evidence from your own systems
-- **B**: Reputable threat intelligence providers, well-known security researchers, ISACs, FIRST members
-- **C**: Community threat feeds, open-source intelligence tools with mixed accuracy, semi-verified social media accounts of known researchers
-- **D**: Unverified forum posts, anonymous tips, single-source claims without corroboration
-- **E**: Known disinformation actors, sources with demonstrated fabrication history
-- **F**: First-time sources, automated feeds without historical accuracy data, newly discovered paste sites
+Judge the source on how it knows and how it has performed, not on its name.
+
+- **A**: Direct access to what it reports (own telemetry, an incident response engagement, forensic evidence from your own systems, a victim's own regulatory disclosure) and no known retractions on this kind of claim
+- **B**: Established source reporting from indirect access, such as sample analysis or partner data; well-known researcher with a history of published work; vetted sharing community relaying member reporting
+- **C**: Access not disclosed; reporting that mixes own findings with aggregation; community feeds and open-source tools with mixed accuracy; advisory that aggregates others' reporting without adding evidence
+- **D**: No originating source can be located; unverified forum posts and anonymous tips; source that has been wrong before
+- **E**: Documented history of inaccurate, inflated or fabricated claims
+- **F**: No basis to judge: first-time sources, automated feeds without historical accuracy data, newly discovered paste sites, a threat actor's own statements
 
 ## Information Credibility
 
@@ -56,6 +74,8 @@ How likely is the **information itself** to be accurate, regardless of source?
 
 ## Combined Rating Examples
 
+These illustrate the reasoning. They are not standing grades for the organisations named.
+
 | Rating | Example |
 |--------|---------|
 | **A1** | Microsoft publishes CVE details with MSRC forensic analysis, confirmed by CISA KEV listing |
@@ -75,5 +95,6 @@ How likely is the **information itself** to be accurate, regardless of source?
 
 - Confusing source reliability with information credibility (a reliable source can relay inaccurate information)
 - Rating all vendor reports as A1 (vendors can have biases and errors)
+- Giving an article one Admiralty rating for the outlet that published it (articles and reports go to `/quality-of-information-check`, which grades each claim on the primary's access and wording, plus how faithfully the outlet transmitted it; five outlets covering one report are one source)
 - Not reassessing ratings when new corroborating or contradicting information emerges
 - Omitting the rating entirely because "it's obvious" — always be explicit

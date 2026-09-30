@@ -46,5 +46,11 @@ tools/clis/.venv-*/
 tools/clis/__pycache__/
 *.pyc
 
+# User-maintained alias file for cross-vendor name matching (see aliases.example.yml)
+skills/quality-of-information-check/references/aliases.yml
+
+# Test scratch files
+tests/provenance/qoi/.tmp-*.json
+
 # Playwright MCP screenshot/console artifacts
 .playwright-mcp/

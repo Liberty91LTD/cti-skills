@@ -226,6 +226,8 @@ Liberty91 emits Admiralty ratings natively, so **use the platform's own numbers 
 
 Downgrade to the *worst* contributing source when an occurrence rests on one `D`/`E`-graded publisher, regardless of how confident the summary sounds.
 
+**These are not evidence grades.** The per-source `reliability` letter and the occurrence `credibility` number are the platform's ratings of the outlet and the event. They are passed to `/source-assessment` as Admiralty-style ratings where that skill is used. They are never copied into an evidence grade: `/quality-of-information-check` grades each claim from a document itself, in words (access level and claim support).
+
 ## Testing your credentials
 
 ```bash

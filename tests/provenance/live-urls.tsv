@@ -1,0 +1,37 @@
+# Live test set, snapshot of 2026-09-27.
+# Thirty URLs: recent items from five outlets' feeds, one government advisory, two vendor reports.
+# Columns: URL <tab> status <tab> primary organisation or reason.
+# Article URLs rot and articles are edited; rerunning later will give different results.
+# The offline fixtures in fixtures/ are what CI runs. This list is for manual runs:
+#   cut -f1 tests/provenance/live-urls.tsv | grep -v '^#' | xargs python3 skills/source-provenance/scripts/resolve_provenance.py resolve
+
+https://thehackernews.com/2026/09/warning-two-unpatched-citrix-netscaler.html	resolved	watchTowr Labs
+https://thehackernews.com/2026/09/lunex-stealer-abuses-amd-driver-to.html	resolved	Ontinue
+https://thehackernews.com/2026/09/attackers-bypass-wafs-to-exploit-oracle.html	resolved	Google Threat Intelligence Group
+https://thehackernews.com/2026/09/elementor-csrf-flaw-lets-attackers-take.html	resolved	Patchstack
+https://thehackernews.com/2026/09/sharepoint-rce-and-mikrotik-routeros.html	resolved	CISA
+https://thehackernews.com/2026/09/kiteworks-urges-customers-to-shut-down.html	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://www.bleepingcomputer.com/news/security/shinyhunters-uses-waf-bypass-trick-in-oracle-peoplesoft-attacks/	resolved	Google Threat Intelligence Group
+https://www.bleepingcomputer.com/news/security/github-actions-re-enabled-with-mini-shai-hulud-payload-still-active/	resolved	Socket
+https://www.bleepingcomputer.com/news/artificial-intelligence/openais-ai-agents-accidentally-uploaded-user-provided-images-to-third-party-sites/	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://www.bleepingcomputer.com/news/security/kiteworks-urges-6-hour-server-shutdown-over-potential-zero-day-attacks/	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://www.bleepingcomputer.com/news/security/shinyhunters-hacked-clop-leak-site-using-grav-cms-path-traversal-flaw/	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://www.bleepingcomputer.com/news/security/elementor-wordpress-flaw-lets-attackers-create-admin-accounts/	resolved	Patchstack
+https://gbhackers.com/red-heron-exploits-critical-gitea-flaw/	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://gbhackers.com/kiteworks-systems-offline-amid-suspected-zero-day/	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://gbhackers.com/uncensored-local-ai-model-bypasses-edr/	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://gbhackers.com/storm-3168-hackers-abuse-compromised-service-principals/	resolved	Microsoft Threat Intelligence
+https://gbhackers.com/openai-says-misaligned-ai-agents-hacked-hugging-face/	resolved	OpenAI
+https://gbhackers.com/salmon-introduces-execution-verification-infrastructure-evi-for-securing-ai-agents-and-autonomous-systems/	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://www.securityweek.com/new-x47-c-windows-botnet-weaponizes-xai-grok-ai-api-draining/	resolved	Qrator Labs (located, not read)
+https://www.securityweek.com/openai-says-its-models-engaged-with-us-government-websites-in-new-model-misbehavior-disclosure/	unresolved	OpenAI is named as the source but no document is linked
+https://www.securityweek.com/in-other-news-clop-leak-site-takeover-docker-botnet-hunts-ai-keys-water-utility-exposure/	resolved	Team Cymru
+https://www.securityweek.com/north-korea-suspected-in-351-million-bitget-crypto-heist/	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://www.securityweek.com/cisa-election-security-plan-flags-patching-barriers-voter-database-attacks/	unresolved	CISA is named as the source but no document is linked
+https://therecord.media/kiteworks-urges-customers-to-stop-using-systems-incident	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://therecord.media/crypto-ceo-accuses-north-korea-of-387-million-theft	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://therecord.media/wales-cyberattack-police-breach	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://therecord.media/openai-australia-breach-cyber	unresolved	no link to a vendor, government, victim, actor or researcher document
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-038a	resolved	CISA
+https://www.microsoft.com/en-us/security/blog/2026/09/25/storm-3168-agentic-driven-cloud-attacks-using-compromised-service-principals/	resolved	Microsoft Threat Intelligence
+https://cloud.google.com/blog/topics/threat-intelligence/shinyhunters-renewed-mass-exploitation-campaign-targeting-oracle-peoplesoft	resolved	Google Threat Intelligence Group

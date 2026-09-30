@@ -1,9 +1,9 @@
 ---
 name: confidence-levels
-description: Use when assigning a confidence level to an analytical judgment, the user asks "how confident are we?" / "what is the confidence on X?", or the orchestrator's tradecraft pipeline calls for a confidence level before publishing. Provides the MISP 0-100 scale and qualitative-band mapping.
+description: Use when assigning a confidence level to an analytical judgment, the user asks "how confident are we?" / "what is the confidence on X?", or the orchestrator's tradecraft pipeline calls for a confidence level before publishing. Provides three named levels (High, Moderate, Low) with 0-100 score ranges aligned to STIX, and the rule that confidence cannot exceed what the weakest load-bearing claim supports.
 user-invocable: true
 metadata:
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # Confidence Levels
@@ -12,20 +12,31 @@ Every analytical judgment produced by this platform MUST carry a confidence leve
 
 ## Primary Scale: Named Bands
 
-| Band | Score Range | Meaning |
-|------|-----------|---------|
-| **Very High** | 90-100 | Based on high-quality information from multiple independent sources. Analyst has no significant concerns about the validity of the sources. Well-corroborated assessment. |
-| **High** | 75-89 | Based on high-quality information, or from multiple sources with minor inconsistencies. Key assumptions are well-supported. |
-| **Moderate** | 50-74 | Based on credible information that is not sufficient to warrant higher confidence. Key assumptions are reasonable but not fully validated. Alternative interpretations exist. |
-| **Low** | 25-49 | Based on limited or fragmentary information. Key assumptions have significant uncertainty. Multiple plausible alternative interpretations. |
-| **Very Low** | 0-24 | Based on sparse, unreliable, or largely circumstantial information. Assessment is essentially speculative. |
+Three levels, following ICD 203. Each band is tied to the claim support of the evidence underneath, as graded by `/quality-of-information-check`. On export, STIX `confidence` comes from claim support: established 90, firm 70, tentative 50, disputed 30, and unverified omits the property. These values are the pack's own mapping, chosen to sit inside the bands below, so a confidence level, a STIX `confidence` value and the grade of the evidence underneath all say the same thing.
+
+| Band | Score Range | Meaning | Evidence it requires |
+|------|-----------|---------|---------|
+| **High** | 80-100 | Based on high-quality information from multiple independent sources. Well corroborated. High confidence does not mean the judgment is a fact. | Every load-bearing claim at claim support established, with access level direct or limited |
+| **Moderate** | 60-79 | Based on credibly sourced and plausible information that is not corroborated enough to warrant higher confidence. Alternative interpretations exist. | Weakest load-bearing claim at claim support firm, or established with access level indirect |
+| **Low** | 40-59 | Based on limited or fragmentary information, or on a judgment the source itself hedged. Several plausible alternative interpretations. | Weakest load-bearing claim at claim support tentative |
+| **No confidence level** | none | The evidence cannot carry a judgment. Do not attach a label. State what is known, state the gap, and say what collection would close it. | Any load-bearing claim at claim support disputed or unverified |
+
+Scores below 40 are not used. A judgment that would score there is not one the evidence supports, and it gets no confidence level.
+
+### The ceiling
+
+Confidence in a judgment is bounded above by the weakest load-bearing claim. Grades come from `/quality-of-information-check`. The ceiling rules, including the effect of access level, are in `/threat-assessment` under "Confidence Ceiling". First-party observation, a hit in the organisation's own telemetry, is graded direct, established and is the top of the scale.
+
+The ceiling is a maximum, not a target. Weak reasoning or untested assumptions lower confidence further. Nothing raises it above the ceiling.
+
+Before version 2.0 this skill had five bands, Very Low to Very High. Products written on that scale should be re-rated, not converted by arithmetic.
 
 ## What Determines Confidence
 
 Confidence is determined by three factors:
 
 ### 1. Quality of Sources
-- How reliable are the sources? (Cross-reference with Admiralty Scale)
+- How do the sources know, and what backs each claim? (The evidence grade from `/quality-of-information-check` for claims from documents. The Admiralty scale from `/source-assessment` for lookup results and single items. Neither is converted into the other.)
 - Are sources independent or derivative?
 - Is there potential for deception or disinformation?
 
@@ -85,5 +96,7 @@ The confidence in the capability assessment is high (strong evidence). The likel
 - Conflating confidence with likelihood ("high confidence it will happen" — this is two concepts mashed together)
 - Not explaining WHY confidence is at a given level (always include rationale)
 - Defaulting to "moderate" to avoid commitment — if the evidence is strong, say so
+- Giving high confidence on uncorroborated evidence — one primary with direct access is claim support firm, which supports moderate at most
+- Attaching a low-confidence label where the evidence supports no judgment at all
 - Changing confidence based on desired outcome rather than evidence
 - Treating confidence as static — reassess when new evidence emerges

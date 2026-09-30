@@ -10,31 +10,34 @@ Agents should check this file on session start and warn the user if 2+ skills ha
 
 ## Pack version
 
-**cti-skills:** 1.14.0 (2026-08-04)
+**cti-skills:** 2.0.0 (2026-09-27)
 
 ## Skills
 
 ### Analytical techniques
 | Skill | Version | Last updated |
 |---|---|---|
-| `ach` | 1.0.0 | 2026-04-20 |
+| `ach` | 2.0.0 | 2026-09-27 |
 | `horizon-scanning` | 1.0.0 | 2026-04-20 |
-| `key-assumptions-check` | 1.0.0 | 2026-04-20 |
-| `red-team-analysis` | 1.0.0 | 2026-04-20 |
-| `source-assessment` | 1.0.0 | 2026-04-20 |
-| `structured-analytic-techniques` | 1.0.0 | 2026-04-20 |
-| `threat-assessment` | 1.0.0 | 2026-04-20 |
+| `key-assumptions-check` | 1.1.0 | 2026-09-27 |
+| `quality-of-information-check` | 1.0.0 | 2026-09-27 |
+| `devils-advocacy` | 2.0.0 | 2026-09-27 |
+| `source-assessment` | 1.1.0 | 2026-09-27 |
+| `source-provenance` | 1.0.0 | 2026-09-27 |
+| `structured-analytic-techniques` | 2.0.0 | 2026-09-27 |
+| `threat-assessment` | 2.0.0 | 2026-09-27 |
 
 ### CTI tradecraft
 | Skill | Version | Last updated |
 |---|---|---|
-| `campaign-tracking` | 1.0.0 | 2026-04-20 |
+| `campaign-tracking` | 1.1.0 | 2026-09-27 |
+| `claim-extraction` | 1.0.0 | 2026-09-27 |
 | `control-coverage-mapping` | 1.0.0 | 2026-08-01 |
 | `darkweb-collection` | 2.0.0 | 2026-04-28 |
 | `indicator-pivoting` | 2.0.0 | 2026-04-28 |
 | `malware-analysis` | 1.1.0 | 2026-05-14 |
 | `osint-methodology` | 1.0.0 | 2026-04-20 |
-| `threat-actor-profiling` | 1.0.0 | 2026-04-20 |
+| `threat-actor-profiling` | 1.1.0 | 2026-09-27 |
 | `vulnerability-intelligence` | 1.0.0 | 2026-04-20 |
 
 ### Hyperloop
@@ -47,17 +50,17 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 
 | Skill | Version | Last updated |
 |---|---|---|
-| `carding-financial-fraud` | 1.0.0 | 2026-04-20 |
-| `china-cyber-espionage` | 1.0.0 | 2026-04-20 |
-| `dprk-cyber-espionage` | 1.0.0 | 2026-04-20 |
-| `hacktivism` | 1.0.0 | 2026-04-20 |
-| `infostealers` | 1.0.0 | 2026-04-20 |
-| `initial-access-brokers` | 1.0.0 | 2026-04-20 |
-| `iran-cyber-espionage` | 1.0.0 | 2026-04-20 |
-| `phishing-social-engineering` | 1.0.0 | 2026-04-20 |
-| `ransomware-ecosystem` | 1.0.0 | 2026-04-20 |
-| `russia-cyber-espionage` | 1.0.0 | 2026-04-20 |
-| `supply-chain-threats` | 1.0.0 | 2026-04-20 |
+| `carding-financial-fraud` | 1.1.0 | 2026-09-29 |
+| `china-cyber-espionage` | 1.1.0 | 2026-09-29 |
+| `dprk-cyber-espionage` | 1.1.0 | 2026-09-29 |
+| `hacktivism` | 1.1.0 | 2026-09-29 |
+| `infostealers` | 1.1.0 | 2026-09-29 |
+| `initial-access-brokers` | 1.1.0 | 2026-09-29 |
+| `iran-cyber-espionage` | 1.1.0 | 2026-09-29 |
+| `phishing-social-engineering` | 1.1.0 | 2026-09-29 |
+| `ransomware-ecosystem` | 1.1.0 | 2026-09-29 |
+| `russia-cyber-espionage` | 1.1.0 | 2026-09-29 |
+| `supply-chain-threats` | 1.1.0 | 2026-09-29 |
 
 ### Management
 | Skill | Version | Last updated |
@@ -66,29 +69,29 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `intelligence-sharing` | 1.0.0 | 2026-04-20 |
 | `maturity-assessment` | 1.0.0 | 2026-04-20 |
 | `pir-management` | 1.0.0 | 2026-04-20 |
-| `quality-control` | 1.0.0 | 2026-04-20 |
+| `quality-control` | 2.0.0 | 2026-09-27 |
 | `sops` | 1.0.0 | 2026-04-20 |
 | `stakeholder-management` | 1.0.0 | 2026-04-20 |
 
 ### Production
 | Skill | Version | Last updated |
 |---|---|---|
-| `confidence-levels` | 1.0.0 | 2026-04-20 |
-| `intelligence-writing` | 1.0.0 | 2026-04-20 |
+| `confidence-levels` | 2.0.0 | 2026-09-27 |
+| `intelligence-writing` | 1.1.0 | 2026-09-27 |
 | `ioc-enrichment-workflow` | 2.1.0 | 2026-05-14 |
-| `ioc-export` | 1.0.0 | 2026-04-20 |
+| `ioc-export` | 2.0.0 | 2026-09-27 |
 | `kql-writing` | 1.1.0 | 2026-08-04 |
 | `likelihood-language` | 1.0.0 | 2026-04-20 |
 | `sigma-writing` | 1.0.0 | 2026-04-20 |
-| `stix-bundle` | 1.0.0 | 2026-04-20 |
+| `stix-bundle` | 2.0.0 | 2026-09-27 |
 | `tlp-guide` | 1.0.0 | 2026-04-20 |
-| `writing-assessments` | 1.0.0 | 2026-04-20 |
+| `writing-assessments` | 2.0.0 | 2026-09-27 |
 | `yara-writing` | 1.1.0 | 2026-05-14 |
 
 ### Orchestrator + investigation skills (new in Phase C)
 | Skill | Version | Last updated |
 |---|---|---|
-| `cti-orchestrator` | 1.0.0 | 2026-04-20 |
+| `cti-orchestrator` | 2.0.0 | 2026-09-27 |
 | `ip-investigation` | 1.1.0 | 2026-05-14 |
 | `domain-investigation` | 1.2.0 | 2026-05-14 |
 | `hash-investigation` | 1.1.0 | 2026-05-14 |
@@ -97,7 +100,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 ### Lookup skills (external API wrappers)
 | Skill | Version | Last updated |
 |---|---|---|
-| `lookup-liberty91` | 1.1.0 | 2026-07-31 |
+| `lookup-liberty91` | 1.2.0 | 2026-09-27 |
 | `lookup-abuseipdb` | 1.0.0 | 2026-04-20 |
 | `lookup-censys` | 1.0.0 | 2026-04-20 |
 | `lookup-greynoise` | 1.0.0 | 2026-04-20 |
@@ -108,7 +111,7 @@ Knowledge cells decay faster than other skills — update the `Last updated` col
 | `lookup-ransomwarelive` | 1.0.0 | 2026-04-26 |
 | `lookup-reversinglabs` | 1.0.0 | 2026-05-08 |
 | `lookup-crowdstrike` | 1.0.0 | 2026-05-30 |
-| `lookup-sentinel` | 1.0.0 | 2026-08-04 |
+| `lookup-sentinel` | 1.1.0 | 2026-09-27 |
 | `lookup-urlscan` | 1.0.0 | 2026-04-20 |
 | `lookup-virustotal` | 1.0.0 | 2026-04-20 |
 | `mitre-attack` | 1.0.0 | 2026-04-20 |
@@ -129,6 +132,58 @@ These remain for reference but agents should prefer the `lookup-*` skills above.
 | `virustotal-api` | 1.0.0 | 2026-04-20 | superseded by `lookup-virustotal` |
 
 ## Changelog
+
+### 2.0.0 — 2026-09-27
+
+**Grade the evidence before you reason about it.** Three new tradecraft skills, and a behaviour change: `/ach`, `/threat-assessment` and `/writing-assessments` grade their evidence first by default. Grading is preferred, not required: skip it and they still run, labelled as ungraded and capped at Moderate confidence.
+
+**Breaking changes**
+- **`ach` 2.0.0, `threat-assessment` 2.0.0, `writing-assessments` 2.0.0.** Graded evidence items are the preferred input. Handed raw URLs or text, these skills run `/quality-of-information-check` first. When the user asks to skip the check, or it cannot run, they run in ungraded mode: the header carries `Evidence basis: ungraded` or `mixed`, no grade is invented, ungraded ACH rows weigh 1 so none can eliminate a hypothesis alone, and confidence is capped at Moderate. ACH generates hypotheses before any evidence is read, removes non-diagnostic rows before scoring, weights the rest by grade (credibility 1 = 3, 2 = 2, 3 = 1, 4 to 6 = 0; reliability D or worse subtracts 1), reports the heaviest inconsistent item per hypothesis alongside the sum, and says when one item eliminated a hypothesis. Hypotheses are separated only when their scores differ by more than 10% of the total available weight. An assessment's confidence cannot exceed what its weakest load-bearing claim supports: High needs every load-bearing claim at credibility 1, credibility 2 caps at Moderate, 3 at Low, and 4 to 6 means no confidence level is given and the gap is stated.
+- **`confidence-levels` 2.0.0.** Three levels in place of five: High (80 to 100), Moderate (60 to 79), Low (40 to 59), and no confidence level below that. The three levels correspond to claim support established, firm and tentative, so the confidence level, the exported STIX value and the grade of the evidence agree. Products rated on the old five-band scale should be re-rated.
+- **`red-team-analysis` is renamed `devils-advocacy` (2.0.0).** The skill takes the team's own judgment and argues it is wrong, which is Devil's Advocacy, a contrarian technique. Red Team Analysis, which reasons as the adversary, is a different technique and is not in the pack. `/red-team-analysis` no longer resolves.
+- **`stix-bundle` 2.0.0, `ioc-export` 2.0.0.** Grades are exported per claim, never per event. Claim support maps to STIX `confidence` (established 90, firm 70, tentative 50, disputed 30, unverified omits the property). The values are the pack's own mapping. Confidence sits on the object that expresses the claim: never on SCOs; on the Indicator, Relationship or Sighting. The two elements travel in words as `x_liberty91_access_level` and `x_liberty91_claim_support`, with the primary as an external reference. Report objects carry weakest-link confidence for interoperability. MISP export tags attributes with `cti-skills:access-level` and `cti-skills:claim-support` and a derived confidence level. Evidence grades are never exported under the `admiralty-scale` taxonomy. Imported confidence values are flagged `derived_from_confidence`. The `ioc-export` CSV gains `access_level`, `claim_support` and `source_url` columns, which changes the header order: update anything that parses the old CSV by position.
+- **`quality-control` 2.0.0.** Now the enforcement point. Runs `validate_evidence.py` first and rejects output with a missing or non-verbatim anchor, a grade above a cap, corroboration asserted without basis, or no `provenance_basis`.
+- **`cti-orchestrator` 2.0.0, `structured-analytic-techniques` 2.0.0.** Quality of Information Check is the default first step of any diagnostic run. "Where does this come from", "how reliable is this", "grade this source" and "check this report" route to it. A bare article URL routes to `/source-provenance` plus a short check.
+
+**New skills**
+- **`source-provenance` 1.0.0.** Resolves a URL to its originating source and returns the chain as data. Deterministic: `scripts/resolve_provenance.py` (standard library only) follows body links and named attributions, classifies hosts from a maintained table, reads the primary's own access and confidence language, and reports every hop it could not resolve. Distinguishes the origin from background links by publication date, ignores sponsored links, and surfaces cited hosts it cannot classify instead of guessing. Fixed fetcher policy: identifying user agent, `robots.txt` honoured with no override, per-host spacing, local cache, 50 URL and 2 hop cap, anchors only in output.
+- **`claim-extraction` 1.0.0.** Splits a document into five to twelve atomic claims, typed as observation, attribution, assessment, actor claim or victim disclosure, each anchored to the verbatim source sentence. Preserves the source's hedging. Classifies article-only material: attributed quotes, second primaries, press-originated assertions, and restatements with changed strength.
+- **`quality-of-information-check` 1.0.0.** The user-facing technique. Runs provenance, extraction, transmission fidelity, corroboration, a fixed grading rubric with hard caps (R1 to R13), recency, a MOM/POP/MOSES/EVE deception screen and a derived event aggregate, in an enforced order. Emits a graded claim table and JSON. Every output states its `provenance_basis` (platform-resolved, script-resolved or model-judged) and which parts are model judgement. `scripts/validate_evidence.py` checks the schema and the caps.
+
+**Design decisions recorded**
+- **The principle.** Confidence in a judgment is bounded above by the weakest load-bearing claim, and first-party observation is the top of the scale, not outside it.
+- **First-party observation is the top of the scale (rule R12).** A hit in the user's own telemetry enters the claim table graded direct and established, with `provenance_basis: first-party`, can be load-bearing, and can raise the ceiling. A miss is never an item. `lookup-sentinel` 1.1.0 grades hits accordingly. A KEV listing is a claim by CISA and is graded as one. CVSS and EPSS are attributes of a CVE, not evidence, and stay out of the claim table.
+- **`references/source-types.md` has no reliability column.** About 300 rows classify organisations by type, access profile and interest. Reliability is computed per claim. The file is protected by `CODEOWNERS`, and PRs that add ratings of named organisations are not merged.
+- **Alias resolution ships as a mechanism.** `references/aliases.yml` is user-maintained and gitignored. With a Liberty91 key the Threat Library is used. With neither, names are not matched across vendors and the output says so.
+- **Three tiers.** Platform-resolved with a Liberty91 key when the platform returns provenance fields; script-resolved on any URL without one; model-judged for pasted text. The label travels with the evidence into every downstream product. The platform fields are not in the Liberty91 API as of this release, so Tier 1 is dormant: the skills check for the fields and fall back to the script.
+- **The evidence grade is not the Admiralty scale.** A claim is graded on two elements written in words. Access level (direct, limited, indirect, untraced, adversary) records how the source knows the thing claimed, read from the document. Claim support (established, firm, tentative, disputed, unverified) records what backs the statement. The Admiralty scale rates a source on its track record, which the pack has no data for, and it is a letter and a number. The evidence grade uses neither, is never shown or exported as an Admiralty rating, and is not converted to one. `/source-assessment` and the default ratings on lookup results remain Admiralty, as a separate instrument.
+
+**Other changes**
+- **All eleven knowledge cells refreshed to 1.1.0 (2026-09-29).** Each cell was seeded from model knowledge ending in early 2025 and had not been updated since. Every cell now covers 2025 and 2026, with actor and market status corrected, errors in the seed text fixed, source disagreements stated instead of resolved, and 21 to 44 new sources per cell with URLs. Statements that could not be confirmed against an opened source are listed under Intelligence Gaps in each cell. Seed text that was not re-verified is left in place and is not marked as verified.
+- `source-provenance`: the text extractor now keeps the whole body of a page that splits its article across sibling sections. It previously kept one section. Covered by a new fixture and test.
+- **Fixes from the first end-to-end run (2026-09-29).**
+  - Grading rubric: reliability follows access for every claim type; the worked examples and the rubric now agree. New rule R13 fixes the credibility of an attribution or assessment from the primary's stated confidence (high 2 for attribution and 3 for assessment, moderate 3, low 4, not stated 3). The validator enforces it.
+  - `age_days` counts from the date of the activity when the document gives it, and from publication when it does not. R9 uses `age_days`.
+  - A platform's own event credibility, verification status, source count and per-source reliability are not grades and are not copied into one.
+  - New fidelity value `not_carried` for an outlet that does not repeat a claim. The primary's own hop is always `faithful`.
+  - Access is recorded per claim. `alias_source` records what was used. `commercial_interest` is set only where believing the claim favours the vendor. The weakest-link tie-break ends at the lowest `claim_id`.
+  - `/threat-assessment` says when to invoke `/key-assumptions-check`.
+  - Resolver: reports the organisations a primary itself cites (`primary_cites`) and flags a primary that relays another source's findings (`primary_relays`); keeps table rows, one line per row; ignores access phrases that follow a negation.
+  - Grades are written in words. The validator rejects the fields `source_reliability` and `information_credibility` and requires `grading.access_level` and `grading.claim_support`. `/ach` weights, the confidence ceiling, `/quality-control` rules and the STIX, MISP and CSV exports are restated in those terms.
+  - Validator: the atomicity warning looks for a second clause with its own verb, so one assertion about two objects is no longer flagged.
+- `key-assumptions-check` 1.1.0 walks the claim table for assessment-type and attribution-type claims being treated as observations.
+- `threat-actor-profiling` 1.1.0 and `campaign-tracking` 1.1.0 run `/source-provenance` on every ingested report, dedupe by primary, and store grades with the entities they support.
+- `intelligence-writing` 1.1.0 consumes claims, cites the primary, and adds a sourcing paragraph in the ICD 206 style.
+- `source-assessment` 1.1.0 describes source characteristics instead of naming organisations as standing examples of a grade.
+- `lookup-liberty91` 1.2.0 documents event provenance fields and Threat Library alias resolution.
+
+**Documentation**
+- `docs/how-evidence-grading-works.md` explains the release in plain English for readers without an analyst background.
+
+**Tests and CI**
+- `tests/provenance/`: ten chain scenarios on synthetic fixtures, source-table checks, and twenty-two rubric violations the validator must reject. Offline, standard library only.
+- `.github/workflows/validate.yml` runs `validate-skills.sh` and the tests on every push and pull request.
+- A live run on 30 URLs on 2026-09-27 resolved 15. Results by outlet are in `tests/provenance/README.md`.
 
 ### 1.14.0 — 2026-08-04
 - **New skill `lookup-sentinel` (1.0.0)** — hunt in the organisation's **own Microsoft Sentinel workspace**: IOC exposure sweeps ("was this indicator seen in our environment?"), behavioural ATT&CK TTP hunts, freeform KQL, and table inventory. The pack's first telemetry-side integration: every other lookup asks the world about an indicator; this one asks your logs whether it touched you.

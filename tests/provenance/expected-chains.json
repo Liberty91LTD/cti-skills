@@ -1,0 +1,84 @@
+[
+  {
+    "name": "one hop: outlet links the vendor report",
+    "url": "https://thehackernews.com/2026/09/crimson-heron-water-utilities.html",
+    "status": "resolved",
+    "chain": ["The Hacker News", "Microsoft Threat Intelligence"],
+    "primary": {"org": "Microsoft Threat Intelligence", "type": "vendor", "date_published": "2026-09-18",
+                "access": "telemetry", "interest": "commercial", "resolution": "linked"},
+    "stated_confidence_contains": "moderate confidence"
+  },
+  {
+    "name": "two hops: outlet links an outlet that links the vendor report",
+    "url": "https://gbhackers.com/embers-backdoor-water-utilities/",
+    "status": "resolved",
+    "chain": ["GBHackers", "BleepingComputer", "Palo Alto Networks Unit 42"],
+    "primary": {"org": "Palo Alto Networks Unit 42", "date_published": "2026-09-18",
+                "access": "ir_engagement", "stated_confidence": "not stated"}
+  },
+  {
+    "name": "unresolved: own links only, unnamed researchers",
+    "url": "https://gbhackers.com/new-stealer-hits-finance-teams/",
+    "status": "unresolved",
+    "chain": ["GBHackers"],
+    "reason_contains": "no link to a vendor",
+    "unattributed_sourcing": 1
+  },
+  {
+    "name": "unresolved: outlets citing each other",
+    "url": "https://cybersecuritynews.com/utility-breach-claims/",
+    "status": "unresolved",
+    "chain": ["Cyber Security News"],
+    "reason_contains": "circular press citations"
+  },
+  {
+    "name": "unresolved: organisation named, no document linked",
+    "url": "https://www.securityweek.com/ransomware-group-shifts-to-edge-devices/",
+    "status": "unresolved",
+    "chain": ["SecurityWeek"],
+    "primary": {"org": "Sophos X-Ops", "url": null, "resolution": "named_not_linked",
+                "access": "undisclosed", "stated_confidence": "not stated"},
+    "reason_contains": "named as the source but no document is linked"
+  },
+  {
+    "name": "unresolved: the only vendor link is a sponsored one",
+    "url": "https://gbhackers.com/loader-campaign-abuses-signed-drivers/",
+    "status": "unresolved",
+    "chain": ["GBHackers"],
+    "reason_contains": "no link to a vendor"
+  },
+  {
+    "name": "unresolved: the only primary-type link is two years old",
+    "url": "https://therecord.media/file-transfer-vendor-warns-customers",
+    "status": "unresolved",
+    "chain": ["The Record"],
+    "background_references": ["CISA"],
+    "reason_contains": "treated as background"
+  },
+  {
+    "name": "resolved, primary located but not readable",
+    "url": "https://thehackernews.com/2026/09/gateway-zero-day-exploited.html",
+    "status": "resolved",
+    "chain": ["The Hacker News", "Volexity"],
+    "primary": {"org": "Volexity", "resolution": "linked_not_read", "access": "undisclosed",
+                "stated_confidence": "not stated"},
+    "reason_contains": "robots.txt"
+  },
+  {
+    "name": "primary given directly",
+    "url": "https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-260a",
+    "status": "resolved",
+    "chain": ["CISA"],
+    "primary": {"org": "CISA", "type": "government", "access": "ir_engagement",
+                "interest": "governmental"},
+    "stated_confidence_contains": "high confidence"
+  },
+  {
+    "name": "several primaries: the one whose date can be checked is preferred",
+    "url": "https://thehackernews.com/2026/09/two-gateway-flaws-under-attack.html",
+    "status": "resolved",
+    "chain": ["The Hacker News", "watchTowr Labs"],
+    "primary": {"org": "watchTowr Labs", "access": "sample_analysis"},
+    "other_primaries": ["Citrix"]
+  }
+]

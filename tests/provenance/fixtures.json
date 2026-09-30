@@ -1,0 +1,29 @@
+{
+  "https://thehackernews.com/2026/09/crimson-heron-water-utilities.html": "fixtures/01-press-one-hop.html",
+  "https://www.microsoft.com/en-us/security/blog/2026/09/18/crimson-heron-targets-water-utilities/": "fixtures/01-primary-vendor.html",
+  "https://gbhackers.com/embers-backdoor-water-utilities/": "fixtures/02-press-two-hop.html",
+  "https://www.bleepingcomputer.com/news/security/new-embers-backdoor-deployed-at-water-utilities/": "fixtures/02-press-intermediate.html",
+  "https://unit42.paloaltonetworks.com/embers-backdoor-analysis/": "fixtures/02-primary-vendor.html",
+  "https://gbhackers.com/new-stealer-hits-finance-teams/": "fixtures/03-press-unresolved.html",
+  "https://cybersecuritynews.com/utility-breach-claims/": "fixtures/04-press-circular-a.html",
+  "https://cyberpress.org/utility-breach-claims/": "fixtures/04-press-circular-b.html",
+  "https://www.securityweek.com/ransomware-group-shifts-to-edge-devices/": "fixtures/05-press-named-not-linked.html",
+  "https://gbhackers.com/loader-campaign-abuses-signed-drivers/": "fixtures/06-press-promo-link.html",
+  "https://therecord.media/file-transfer-vendor-warns-customers": "fixtures/07-press-background.html",
+  "https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-001a": "fixtures/07-primary-old-advisory.html",
+  "https://thehackernews.com/2026/09/gateway-zero-day-exploited.html": "fixtures/08-press-primary-blocked.html",
+  "https://www.volexity.com/blog/2026/09/22/gateway-zero-day-exploited/": {
+    "status": "blocked_by_robots",
+    "reason": "robots.txt disallows this path; paste the text to continue"
+  },
+  "https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-260a": "fixtures/09-primary-direct.html",
+  "https://thehackernews.com/2026/09/two-gateway-flaws-under-attack.html": "fixtures/10-press-multi-primary.html",
+  "https://support.citrix.com/external/article/CTX000001/security-bulletin.html": "fixtures/10-primary-undated-bulletin.html",
+  "https://labs.watchtowr.com/gateway-pre-auth-rce-analysis/": "fixtures/10-primary-dated-report.html",
+  "https://blog.example-vendor.com/harbour-lynx-file-transfer/": "fixtures/11-primary-split-sections.html",
+  "https://unit42.paloaltonetworks.com/placeholder-domain-lure/": {
+    "status": "blocked_by_robots",
+    "reason": "not needed by the test"
+  },
+  "https://www.malwarebytes.com/blog/news/2026/09/placeholder-domain-lure/": "fixtures/12-primary-relays-research.html"
+}

@@ -11,13 +11,14 @@ Not an internal ops tool. A public distribution artifact. Optimize for adoption 
 ## Shape
 
 ```
-skills/                 # flat — ~52 composable skills (will flatten in Phase C)
+skills/                 # flat — 78 composable skills
 .claude/                # Claude Code specific (agents, settings). Other platforms ignore.
 .claude-plugin/         # plugin manifest for Claude Code marketplace install
 tools/                  # REGISTRY.md + per-API integration guides + zero-dep CLIs
 data/                   # sample IOCs, reports, PIRs — example content, not required
 mitre-attack/           # local MITRE ATT&CK Enterprise dataset
 VERSIONS.md             # per-skill semver + changelog
+tests/                  # offline tests for provenance resolution and grading caps
 validate-skills.sh      # frontmatter linter — run before committing
 ```
 
@@ -55,6 +56,22 @@ This pack *offers* tradecraft vocabularies. It does not enforce them. Skills tha
 
 Each has a dedicated skill (`/apply-tlp`, `/score-source`, `/confidence-language`, `/likelihood-language`) that the orchestrator auto-invokes.
 
+### The one default: graded evidence
+
+Since 2.0, `/ach`, `/threat-assessment` and `/writing-assessments` prefer graded evidence items and run `/quality-of-information-check` first when handed raw URLs or text. The user can skip it. A run on ungraded evidence is labelled `Evidence basis: ungraded`, carries no invented grades, and is capped at Moderate confidence, so the reader always knows which kind of product they are holding.
+
+The principle behind it: confidence in a judgment is bounded above by the weakest load-bearing claim, and first-party observation is the top of the scale, not outside it.
+
+When you work with sources:
+
+- **Resolve provenance from data.** Use `/source-provenance`. Do not state where a report originated from memory.
+- **Grade claims, not events, and not outlets.** Use `/quality-of-information-check` and its fixed rubric.
+- **Do not assert what was not established.** No primary the script or platform did not resolve, no corroboration without data, no access type inferred from reputation, no invented confidence language.
+- **Carry `provenance_basis` through** (`platform-resolved`, `script-resolved`, `model-judged`) into every product built on the evidence.
+- **Enter hits in the user's own telemetry as observations graded direct and established.** CVSS and EPSS are reference data, not evidence.
+- **Write the evidence grade in words.** Access level and claim support, for example "direct, firm". It is not an Admiralty rating: never write it as a letter and a number, and never convert one into the other. Admiralty ratings apply to lookup results and single items through `/source-assessment`.
+- **Never add ratings of organisations to `source-types.md`.** It records what an organisation is, not how much to trust it.
+
 ## External APIs
 
 Each external threat-intel API has three artifacts:
@@ -70,7 +87,7 @@ This separation means: skills are platform-neutral (just SKILL.md), integration 
 1. Edit the skill body
 2. Bump version in its frontmatter `metadata.version`
 3. Update the row in `VERSIONS.md`
-4. Run `./validate-skills.sh`
+4. Run `./validate-skills.sh` and `python3 tests/provenance/run_tests.py`
 5. Open a PR (see `CONTRIBUTING.md`)
 
 ## What not to do

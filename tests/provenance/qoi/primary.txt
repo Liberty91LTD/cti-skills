@@ -1,0 +1,17 @@
+Crimson Heron targets regional water utilities
+
+During three incident response engagements between June and August 2026, we identified a previously undocumented backdoor we call Embers.
+
+In all three cases, initial access was obtained through exploitation of CVE-2026-0001 in an internet-facing remote access gateway.
+
+Embers communicates with its command and control server over HTTPS, using a hard-coded list that in our samples included 203.0.113.42 and 198.51.100.17.
+
+We assess with moderate confidence that this activity was conducted by Crimson Heron. The assessment rests on overlaps in infrastructure registration patterns and on reuse of a custom credential-dumping tool previously documented in Crimson Heron intrusions.
+
+Crimson Heron has been linked by several governments to a state intelligence service.
+
+We did not observe data destruction or manipulation of control systems. The intruders collected network diagrams and credentials.
+
+We believe the objective is pre-positioning, and that the group is likely to target additional utilities in the region over the coming months.
+
+Customers of Northwind Managed Detection are protected against this threat.

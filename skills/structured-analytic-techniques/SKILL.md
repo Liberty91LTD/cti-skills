@@ -1,9 +1,9 @@
 ---
 name: structured-analytic-techniques
-description: Use when the user asks "which SAT should I use for X?", wants the index of Structured Analytic Techniques, or is choosing between ACH, key-assumptions-check, red-team-analysis, indicators of change, etc.
+description: Use when the user asks "which SAT should I use for X?", wants the index of Structured Analytic Techniques, or is choosing between quality-of-information-check, ACH, key-assumptions-check, devils-advocacy, indicators of change, etc. Quality of Information Check is the default first step of any diagnostic run.
 user-invocable: true
 metadata:
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # Structured Analytic Techniques (SATs) Index
@@ -18,26 +18,35 @@ SATs are formal methods that externalise analytical thinking, making it transpar
 - When you need to communicate your reasoning transparently
 - When building on analysis from multiple analysts
 
+## Start With the Evidence
+
+The Quality of Information Check is the default first step of any diagnostic run. Before hypotheses are tested or an assessment is written, run `/quality-of-information-check` on the reports and articles the analysis will rest on. It resolves each one to its originating source, splits it into claims and grades each claim. `ach`, `threat-assessment` and `writing-assessments` prefer graded evidence and run the check themselves when handed raw material.
+
+Skip it when the evidence already arrives as graded evidence items, when there are no documents to grade, or when the user asks to. A skipped check puts those three skills in ungraded mode: the output is labelled as ungraded and confidence is capped at Moderate. Hits in the organisation's own telemetry enter as observations graded "direct, established" (rubric rule R12). Third-party lookup results are rated through `source-assessment` on the Admiralty scale, which is a separate instrument: the evidence grade applies to claims from documents, and neither is converted into the other.
+
 ## Technique Categories
+
+Families follow the CIA Tradecraft Primer. The full list, one line per technique with the covering skill or "not in the pack", is in [references/when-to-use.md](references/when-to-use.md).
 
 ### Diagnostic Techniques
 **Purpose**: Evaluate existing analysis for quality and bias.
 
 | Technique | When to Use | Skill |
 |-----------|-------------|-------|
+| **Quality of Information Check** | First, before any other diagnostic technique. Resolve provenance, split reports into claims, grade each claim, list gaps | `quality-of-information-check` |
 | **Key Assumptions Check** | Before or after any major assessment — surface and challenge unstated assumptions | `key-assumptions-check` |
-| **Quality of Information Check** | When evidence quality is uncertain — assess source reliability and information gaps | Use `source-assessment` skill |
-| **Indicators Validation** | When monitoring a developing situation — define observable markers of change | Part of horizon-scanning |
+| **Analysis of Competing Hypotheses** | Multiple plausible explanations — systematically evaluate each against evidence | `ach` |
+| **Indicators or Signposts of Change** | When monitoring a developing situation — define observable markers of change | Not in the pack. `horizon-scanning` defines early warning indicators in part |
 
 ### Contrarian Techniques
 **Purpose**: Challenge prevailing judgments and expose blind spots.
 
 | Technique | When to Use | Skill |
 |-----------|-------------|-------|
-| **Analysis of Competing Hypotheses** | Multiple plausible explanations — systematically evaluate each against evidence | `ach` |
-| **Devil's Advocate / Red Team** | When consensus is strong — deliberately argue the opposing position | `red-team-analysis` |
-| **What-If Analysis** | Explore low-probability but high-impact scenarios | Part of horizon-scanning |
-| **High-Impact / Low-Probability** | Ensure unlikely but catastrophic scenarios are considered | Combine `threat-assessment` + `horizon-scanning` |
+| **Devil's Advocacy** | When consensus is strong — take the team's own lead judgment and argue it is wrong | `devils-advocacy` |
+| **What-If Analysis** | Assume an event has happened and reason back to how | Not in the pack |
+| **High-Impact / Low-Probability** | Ensure unlikely but catastrophic scenarios are considered | Not in the pack. Nearest: combine `threat-assessment` + `horizon-scanning` |
+| **Team A / Team B** | Two competing views each deserve a full case | Not in the pack |
 
 ### Imaginative Techniques
 **Purpose**: Generate new ideas, hypotheses, and indicators.
@@ -51,6 +60,9 @@ SATs are formal methods that externalise analytical thinking, making it transpar
 ## Decision Guide: Which Technique?
 
 ```
+Are you about to reason from reports or articles? (default first step)
+  → Quality of Information Check (quality-of-information-check skill)
+
 Are you evaluating WHO did something?
   → ACH (ach skill)
 
@@ -61,12 +73,15 @@ Are you challenging your OWN analysis?
   → Key Assumptions Check (key-assumptions-check skill)
 
 Are you challenging SOMEONE ELSE's analysis?
-  → Red Team / Devil's Advocate (red-team-analysis skill)
+  → Devil's Advocacy (devils-advocacy skill)
 
 Are you looking FORWARD (emerging threats)?
   → Horizon Scanning (horizon-scanning skill)
 
-Are you unsure if your evidence is RELIABLE?
+Are you unsure if your evidence is RELIABLE, or where it comes from?
+  → Quality of Information Check (quality-of-information-check skill)
+
+Do you need the Admiralty scale DEFINITIONS, or an Admiralty rating for a single lookup result?
   → Source Assessment (source-assessment skill)
 
 Do you have MULTIPLE plausible explanations?
@@ -76,7 +91,10 @@ Do you have MULTIPLE plausible explanations?
 ## Combining Techniques
 
 For complex assessments, combine techniques:
-1. **Key Assumptions Check** first (surface your assumptions)
-2. **ACH** for the core analysis (evaluate hypotheses)
-3. **Red Team** to challenge the result (stress-test conclusions)
-4. **Horizon Scanning** for forward-looking implications
+1. **Quality of Information Check** first (grade the evidence before reasoning from it)
+2. **Key Assumptions Check** (surface your assumptions)
+3. **ACH** for the core analysis (evaluate hypotheses against the graded claims)
+4. **Devil's Advocacy** to challenge the result (stress-test conclusions)
+5. **Horizon Scanning** for forward-looking implications
+
+`ach` writes its hypotheses before it reads any evidence. When the sequence is run for ACH, state the question first, let `ach` list the hypotheses, then run the Quality of Information Check.

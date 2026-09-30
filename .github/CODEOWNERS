@@ -1,0 +1,9 @@
+# The source classification table cannot merge without a maintainer, independent of
+# who else gains merge rights on skills. It records type, access profile and interest.
+# It does not grade reliability, and PRs that add ratings are not merged.
+/skills/source-provenance/references/source-types.md  @renzejongman
+
+# The grading rubric and the schema are the contract every tradecraft skill depends on.
+/skills/quality-of-information-check/references/grading-rubric.md        @renzejongman
+/skills/quality-of-information-check/references/evidence-item-schema.md  @renzejongman
+/.github/CODEOWNERS                                                       @renzejongman

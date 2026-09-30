@@ -1,0 +1,13 @@
+State hackers burrow into water utilities
+
+State-sponsored hackers have broken into water utilities across the region and planted a new backdoor, security firm Northwind said on Thursday.
+
+The findings are set out in a report published by the company.
+
+The campaign has been attributed to Crimson Heron, a group tied to a foreign intelligence service.
+
+“What worries us is how quiet they were. Two of the three utilities had no idea until we told them,” said Dana Reyes, head of incident response at Northwind.
+
+The national cyber agency said in a separate advisory that it had seen scanning for the same vulnerability against government networks.
+
+Attacks on water infrastructure have been rising sharply this year.

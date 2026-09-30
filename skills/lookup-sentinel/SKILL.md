@@ -2,11 +2,11 @@
 name: lookup-sentinel
 description: Use when you need to hunt in the organisation's own Microsoft Sentinel workspace — sweep the logs for IOC hits (IP, domain, hash, URL, account), hunt behavioural TTPs from MITRE ATT&CK techniques, run KQL against live data, or check which tables the workspace actually ingests. Discovers available tables first and only generates KQL for tables that verifiably exist, so hunts adapt to each environment's connectors. Commonly chained by the /*-investigation skills to answer "were we exposed?". Reads $SENTINEL_TENANT_ID, $SENTINEL_CLIENT_ID, $SENTINEL_CLIENT_SECRET, $SENTINEL_WORKSPACE_ID. Read-only.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   tags: [lookup, hunting, kql, sentinel, telemetry, mitre-attack]
   api: sentinel
   default_source_reliability: A
-  default_information_credibility: 2
+  default_information_credibility: 1
 ---
 
 # lookup-sentinel
@@ -129,9 +129,20 @@ hunt:
 telemetry_gaps: [<behaviours this workspace cannot currently observe, and why>]
 ```
 
-## Source reliability (Admiralty default)
+## Source reliability (Admiralty default) and evidence grade
 
-**A2** — your own organisation's primary telemetry, so reliability A; credibility defaults to 2 rather than 1 because (a) absence of a hit is bounded by connector coverage, retention, and logging depth, and (b) logs are themselves an adversary target (T1070/T1562). Corroborated positive hits across independent tables can be raised to A1. Full reasoning: `tools/integrations/sentinel.md`.
+Two instruments apply to a hit, and neither is converted into the other.
+
+**Admiralty default: A1 for a hit.** This is the frontmatter default, used when `/source-assessment` rates the lookup result as a single item.
+
+**Evidence grade: "direct, established" for a hit.** A positive hit is a first-party observation: the organisation saw the indicator in its own environment. It enters the claim table as an evidence item with access level `direct` and claim support `established`, `claim_type: observation`, `access: telemetry`, source "user environment", `provenance_basis: first-party` (grading rubric rule R12 in `/quality-of-information-check`). It can be load-bearing and it can raise an assessment's confidence ceiling.
+
+Two limits:
+
+- **A miss is not evidence.** Absence of a hit is bounded by connector coverage, retention and logging depth. It is reported as "not observed in collected telemetry over this window" and never becomes a graded item.
+- **Logs are an adversary target** (T1070, T1562). Where tampering is suspected, grade the hit "direct, firm" and set `deception_indicators_present`.
+
+Full reasoning: `tools/integrations/sentinel.md`.
 
 ## Operational notes
 

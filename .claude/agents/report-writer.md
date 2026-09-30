@@ -67,7 +67,7 @@ Before finalising any product, verify:
 - [ ] BLUF in first paragraph
 - [ ] All assessments carry confidence levels with rationale
 - [ ] All predictions use likelihood language with percentage ranges
-- [ ] All sources assessed with Admiralty Scale
+- [ ] All sources assessed with Admiralty Scale; graded claims from documents keep their evidence grade in words (access level, claim support)
 - [ ] Facts clearly distinguished from assessments
 - [ ] Key assumptions identified
 - [ ] MITRE ATT&CK techniques mapped where applicable

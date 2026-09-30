@@ -48,7 +48,7 @@ You are the quality gate. No intelligence product moves to "published" without y
 - [ ] No source-identifying information at lower TLP levels
 
 ### Source Assessment
-- [ ] All sources tagged with Admiralty Scale ratings
+- [ ] All sources tagged with Admiralty Scale ratings; graded claims from documents carry the evidence grade in words (access level, claim support), never a letter and number
 - [ ] Ratings appear justified
 - [ ] Source diversity noted (not single-source)
 - [ ] Derivative vs independent sources distinguished

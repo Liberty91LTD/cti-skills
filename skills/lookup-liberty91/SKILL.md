@@ -1,8 +1,8 @@
 ---
 name: lookup-liberty91
-description: Use when you need Liberty91 platform intelligence — what actually happened (deduplicated Threat Events with every source, Admiralty reliability/credibility and verification stage), whether an IOC is already known to your account, the canonical threat library (actors, malware, vulnerabilities, clusters, ATT&CK TTPs), alert matches, or which of your customer organizations an occurrence affects — or when you need to push intelligence back: ingesting your own report, generating an intelligence package, or uploading an organization document. Two-way, first-party integration. Commonly invoked by /ip-investigation and friends, /ioc-enrichment-workflow, /threat-actor-profiling, /campaign-tracking and /vulnerability-intelligence. Reads $LIBERTY91_API_KEY.
+description: Use when you need Liberty91 platform intelligence — what actually happened (deduplicated Threat Events with every source, Admiralty reliability/credibility and verification stage), whether an IOC is already known to your account, the canonical threat library (actors, malware, vulnerabilities, clusters, ATT&CK TTPs), alert matches, or which of your customer organizations an occurrence affects — or when you need to push intelligence back: ingesting your own report, generating an intelligence package, or uploading an organization document. Also supplies event provenance fields, when the platform returns them, and Threat Library alias resolution to /source-provenance and /quality-of-information-check. Two-way, first-party integration. Commonly invoked by /ip-investigation and friends, /ioc-enrichment-workflow, /threat-actor-profiling, /campaign-tracking and /vulnerability-intelligence. Reads $LIBERTY91_API_KEY.
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   tags: [lookup, write, threat-intel, knowledge-base, first-party, stix]
   api: liberty91
   default_source_reliability: B
@@ -36,6 +36,7 @@ Everything else follows from it.
 - An indicator surfaced elsewhere and you want to know whether the platform already holds it (`ioc-lookup`)
 - An actor / malware family / CVE needs its canonical record, aliases, ATT&CK TTPs, linked occurrences or co-occurring entities (`library`, `entity`)
 - A vendor's name for an actor needs resolving to the canonical entry (`library threat-actors --alias "…"`)
+- `/source-provenance` or `/quality-of-information-check` needs an occurrence's provenance, or needs two vendors' names matched to one entity (see Provenance fields and Alias resolution below)
 - The user wants their alert rules' matches, or a saved search re-run (`alert-matches`, `run-search`)
 - A TIP (MISP, OpenCTI) needs parented STIX for an occurrence (`threat-event <id> --section iocs-export`)
 - The user asks which of their customer organizations is affected, or about an org's assets/suppliers (`threat-event --section detail`, `orgs`, `org`)
@@ -177,6 +178,51 @@ Three separate judgements travel with every occurrence. **Do not collapse them i
 
 `--verification corroborated --min-credibility 2` is the triage filter for "actionable now".
 
+## Provenance fields
+
+`/source-provenance` and `/quality-of-information-check` read the following per occurrence **when the platform returns them**. They are planned platform work. As of 27 September 2026 they are not in the documented API contract and the CLI has no code that depends on them, so expect them to be absent.
+
+| Field | Content |
+|---|---|
+| `primaries[]` | The originating sources, each with `org`, `type`, `access`, `date`, `url`, `stated_confidence`, `interest`. Values follow the evidence item schema |
+| `independent_primaries` | Count of primaries with separate access. Reports that cite one another count once |
+| `secondary_reports` | Count of reports that relay a primary without adding evidence |
+| `chains[]` | Per report, the ordered hops from that outlet to its primary |
+| `most_recent_observation` | Date the activity was last observed, which is not the publication date |
+| `superseded_by` | Later report by the same primary that replaces this one, or `null` |
+
+The CLI passes the API response through, so once a host serves these fields they appear in `threat-event <id>` output with no CLI change. Check the response, or `/api/v1/schema/`, rather than assuming.
+
+**Which label the result gets:**
+
+- Fields present → `provenance_basis: platform-resolved`. Use the values verbatim.
+- Fields absent, or no `LIBERTY91_API_KEY` configured → fall back to `/source-provenance`, which resolves the chain by script for the URLs in hand. The result is labelled `script-resolved`, never `platform-resolved`.
+- Some present, some absent → each evidence item takes the label of where its own provenance came from, and the run reports the worst of them.
+
+**What today's API does return is not a substitute.** `--section sources` gives `source_name`, `url`, `published_at`, `stance` and `reliability` per report. That says who reported, not who originated. Do not build `primaries[]` or `chains[]` from it, and do not read `verification: corroborated` or the number of `corroborates` stances as `independent_primaries`. Pass the report URLs to `/source-provenance` instead. Never fill a missing provenance field with a guess. The per-source `reliability` letter and the occurrence `credibility` number are the platform's ratings of the outlet and the event. They are passed to `/source-assessment` as Admiralty-style ratings where that skill is used. They are never copied into an evidence grade: `/quality-of-information-check` grades each claim itself, in words (access level and claim support).
+
+## Alias resolution
+
+`/quality-of-information-check` has to know that two vendors mean the same actor or malware before it can count them as corroborating each other. With a key, the Threat Library does the matching, and the evidence item records `alias_source: liberty91`.
+
+```bash
+python3 tools/clis/liberty91.py library threat-actors --alias "Sednit"
+python3 tools/clis/liberty91.py library threat-actors --name "APT28"
+python3 tools/clis/liberty91.py library malware --alias "X-Agent"
+```
+
+Two names match when both resolve to the same canonical `id`. Compare ids, not strings.
+
+What the CLI can do today:
+
+- `--alias` is a case-insensitive **exact** match and `--name` matches the canonical name. Neither is fuzzy. Try the name as written, then `--q` for a substring, and treat a `--q` hit as a candidate to confirm on the record, not as a match.
+- **Vendor-cluster merge records** (a vendor's unnamed cluster, such as a UNC or Storm designation, later merged into a named group) are used when the library record returns them. The CLI has no dedicated command or flag for them today. If the older designation is listed as an alias on the canonical record, `--alias` finds it. If it is not, the names do not match.
+- `clusters` entries are account-local and have no canonical record, so they cannot match names across vendors.
+- No result means not matched. It does not mean the two are different actors. Corroboration for that claim stays at 1, `unchecked`.
+- The library endpoints need API v2.0 or later. When `quota` reports `occurrence_layer_available: false`, alias resolution is unavailable on that host.
+
+Without a key, or when resolution is unavailable, QoI uses the user's own `references/aliases.yml` (`alias_source: user`) or matches no names (`alias_source: none`). Hash, CVE and infrastructure matching do not depend on aliases.
+
 ## Response format
 
 All commands return JSON on stdout:
@@ -214,6 +260,8 @@ Liberty91 emits Admiralty ratings natively — **use the platform's own numbers 
 
 When an occurrence rests on a single `D`/`E`-graded publisher, downgrade to that worst contributing source no matter how confident the summary reads.
 
+These ratings apply to the occurrence and its outlets as lookup results. They are not evidence grades. Claims from the reports behind an occurrence are graded by `/quality-of-information-check` with access level and claim support, and neither is converted into the other.
+
 ## Operational notes
 
 - **A bad filter value is a `400`, not an empty page.** If a sector or country filter errors, it is a typo in your query — not absence of data. Read `detail`; it names the field.
@@ -237,6 +285,8 @@ When an occurrence rests on a single `D`/`E`-graded publisher, downgrade to that
 - `/vulnerability-intelligence` — `library vulnerabilities` for CVE records with exploitation context
 - `/lookup-misp`, `/lookup-opencti` — the other two-way integrations; Liberty91 is the source, MISP the exchange layer, OpenCTI the internal graph
 - `/stix-bundle` — the bundle structure `--section stix` produces
+- `/source-provenance` — the fallback when provenance fields are absent or no key is configured; output is `script-resolved`
+- `/quality-of-information-check` — consumes provenance fields and alias resolution; grades per claim with the evidence grade (access level and claim support), never from the platform's `reliability` or `credibility`
 - `/source-assessment`, `/confidence-levels`, `/tlp-guide` — consume the platform's native ratings rather than inventing new ones
 - `/intelligence-writing`, `/writing-assessments` — turn occurrences into finished products
 

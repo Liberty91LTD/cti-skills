@@ -153,7 +153,9 @@ Default rating for downstream `/score-source`: **B2** (usually reliable, probabl
 - Anonymous community contributor → **C3**
 - Your own org (self-hosted) → **A1** — primary source
 
-Read the event tags too: `admiralty-scale:source-reliability="b"` and `admiralty-scale:information-credibility="2"` are common.
+Read the event tags too: `admiralty-scale:source-reliability="b"` and `admiralty-scale:information-credibility="2"` are common. They are the Admiralty rating of the party that set them. Show them as such.
+
+**Evidence grades are a different instrument.** Admiralty ratings apply to lookup results and single items; the evidence grade from `/quality-of-information-check` applies to claims from documents; neither is converted into the other. When pushing graded claims, do not tag them with the `admiralty-scale` taxonomy. Use the plain tags `cti-skills:access-level="direct"` and `cti-skills:claim-support="firm"` per attribute, as set out in `/ioc-export`. When reading, a MISP confidence value becomes claim support by the import table in `/ioc-export`, with access level `indirect` and the flag `derived_from_confidence`.
 
 ## Operational notes
 
