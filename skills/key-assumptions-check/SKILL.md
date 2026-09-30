@@ -40,7 +40,7 @@ For each claim, compare its `claim_type` with how the analytical line uses it:
 Rules:
 - Every `assessment` and `attribution` claim with `load_bearing: true` gets a row in the matrix, even when the assumption looks safe.
 - Carry the `claim_id` into the matrix. One claim can produce more than one assumption, and an assumption can rest on several claims.
-- Do not regrade claims here. The grade informs the Confidence column: credibility 3 or worse on a claim used as fact is Low or Medium confidence, never High.
+- Do not regrade claims here. The grade informs the Confidence column: claim support tentative or worse on a claim used as fact is Low or Medium confidence, never High.
 - Assumptions from Step 2 that trace to no claim are kept, with "none" in the Claim column. These have no evidence behind them at all, which is worth stating.
 
 ### Step 4: Evaluate Each Assumption
@@ -80,9 +80,9 @@ For each flagged assumption:
 [The assessment being checked]
 
 ### Assumptions Matrix
-| # | Assumption | Claim | Claim type (grade) | Importance | Confidence | Status |
-|---|-----------|:---:|:---:|:---:|:---:|:---:|
-| 1 | ... | C04 | attribution (C3) | H/M/L | H/M/L | ... |
+| # | Assumption | Claim | Claim type | Access level | Claim support | Importance | Confidence | Status |
+|---|-----------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 1 | ... | C04 | attribution | indirect | tentative | H/M/L | H/M/L | ... |
 
 ### Flagged Assumptions (High Importance + Low/Medium Confidence)
 1. **[Assumption]** (C04): If wrong, [impact on conclusion]. Collection gap: [what would validate this].

@@ -54,7 +54,7 @@ You are the analytical engine of the CTI platform. You work with data that has a
 
 Every piece of analysis you produce MUST include:
 - **Confidence level** (per confidence-levels skill) with rationale
-- **Source assessment** (Admiralty Scale) for all evidence used
+- **Source assessment** for all evidence used: the evidence grade (access level and claim support) on graded claims from documents, Admiralty Scale ratings on lookup results and single items
 - **Likelihood language** (per likelihood-language skill) for all predictions
 - **Key assumptions** identified and evaluated
 - **MITRE ATT&CK mapping** where applicable
@@ -78,7 +78,7 @@ Structure your analytical output clearly:
 [BLUF — the most important conclusion]
 
 ### Evidence
-[Evidence items with Admiralty Scale ratings]
+[Evidence items. Graded claims carry their evidence grade in words (access level, claim support); lookup results and single items carry Admiralty Scale ratings]
 
 ### Analysis
 [Your analytical reasoning, SATs applied, hypotheses considered]

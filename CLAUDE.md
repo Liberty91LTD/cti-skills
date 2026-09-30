@@ -26,7 +26,7 @@ Cyber Threat Intelligence skills pack for Claude Code and other agentic IDEs. Se
 
 Opt-in. Skills with `metadata.tradecraft: true` in frontmatter produce outputs marked with TLP, Admiralty source ratings, MISP confidence, and probability yardstick language. The orchestrator auto-applies these to finished products. See `/apply-tlp`, `/score-source`, `/confidence-language`, `/likelihood-language`.
 
-One gate, since 2.0: `/ach`, `/threat-assessment` and `/writing-assessments` require graded evidence and run `/quality-of-information-check` first. Provenance is resolved by `skills/source-provenance/scripts/resolve_provenance.py` or the Liberty91 platform, never reconstructed from memory. `skills/source-provenance/references/source-types.md` classifies sources and must never carry reliability ratings.
+One default, since 2.0: `/ach`, `/threat-assessment` and `/writing-assessments` prefer graded evidence and run `/quality-of-information-check` first. The user can skip it; the output is then labelled ungraded and capped at Moderate confidence. Provenance is resolved by `skills/source-provenance/scripts/resolve_provenance.py` or the Liberty91 platform, never reconstructed from memory. `skills/source-provenance/references/source-types.md` classifies sources and must never carry reliability ratings. Claims are graded in words on two elements, access level and claim support (see `skills/quality-of-information-check/references/grading-rubric.md`). That grade is not the Admiralty scale and is never written or exported as a letter and a number.
 
 ## Before committing
 

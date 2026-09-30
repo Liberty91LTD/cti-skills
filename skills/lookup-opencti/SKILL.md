@@ -155,6 +155,10 @@ Default rating for downstream `/score-source`: **B2** (usually reliable, probabl
 - Open feeds (AlienVault, abuse.ch, MISP feed connectors) → **B3** / **C3**
 - `confidence` field on the entity (0-100) maps directly onto `/confidence-levels` bands
 
+A reliability value on an Organization in OpenCTI is that instance's Admiralty rating of the source. Show it as such.
+
+**Evidence grades are a different instrument.** Admiralty ratings apply to lookup results and single items; the evidence grade from `/quality-of-information-check` applies to claims from documents; neither is converted into the other. When pushing graded claims, do not write the grade into an Organization's reliability field. That field is a track-record rating. Put the two words in the labels or the description of the object that expresses the claim, for example `--labels access-level:direct,claim-support:firm`. Bundles from `/stix-bundle` carry them as `x_liberty91_access_level` and `x_liberty91_claim_support`. When reading, a `confidence` value becomes claim support by the import table in `/stix-bundle`, with access level `indirect` and the flag `derived_from_confidence`.
+
 ## Operational notes
 
 - **GraphQL errors arrive as HTTP 200** with an `errors` array — the CLI surfaces the first message and exits 1. `AUTH_REQUIRED` means a bad or missing token.

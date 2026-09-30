@@ -12,20 +12,20 @@ Every analytical judgment produced by this platform MUST carry a confidence leve
 
 ## Primary Scale: Named Bands
 
-Three levels, following ICD 203. The score ranges are the STIX 2.1 Appendix A ranges for Admiralty credibility 1, 2 and 3, so a confidence level, a STIX `confidence` value and the grade of the evidence underneath all say the same thing.
+Three levels, following ICD 203. Each band is tied to the claim support of the evidence underneath, as graded by `/quality-of-information-check`. On export, STIX `confidence` comes from claim support: established 90, firm 70, tentative 50, disputed 30, and unverified omits the property. These values are the pack's own mapping, chosen to sit inside the bands below, so a confidence level, a STIX `confidence` value and the grade of the evidence underneath all say the same thing.
 
 | Band | Score Range | Meaning | Evidence it requires |
 |------|-----------|---------|---------|
-| **High** | 80-100 | Based on high-quality information from multiple independent sources. Well corroborated. High confidence does not mean the judgment is a fact. | Every load-bearing claim at credibility 1, with reliability A or B |
-| **Moderate** | 60-79 | Based on credibly sourced and plausible information that is not corroborated enough to warrant higher confidence. Alternative interpretations exist. | Weakest load-bearing claim at credibility 2 |
-| **Low** | 40-59 | Based on limited or fragmentary information, or on a judgment the source itself hedged. Several plausible alternative interpretations. | Weakest load-bearing claim at credibility 3 |
-| **No confidence level** | none | The evidence cannot carry a judgment. Do not attach a label. State what is known, state the gap, and say what collection would close it. | Any load-bearing claim at credibility 4, 5 or 6 |
+| **High** | 80-100 | Based on high-quality information from multiple independent sources. Well corroborated. High confidence does not mean the judgment is a fact. | Every load-bearing claim at claim support established, with access level direct or limited |
+| **Moderate** | 60-79 | Based on credibly sourced and plausible information that is not corroborated enough to warrant higher confidence. Alternative interpretations exist. | Weakest load-bearing claim at claim support firm, or established with access level indirect |
+| **Low** | 40-59 | Based on limited or fragmentary information, or on a judgment the source itself hedged. Several plausible alternative interpretations. | Weakest load-bearing claim at claim support tentative |
+| **No confidence level** | none | The evidence cannot carry a judgment. Do not attach a label. State what is known, state the gap, and say what collection would close it. | Any load-bearing claim at claim support disputed or unverified |
 
 Scores below 40 are not used. A judgment that would score there is not one the evidence supports, and it gets no confidence level.
 
 ### The ceiling
 
-Confidence in a judgment is bounded above by the weakest load-bearing claim. Grades come from `/quality-of-information-check`. The ceiling rules, including the effect of source reliability, are in `/threat-assessment` under "Confidence Ceiling". First-party observation, a hit in the organisation's own telemetry, is graded A1 and is the top of the scale.
+Confidence in a judgment is bounded above by the weakest load-bearing claim. Grades come from `/quality-of-information-check`. The ceiling rules, including the effect of access level, are in `/threat-assessment` under "Confidence Ceiling". First-party observation, a hit in the organisation's own telemetry, is graded direct, established and is the top of the scale.
 
 The ceiling is a maximum, not a target. Weak reasoning or untested assumptions lower confidence further. Nothing raises it above the ceiling.
 
@@ -36,7 +36,7 @@ Before version 2.0 this skill had five bands, Very Low to Very High. Products wr
 Confidence is determined by three factors:
 
 ### 1. Quality of Sources
-- How reliable are the sources? (Cross-reference with Admiralty Scale)
+- How do the sources know, and what backs each claim? (The evidence grade from `/quality-of-information-check` for claims from documents. The Admiralty scale from `/source-assessment` for lookup results and single items. Neither is converted into the other.)
 - Are sources independent or derivative?
 - Is there potential for deception or disinformation?
 
@@ -96,7 +96,7 @@ The confidence in the capability assessment is high (strong evidence). The likel
 - Conflating confidence with likelihood ("high confidence it will happen" — this is two concepts mashed together)
 - Not explaining WHY confidence is at a given level (always include rationale)
 - Defaulting to "moderate" to avoid commitment — if the evidence is strong, say so
-- Giving high confidence on uncorroborated evidence — one primary with direct access is credibility 2, which supports moderate at most
+- Giving high confidence on uncorroborated evidence — one primary with direct access is claim support firm, which supports moderate at most
 - Attaching a low-confidence label where the evidence supports no judgment at all
 - Changing confidence based on desired outcome rather than evidence
 - Treating confidence as static — reassess when new evidence emerges

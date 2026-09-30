@@ -54,7 +54,7 @@ Does the evidence hold together?
 
 | Prompt | Notes |
 |---|---|
-| Is the claim consistent with the other claims from the same primary? | Internal contradictions lower credibility to 4 |
+| Is the claim consistent with the other claims from the same primary? | Internal contradictions lower claim support to disputed |
 | Is it consistent with other primaries? | A conflict between two credible primaries sets `disputed` |
 | Do the dates work? | Activity dated after publication, a "new" sample with an old compile time and old submissions |
 | Is anything conspicuously missing? | Attribution with no stated basis. A breach claim with no sample data. An exploitation claim with no indicators |
@@ -83,4 +83,4 @@ A raised flag does not change a grade by itself. It is recorded on the claim, sh
 
 ## What the screen is not
 
-It is not the full deception detection technique, which is a separate structured exercise. And it is not a reason to discount everything an actor says. Actors' claims are often true. They are graded F for reliability because the source has a motive to mislead and cannot be held to account, and they move up the credibility scale when someone with separate access confirms them.
+It is not the full deception detection technique, which is a separate structured exercise. And it is not a reason to discount everything an actor says. Actors' claims are often true. Their access level is adversary because the source has a motive to mislead and cannot be held to account, and their claim support rises when someone with separate access confirms them.

@@ -4,7 +4,7 @@ One line per technique. Families follow the CIA Tradecraft Primer (2009). Techni
 
 "Not in the pack" means there is no skill for the technique. Do not route to a skill name that is not in this file. Where an existing skill covers part of a technique, the line says which part.
 
-For any diagnostic run on documents, articles or reports, `/quality-of-information-check` goes first. `/ach`, `/threat-assessment` and `/writing-assessments` refuse ungraded evidence.
+For any diagnostic run on documents, articles or reports, `/quality-of-information-check` goes first. `/ach`, `/threat-assessment` and `/writing-assessments` prefer graded evidence. They run on ungraded evidence when the user asks, labelled as such and capped at Moderate confidence.
 
 ## Diagnostic
 
@@ -51,6 +51,6 @@ Brainstorming variants, nominal group technique, Delphi, mind maps, SWOT, force 
 |---|---|---|
 | `/source-provenance` | You have a URL and need the originating source and the chain it arrived through. | First step inside the Quality of Information Check. Usable alone. |
 | `/claim-extraction` | You need a report split into atomic, typed claims anchored to source sentences. | Second step inside the Quality of Information Check. Usable alone. |
-| `/source-assessment` | You need the definitions of the Admiralty scale, or a grade for a single item such as a lookup result. | Reference for the scale. Documents are graded by `/quality-of-information-check`. |
-| `/threat-assessment` | You are formally evaluating a threat by intent, capability and opportunity. | Assessment method. Requires graded evidence. |
+| `/source-assessment` | You need the definitions of the Admiralty scale, or an Admiralty rating for a single item such as a lookup result. | Reference for the scale. Documents are graded per claim by `/quality-of-information-check` with the evidence grade (access level and claim support), which is not an Admiralty rating. |
+| `/threat-assessment` | You are formally evaluating a threat by intent, capability and opportunity. | Assessment method. Prefers graded evidence. |
 | `/horizon-scanning` | You are looking forward for weak signals and emerging threats. | Forecasting method. Covers scenarios and early warning indicators in part. |

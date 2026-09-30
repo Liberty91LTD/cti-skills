@@ -129,14 +129,18 @@ hunt:
 telemetry_gaps: [<behaviours this workspace cannot currently observe, and why>]
 ```
 
-## Source reliability (Admiralty default)
+## Source reliability (Admiralty default) and evidence grade
 
-**A1 for a hit.** A positive hit is a first-party observation: the organisation saw the indicator in its own environment. It enters the claim table as an evidence item graded A1, `claim_type: observation`, `access: telemetry`, source "user environment", `provenance_basis: first-party` (grading rubric rule R12 in `/quality-of-information-check`). It can be load-bearing and it can raise an assessment's confidence ceiling.
+Two instruments apply to a hit, and neither is converted into the other.
+
+**Admiralty default: A1 for a hit.** This is the frontmatter default, used when `/source-assessment` rates the lookup result as a single item.
+
+**Evidence grade: "direct, established" for a hit.** A positive hit is a first-party observation: the organisation saw the indicator in its own environment. It enters the claim table as an evidence item with access level `direct` and claim support `established`, `claim_type: observation`, `access: telemetry`, source "user environment", `provenance_basis: first-party` (grading rubric rule R12 in `/quality-of-information-check`). It can be load-bearing and it can raise an assessment's confidence ceiling.
 
 Two limits:
 
 - **A miss is not evidence.** Absence of a hit is bounded by connector coverage, retention and logging depth. It is reported as "not observed in collected telemetry over this window" and never becomes a graded item.
-- **Logs are an adversary target** (T1070, T1562). Where tampering is suspected, grade the hit A2 and set `deception_indicators_present`.
+- **Logs are an adversary target** (T1070, T1562). Where tampering is suspected, grade the hit "direct, firm" and set `deception_indicators_present`.
 
 Full reasoning: `tools/integrations/sentinel.md`.
 

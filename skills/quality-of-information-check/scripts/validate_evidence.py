@@ -4,8 +4,8 @@ validate_evidence.py — check a Quality of Information output against the evide
 item schema and the grading caps.
 
 Deterministic. Standard library only. This is the enforcement point: /quality-control
-runs it before any human-judgement review, and /ach and /threat-assessment refuse
-evidence that does not pass.
+runs it before any human-judgement review, and /ach and /threat-assessment treat
+evidence that does not pass as ungraded.
 
 Usage:
   validate_evidence.py <qoi.json> [--source-text FILE ...] [--claims-only]
@@ -43,27 +43,42 @@ SOURCE_TYPES = {"vendor", "government", "victim", "actor", "researcher", "press"
 ACCESS = {"telemetry", "ir_engagement", "sample_analysis", "osint", "actor_statement",
           "victim_statement", "statement", "undisclosed"}
 INTEREST = {"commercial", "governmental", "victim", "actor", "independent"}
-FIDELITY = {"faithful", "embellished", "caveats_dropped", "unresolved"}
-RELIABILITY = "ABCDEF"
-CREDIBILITY = (1, 2, 3, 4, 5, 6)
+FIDELITY = {"faithful", "embellished", "caveats_dropped", "not_carried", "unresolved"}
+# The evidence grade has two written elements. It is not the Admiralty scale and uses
+# none of its letters or numbers. Both lists run from strongest to weakest.
+ACCESS_LEVEL = ["direct", "limited", "indirect", "untraced", "adversary"]
+CLAIM_SUPPORT = ["established", "firm", "tentative", "disputed", "unverified"]
+LOWERS_FOOTING = {"untraced", "adversary"}       # with flag source_record_disputed
 TRACK_RECORD = {"none", "boundary_up", "boundary_down"}
 CORROBORATION_BASIS = {"platform", "script", "lookups", "unchecked"}
 ALIAS_SOURCE = {"user", "liberty91", "none"}
 PROVENANCE_BASIS = ["first-party", "platform-resolved", "script-resolved", "model-judged"]  # best to worst
 FLAGS = {"single_source", "unresolved_provenance", "commercial_interest", "actor_sourced",
          "caveats_dropped_in_chain", "press_originated", "retracted", "superseded", "stale",
-         "deception_indicators_present", "disputed", "derived_from_confidence"}
+         "deception_indicators_present", "disputed", "derived_from_confidence",
+         "source_record_disputed"}
 
-# Highest reliability each access type can support (grading rubric, access table).
-ACCESS_CEILING = {"telemetry": "A", "ir_engagement": "A", "victim_statement": "A",
-                  "sample_analysis": "B", "statement": "B", "osint": "C",
-                  "undisclosed": "C", "actor_statement": "F"}
+# Best access level each kind of access can support (grading rubric, access table).
+ACCESS_CEILING = {"telemetry": "direct", "ir_engagement": "direct",
+                  "victim_statement": "direct", "sample_analysis": "limited",
+                  "statement": "limited", "osint": "indirect", "undisclosed": "indirect",
+                  "actor_statement": "adversary"}
 
 SCALE_WORDS = re.compile(
     r"\b\d[\d,.]*\s*(?:GB|TB|MB|PB|gigabytes?|terabytes?|records?|victims?|organi[sz]ations?|"
     r"customers?|users?|accounts?|files?|documents?|million|billion)\b", re.IGNORECASE)
-COMPOUND = re.compile(r";\s|\b(?:and|while|whereas)\b[^.]{0,60}\b(?:was|were|is|are|has|have|"
-                      r"used|deployed|stole|exfiltrated|exploited|attributed)\b", re.IGNORECASE)
+# A second clause: a conjunction, then a new subject (up to four words), then a verb.
+# "X and Y were unsuccessful" is one assertion about two objects and does not match,
+# because nothing stands between the conjunction's noun phrase and the first verb
+# except the shared subject. "X was deleted and the actor then stole Y" matches.
+_VERB = (r"(?:was|were|is|are|has|have|had|did|used|deployed|stole|exfiltrated|exploited|"
+         r"attributed|deleted|installed|targeted|compromised|collected|observed|attempted|"
+         r"failed|blocked|sent|ran|executed|created|obtained|accessed|moved)")
+COMPOUND = re.compile(
+    r";\s"
+    r"|\b" + _VERB + r"\b[^.;]{0,80}?,?\s\b(?:and|but|while|whereas|although)\b\s"
+    r"(?:(?!\b(?:and|but|or)\b)[\w'/-]+\s){0,4}?\b" + _VERB + r"\b",
+    re.IGNORECASE)
 ISO_DATE = re.compile(r"^\d{4}-\d{2}(-\d{2})?$")
 
 
@@ -74,9 +89,14 @@ def normalise(text):
     return " ".join(text.split()).lower()
 
 
-def rel_better(a, b):
-    """True when reliability a is a better grade than b. E and F never outrank A to D."""
-    return RELIABILITY.index(a) < RELIABILITY.index(b)
+def level_better(a, b):
+    """True when access level a is stronger than b."""
+    return ACCESS_LEVEL.index(a) < ACCESS_LEVEL.index(b)
+
+
+def support_rank(value):
+    """1 (established) to 5 (unverified). Lower is stronger."""
+    return CLAIM_SUPPORT.index(value) + 1
 
 
 class Checker:
@@ -168,9 +188,14 @@ class Checker:
         dropped = any((h or {}).get("fidelity") in ("caveats_dropped", "embellished") for h in chain)
 
         grading = item.get("grading") or {}
-        rel, cred = grading.get("source_reliability"), grading.get("information_credibility")
-        rel_ok = self.enum(cid, "grading.source_reliability", rel, set(RELIABILITY))
-        cred_ok = self.enum(cid, "grading.information_credibility", cred, set(CREDIBILITY))
+        for old in ("source_reliability", "information_credibility"):
+            if old in grading:
+                self.fail(cid, "schema", f"grading.{old} is not part of the evidence grade; use "
+                                         "grading.access_level and grading.claim_support")
+        rel, support = grading.get("access_level"), grading.get("claim_support")
+        rel_ok = self.enum(cid, "grading.access_level", rel, set(ACCESS_LEVEL))
+        cred_ok = self.enum(cid, "grading.claim_support", support, set(CLAIM_SUPPORT))
+        cred = support_rank(support) if cred_ok else None
         if not (grading.get("rationale") or "").strip():
             self.fail(cid, "schema", "grading.rationale is missing")
         track = grading.get("track_record_applied")
@@ -212,36 +237,47 @@ class Checker:
             self.fail(cid, "corroboration", "corroboration basis 'platform' requires "
                                             "provenance_basis 'platform-resolved'")
 
-        # --- caps (grading-rubric.md, R1 to R12) ------------------------------------
+        # --- caps (grading-rubric.md, R1 to R13) ------------------------------------
         if rel_ok and cred_ok:
             if unresolved and not press_originated:
                 if "unresolved_provenance" not in flags:
                     self.fail(cid, "R1", "primary_source.url is null, so flag unresolved_provenance must be set")
-                if rel != "D" and ctype != "actor_claim":
-                    self.fail(cid, "R1", f"provenance is unresolved: reliability must be D, not {rel}")
+                if rel != "untraced" and ctype != "actor_claim":
+                    self.fail(cid, "R1", f"provenance is unresolved: access level must be untraced, not {rel}")
                 if cred < 3:
-                    self.fail(cid, "R1", f"provenance is unresolved: credibility is capped at 3, not {cred}")
+                    self.fail(cid, "R1", f"provenance is unresolved: claim support is tentative at best, not {support}")
             if ctype == "actor_claim":
-                if rel != "F":
-                    self.fail(cid, "R3", f"actor claims are reliability F, not {rel}")
+                if rel != "adversary":
+                    self.fail(cid, "R3", f"actor claims have access level adversary, not {rel}")
                 if "actor_sourced" not in flags:
                     self.fail(cid, "R3", "actor claims must carry flag actor_sourced")
                 if n_primaries < 2:
-                    if SCALE_WORDS.search(item.get("claim") or "") and cred != 6:
+                    if SCALE_WORDS.search(item.get("claim") or "") and support != "unverified":
                         self.fail(cid, "R2", "uncorroborated actor claim about scale, victim count or "
-                                             f"data volume: credibility must be 6, not {cred}")
+                                             f"data volume: claim support must be unverified, not {support}")
                     elif cred < 3:
-                        self.fail(cid, "R3", f"uncorroborated actor claim: credibility is capped at 3, not {cred}")
+                        self.fail(cid, "R3", f"uncorroborated actor claim: claim support is tentative at best, not {support}")
+            if ctype in ("attribution", "assessment") and n_primaries < 2 and not first_party:
+                stated = str(primary.get("stated_confidence") or "").lower()
+                level = next((l for l in ("low", "moderate", "medium", "high")
+                              if re.search(r"\b" + l + r"\b[- ]confidence|\bconfidence\b[^.]{0,20}\b"
+                                           + l + r"\b", stated)), None)
+                floor = {"high": 2 if ctype == "attribution" else 3, "moderate": 3,
+                         "medium": 3, "low": 4, None: 3}[level]
+                if cred < floor:
+                    said = f"states {level} confidence" if level else "states no confidence level"
+                    self.fail(cid, "R13", f"{ctype} on one primary that {said}: claim support is "
+                                          f"{CLAIM_SUPPORT[floor - 1]} at best, not {support}")
             if ctype == "attribution" and cred < 2 and n_primaries < 2:
-                self.fail(cid, "R4", "attribution cannot be credibility 1 unless two independent primaries agree")
+                self.fail(cid, "R4", "attribution cannot be established unless two independent primaries agree")
             if cred == 1 and (n_primaries < 2 or cbasis == "unchecked") and not first_party:
-                self.fail(cid, "R5", "credibility 1 requires two or more independent primaries with a "
-                                     "corroboration basis other than 'unchecked'")
+                self.fail(cid, "R5", "claim support established requires two or more independent "
+                                     "primaries with a corroboration basis other than 'unchecked'")
             if press_originated:
-                if rel != "D":
-                    self.fail(cid, "R6", f"press_originated claims are reliability D, not {rel}")
+                if rel != "untraced":
+                    self.fail(cid, "R6", f"press_originated claims have access level untraced, not {rel}")
                 if cred < 3:
-                    self.fail(cid, "R6", f"press_originated claims are capped at credibility 3, not {cred}")
+                    self.fail(cid, "R6", f"press_originated claims are tentative at best, not {support}")
                 if item.get("load_bearing") and not item.get("promoted_by_user"):
                     self.fail(cid, "R6", "press_originated claims are not load-bearing unless the user "
                                          "promotes them (set promoted_by_user: true)")
@@ -250,12 +286,12 @@ class Checker:
                                      "caveats_dropped_in_chain must be set")
             if access_ok and not unresolved and ctype != "actor_claim":
                 ceiling = ACCESS_CEILING[primary["access"]]
-                if rel in "ABCD" and ceiling in "ABCD" and rel_better(rel, ceiling):
-                    self.fail(cid, "R8", f"access '{primary['access']}' supports reliability {ceiling} "
-                                         f"at best, not {rel}")
-            if rel == "E" and "http" not in (grading.get("rationale") or ""):
-                self.warn(cid, "E", "reliability E requires a citation for the documented history of "
-                                    "inaccurate claims; none found in the rationale")
+                if level_better(rel, ceiling):
+                    self.fail(cid, "R8", f"access '{primary['access']}' supports access level "
+                                         f"{ceiling} at best, not {rel}")
+            if "source_record_disputed" in flags and "http" not in (grading.get("rationale") or ""):
+                self.warn(cid, "record", "source_record_disputed requires a citation for the documented "
+                                         "history of inaccurate claims; none found in the rationale")
         # R12: first-party observation is the top of the scale, and only that.
         if first_party:
             if ctype != "observation":
@@ -264,15 +300,24 @@ class Checker:
                 self.fail(cid, "R12", "a first-party item must have access telemetry")
             if basis != "first-party":
                 self.fail(cid, "R12", "a first-party item must have provenance_basis first-party")
-            if rel_ok and rel != "A":
-                self.fail(cid, "R12", f"a first-party observation is reliability A, not {rel}")
+            if rel_ok and rel != "direct":
+                self.fail(cid, "R12", f"a first-party observation has access level direct, not {rel}")
             if cred_ok and cred != 1 and not (cred == 2 and "deception_indicators_present" in flags):
-                self.fail(cid, "R12", "a first-party observation is credibility 1, or 2 with "
+                self.fail(cid, "R12", "a first-party observation is established, or firm with "
                                       "deception_indicators_present where log tampering is suspected")
         elif basis == "first-party":
             self.fail(cid, "R12", "provenance_basis first-party is for observations in the user's "
                                   "own telemetry (primary_source.type first_party)")
         age = recency.get("age_days")
+        start = recency.get("date_observed")
+        if start in (None, "unknown"):
+            start = recency.get("date_published")
+        if isinstance(age, int) and isinstance(start, str) and re.match(r"^\d{4}-\d{2}-\d{2}$", start):
+            expected = (self.today - dt.date.fromisoformat(start)).days
+            if abs(expected - age) > 1:
+                self.warn(cid, "R9", f"age_days is {age} but {start} is {expected} days before the "
+                                     "assessment date; age counts from date_observed, or from "
+                                     "date_published when that is unknown")
         if isinstance(age, int) and age > 180 and "stale" not in flags:
             self.warn(cid, "R9", f"claim is {age} days old; set flag stale if the topic is fast-moving")
         if track in ("boundary_up", "boundary_down") and basis != "platform-resolved":
@@ -311,17 +356,30 @@ class Checker:
                 def footing(i):
                     # Footing bands from evidence-item-schema.md; lower is weaker.
                     g = i.get("grading") or {}
-                    rel, cred = g.get("source_reliability"), g.get("information_credibility") or 6
+                    rel, support = g.get("access_level"), g.get("claim_support")
+                    cred = support_rank(support) if support in CLAIM_SUPPORT else 5
                     band = {1: 3, 2: 2, 3: 1}.get(cred, 0)
-                    if cred == 1 and rel == "C":
+                    if cred == 1 and rel == "indirect":
                         band = 2
-                    if rel in ("D", "E", "F"):
+                    if rel in LOWERS_FOOTING or "source_record_disputed" in (i.get("flags") or []):
                         band = max(band - 1, 0)
-                    return (band, -cred, -{"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 4}.get(rel, 4))
+                    track = g.get("track_record_applied")
+                    if track == "boundary_down":
+                        band = max(band - 1, 0)
+                    elif track == "boundary_up":
+                        band = min(band + 1, 3)
+                    order = ACCESS_LEVEL.index(rel) if rel in ACCESS_LEVEL else len(ACCESS_LEVEL)
+                    return (band, -cred, -order)
                 lowest = min(map(footing, bearing))
                 if footing(ids[weakest]) != lowest:
                     self.fail(None, "aggregate", f"weakest_link '{weakest}' is not the lowest-graded "
                                                  "load-bearing claim")
+                else:
+                    tied = sorted(str(i.get("claim_id")) for i in bearing if footing(i) == lowest)
+                    if len(tied) > 1 and weakest != tied[0]:
+                        self.warn(None, "aggregate", f"claims {', '.join(tied)} tie as the weakest "
+                                                     f"link; name the lowest claim_id ({tied[0]}) "
+                                                     "and list the others with it")
         else:
             self.warn(None, "aggregate", "no claim is marked load_bearing; the weakest link cannot be checked")
         for field in ("grade_range", "summary_line", "independent_primaries"):

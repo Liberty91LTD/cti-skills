@@ -1,6 +1,6 @@
 # Source types
 
-This table classifies sources by type, access profile and interest. It does not grade reliability. Reliability is assessed per claim by the skill, from the access type, corroboration and the source's own confidence language. PRs that add reliability opinions, track-record notes or ratings for a named organisation will not be merged.
+This table classifies sources by type, access profile and interest. It does not grade sources. The grade is worked out per claim by the skill, from the stated access, corroboration and the source's own confidence language. PRs that add reliability opinions, track-record notes or ratings for a named organisation will not be merged.
 
 `scripts/resolve_provenance.py` reads this file directly. It is a lookup table, not model knowledge, so classification is deterministic and auditable. If a domain is not listed, the script returns `unknown` and the agent must not fill the gap from memory.
 

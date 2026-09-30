@@ -56,9 +56,9 @@ This pack *offers* tradecraft vocabularies. It does not enforce them. Skills tha
 
 Each has a dedicated skill (`/apply-tlp`, `/score-source`, `/confidence-language`, `/likelihood-language`) that the orchestrator auto-invokes.
 
-### The one gate: graded evidence
+### The one default: graded evidence
 
-Since 2.0 there is one exception to "opt-in". `/ach`, `/threat-assessment` and `/writing-assessments` require graded evidence items and run `/quality-of-information-check` first when handed raw URLs or text. A structured technique run on ungraded evidence produces output with the shape of rigour and none of the discipline, so this one is enforced.
+Since 2.0, `/ach`, `/threat-assessment` and `/writing-assessments` prefer graded evidence items and run `/quality-of-information-check` first when handed raw URLs or text. The user can skip it. A run on ungraded evidence is labelled `Evidence basis: ungraded`, carries no invented grades, and is capped at Moderate confidence, so the reader always knows which kind of product they are holding.
 
 The principle behind it: confidence in a judgment is bounded above by the weakest load-bearing claim, and first-party observation is the top of the scale, not outside it.
 
@@ -68,8 +68,9 @@ When you work with sources:
 - **Grade claims, not events, and not outlets.** Use `/quality-of-information-check` and its fixed rubric.
 - **Do not assert what was not established.** No primary the script or platform did not resolve, no corroboration without data, no access type inferred from reputation, no invented confidence language.
 - **Carry `provenance_basis` through** (`platform-resolved`, `script-resolved`, `model-judged`) into every product built on the evidence.
-- **Enter hits in the user's own telemetry as A1 observations.** CVSS and EPSS are reference data, not evidence.
-- **Never add reliability ratings to `source-types.md`.** It records what an organisation is, not how much to trust it.
+- **Enter hits in the user's own telemetry as observations graded direct and established.** CVSS and EPSS are reference data, not evidence.
+- **Write the evidence grade in words.** Access level and claim support, for example "direct, firm". It is not an Admiralty rating: never write it as a letter and a number, and never convert one into the other. Admiralty ratings apply to lookup results and single items through `/source-assessment`.
+- **Never add ratings of organisations to `source-types.md`.** It records what an organisation is, not how much to trust it.
 
 ## External APIs
 

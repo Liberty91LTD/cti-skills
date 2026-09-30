@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Harbour Lynx targets managed file transfer servers | Example Vendor Blog</title>
+<meta property="article:published_time" content="2026-09-20T09:00:00+00:00">
+</head><body>
+  <!-- Synthetic test fixture. Invented content; not a copy of any published article. -->
+  <!-- Reproduces a page whose body is split across sibling sections, none holding most of the text. -->
+  <nav class="menu"><a href="/">Home</a></nav>
+  <article class="post-x1">
+    <section class="blk"><div><div>
+      <h3>Introduction</h3>
+      <p>We identified renewed exploitation of managed file transfer servers by a cluster we track as Harbour Lynx, observed in our telemetry across several sectors.</p>
+      <p>The operators changed one character in the request path, which allowed the request to pass filtering rules that matched the literal path only.</p>
+    </div></div></section>
+    <section class="blk"><div><div>
+      <h3>Post-exploitation activity</h3>
+      <p>After gaining access the operators placed a web shell on the server and used it to run commands under the service account of the application.</p>
+      <p>We observed archive files being created in temporary directories shortly before outbound transfers to infrastructure controlled by the operators.</p>
+    </div></div></section>
+    <section class="blk"><div><div>
+      <h3>Attribution</h3>
+      <p>We assess with moderate confidence that this activity is conducted by the same operators as the campaign we reported in June of this year.</p>
+      <p>The assessment rests on overlapping infrastructure and on the reuse of a distinctive file naming scheme seen in both periods of activity.</p>
+    </div></div></section>
+    <section class="blk"><div><div>
+      <h3>Remediation</h3>
+      <p>Apply the vendor update and restrict administrative endpoints from the public internet, which does not affect ordinary user sessions.</p>
+      <p>Organisations that find a web shell should treat the host as compromised, preserve evidence and rotate every credential reachable from it.</p>
+    </div></div></section>
+  </article>
+  <footer class="footer"><a href="/about">About</a></footer>
+</body></html>

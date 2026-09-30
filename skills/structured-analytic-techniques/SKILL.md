@@ -20,9 +20,9 @@ SATs are formal methods that externalise analytical thinking, making it transpar
 
 ## Start With the Evidence
 
-The Quality of Information Check is the default first step of any diagnostic run. Before hypotheses are tested or an assessment is written, run `/quality-of-information-check` on the reports and articles the analysis will rest on. It resolves each one to its originating source, splits it into claims and grades each claim. `ach`, `threat-assessment` and `writing-assessments` refuse ungraded evidence.
+The Quality of Information Check is the default first step of any diagnostic run. Before hypotheses are tested or an assessment is written, run `/quality-of-information-check` on the reports and articles the analysis will rest on. It resolves each one to its originating source, splits it into claims and grades each claim. `ach`, `threat-assessment` and `writing-assessments` prefer graded evidence and run the check themselves when handed raw material.
 
-Skip it only when the evidence already arrives as graded evidence items, or when there are no documents to grade. Hits in the organisation's own telemetry enter as A1 observations (rubric rule R12). Third-party lookup results are rated through `source-assessment`.
+Skip it when the evidence already arrives as graded evidence items, when there are no documents to grade, or when the user asks to. A skipped check puts those three skills in ungraded mode: the output is labelled as ungraded and confidence is capped at Moderate. Hits in the organisation's own telemetry enter as observations graded "direct, established" (rubric rule R12). Third-party lookup results are rated through `source-assessment` on the Admiralty scale, which is a separate instrument: the evidence grade applies to claims from documents, and neither is converted into the other.
 
 ## Technique Categories
 
@@ -81,7 +81,7 @@ Are you looking FORWARD (emerging threats)?
 Are you unsure if your evidence is RELIABLE, or where it comes from?
   → Quality of Information Check (quality-of-information-check skill)
 
-Do you need the Admiralty scale DEFINITIONS, or a grade for a single lookup result?
+Do you need the Admiralty scale DEFINITIONS, or an Admiralty rating for a single lookup result?
   → Source Assessment (source-assessment skill)
 
 Do you have MULTIPLE plausible explanations?

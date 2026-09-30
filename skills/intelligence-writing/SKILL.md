@@ -38,7 +38,7 @@ Use active voice. Name the actor.
 ### 4. Use Mandated Language
 - Confidence levels: per the confidence-levels skill
 - Likelihood language: per the likelihood-language skill
-- Source assessment: per the source-assessment skill (the Admiralty scale) and the quality-of-information-check skill (per-claim grades for documents and articles)
+- Source assessment: per the source-assessment skill (the Admiralty scale, for lookup results and single items) and the quality-of-information-check skill (the evidence grade, access level and claim support, for claims from documents and articles). Neither is converted into the other
 - TLP: per the tlp-guide skill
 
 ### 5. Be Specific
@@ -48,7 +48,7 @@ Use active voice. Name the actor.
 - ✅ "We identified 14 IP addresses and 3 domain names associated with this campaign"
 
 ### 6. Write From Claims, Not From Articles
-A product is written from graded claims, not from raw articles. The input is the claim table from `/claim-extraction` or the graded evidence items from `/quality-of-information-check`. If you are handed raw URLs or pasted reports, run `/quality-of-information-check` first.
+A product is best written from graded claims, not from raw articles. The input is the claim table from `/claim-extraction` or the graded evidence items from `/quality-of-information-check`. If you are handed raw URLs or pasted reports, run `/quality-of-information-check` first. If the user asks to skip it, write from the material as given, say in the sourcing paragraph that the evidence was not graded, and keep confidence at Moderate or below.
 
 - Each statement in the product traces to a claim ID. Observations are written as facts, attribution and assessment claims as assessments (see principle 3).
 - Keep the primary's hedge. If the primary says "possibly linked to", the product does not say "attributed to", whatever the outlet wrote.
@@ -61,10 +61,10 @@ A product is written from graded claims, not from raw articles. The input is the
 The Sources section lists the originating source of each claim. The outlet that carried it is listed as "via". Five outlets covering one vendor report are one row. Every product template below uses this table for its Sources section:
 
 ```markdown
-| Primary source | Via | Access | Grade | Claims supported |
-|----------------|-----|--------|-------|------------------|
-| [Org, report title, date] | [Outlet(s), or "direct"] | [telemetry / ir_engagement / sample_analysis / osint / undisclosed] | [e.g., A2 for C01-C03, B3 for C04] | [What it contributed] |
-| Unresolved | [Outlet] | none | [D3 at best] | [What it contributed] |
+| Primary source | Via | Access | Access level | Claim support | Claims supported |
+|----------------|-----|--------|--------------|---------------|------------------|
+| [Org, report title, date] | [Outlet(s), or "direct"] | [telemetry / ir_engagement / sample_analysis / osint / undisclosed] | [e.g., direct for C01-C04] | [e.g., firm for C01-C03, tentative for C04] | [What it contributed] |
+| Unresolved | [Outlet] | none | untraced | [tentative at best] | [What it contributed] |
 ```
 
 Grades are per claim. Where one primary supports claims with different grades, give each.
@@ -82,7 +82,7 @@ Template:
 
 ```markdown
 ## Sourcing
-This product draws on [N] originating source(s): [descriptor, e.g., "one security vendor and one government advisory"]. [Primary 1] states its findings come from [stated access]; [Primary 2] [stated access, or "does not disclose its access"]. We reviewed [the primary reporting directly / press coverage by [outlets], which is derivative of [primary]]. [Where relevant: "Press coverage strengthened the vendor's wording; this product uses the vendor's own wording."] The judgment that [X] rests on a single source. [The government advisory cites the vendor report and adds no independent evidence, so it is not counted as corroboration.] Provenance basis: [platform-resolved / script-resolved / model-judged (unverified)]. The weakest load-bearing claim is [claim, grade].
+This product draws on [N] originating source(s): [descriptor, e.g., "one security vendor and one government advisory"]. [Primary 1] states its findings come from [stated access]; [Primary 2] [stated access, or "does not disclose its access"]. We reviewed [the primary reporting directly / press coverage by [outlets], which is derivative of [primary]]. [Where relevant: "Press coverage strengthened the vendor's wording; this product uses the vendor's own wording."] The judgment that [X] rests on a single source. [The government advisory cites the vendor report and adds no independent evidence, so it is not counted as corroboration.] Provenance basis: [platform-resolved / script-resolved / model-judged (unverified)]. The weakest load-bearing claim is [claim, access level and claim support].
 ```
 
 ## Product Templates
@@ -129,9 +129,9 @@ tags: []
 [Sourcing paragraph, 2-3 sentences for a flash report]
 
 ## Sources
-| Primary source | Via | Access | Grade | Claims supported |
-|----------------|-----|--------|-------|------------------|
-| [Primary] | [Outlet or "direct"] | [Access] | [Per claim] | [What it contributed] |
+| Primary source | Via | Access | Access level | Claim support | Claims supported |
+|----------------|-----|--------|--------------|---------------|------------------|
+| [Primary] | [Outlet or "direct"] | [Access] | [Per claim] | [Per claim] | [What it contributed] |
 ```
 
 ### Intelligence Summary
@@ -173,7 +173,7 @@ tags: []
 [Sourcing paragraph]
 
 ## Sources
-[Sources table: primary, via, access, per-claim grades]
+[Sources table: primary, via, access, per-claim access level and claim support]
 ```
 
 ### Threat Assessment
@@ -228,7 +228,7 @@ tags: []
 [Sourcing paragraph]
 
 ## Sources
-[Sources table: primary, via, access, per-claim grades]
+[Sources table: primary, via, access, per-claim access level and claim support]
 ```
 
 ### Threat Actor Profile
@@ -287,7 +287,7 @@ tags: []
 [Sourcing paragraph]
 
 ## Sources
-[Sources table: primary, via, access, per-claim grades]
+[Sources table: primary, via, access, per-claim access level and claim support]
 ```
 
 ### Campaign Report
@@ -345,7 +345,7 @@ tags: []
 [Sourcing paragraph]
 
 ## Sources
-[Sources table: primary, via, access, per-claim grades]
+[Sources table: primary, via, access, per-claim access level and claim support]
 ```
 
 ## Writing Checklist
@@ -356,7 +356,7 @@ Before submitting any product:
 - [ ] All assessments carry confidence levels?
 - [ ] All forward-looking statements use likelihood language?
 - [ ] Written from graded claims, not raw articles?
-- [ ] Every claim graded with the Admiralty Scale, per claim?
+- [ ] Every claim from a document graded with access level and claim support, per claim, written in words?
 - [ ] Sources section cites the primary, with the outlet as "via"?
 - [ ] Sourcing paragraph present, with single-source judgments flagged and provenance basis stated?
 - [ ] Facts distinguished from assessments?

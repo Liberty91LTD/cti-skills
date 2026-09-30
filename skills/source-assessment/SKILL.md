@@ -8,15 +8,23 @@ metadata:
 
 # Source & Information Assessment — NATO Admiralty Scale
 
-Every piece of intelligence entering this platform MUST be assessed using the Admiralty Scale. This is non-negotiable. Tag every item with a two-character code (e.g., B2).
+Every piece of intelligence entering this platform MUST be assessed using the Admiralty Scale. This is non-negotiable. Tag every item with a two-character code (e.g., B2). Claims from documents are the exception: they carry the evidence grade instead, see below.
+
+## How this differs from the evidence grade
+
+The pack uses two instruments. They are not the same and neither is converted into the other.
+
+- **Admiralty reliability is the source's track record**: how often it has been right before. The evidence grade's **access level** is how the source knows the particular thing claimed.
+- **Admiralty is a letter and a number** (B2). **The evidence grade is two words**, access level then claim support ("direct, firm").
+- **Documents, articles and reports are graded per claim** by `/quality-of-information-check` with the evidence grade. Lookup results and single items are rated here, on the Admiralty scale.
 
 ## Scope of This Skill
 
 This skill is the reference for the Admiralty scale itself: what the letters and digits mean and how to apply them to a single item, such as a lookup result, a feed entry or a tip.
 
-Documents, articles and reports are graded per claim by `/quality-of-information-check`, using its fixed rubric (`references/grading-rubric.md` in that skill). It resolves the article to its originating source first, then grades each claim on the chain it arrived through. One report usually contains claims of different standing, so one grade for the whole report is wrong.
+Documents, articles and reports are graded per claim by `/quality-of-information-check`, using its fixed rubric (`references/grading-rubric.md` in that skill). That grade is the evidence grade, not an Admiralty rating. It resolves the article to its originating source first, then grades each claim on the chain it arrived through. One report usually contains claims of different standing, so one grade for the whole report is wrong.
 
-The pack does not store reliability opinions about named organisations. Where the guides and examples below name a vendor or agency, they illustrate a kind of access and track record. They are not standing grades for that organisation. The same organisation can publish an A2 observation and a C3 attribution in one report.
+The pack does not store reliability opinions about named organisations. Where the guides and examples below name a vendor or agency, they illustrate a kind of access and track record. They are not standing grades for that organisation. In one report the same organisation can publish an observation that `/quality-of-information-check` grades "direct, firm" and an attribution it grades "direct, tentative".
 
 ## Source Reliability
 
@@ -87,6 +95,6 @@ These illustrate the reasoning. They are not standing grades for the organisatio
 
 - Confusing source reliability with information credibility (a reliable source can relay inaccurate information)
 - Rating all vendor reports as A1 (vendors can have biases and errors)
-- Grading the outlet instead of the chain (a news article relaying a vendor report is graded on the vendor's access and wording, plus how faithfully the outlet transmitted it; five outlets covering one report are one source)
+- Giving an article one Admiralty rating for the outlet that published it (articles and reports go to `/quality-of-information-check`, which grades each claim on the primary's access and wording, plus how faithfully the outlet transmitted it; five outlets covering one report are one source)
 - Not reassessing ratings when new corroborating or contradicting information emerges
 - Omitting the rating entirely because "it's obvious" — always be explicit

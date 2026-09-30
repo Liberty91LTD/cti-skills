@@ -46,7 +46,7 @@ That's it. If you get stuck, type `/cti-setup` to fix keys, or `npx github:Liber
 - **14 threat-intel integrations** — Liberty91, VirusTotal, URLScan.io, Shodan, AbuseIPDB, GreyNoise, AlienVault OTX, Censys, MISP, OpenCTI, Ransomware.live, ReversingLabs, CrowdStrike Falcon Intelligence, Microsoft Sentinel. Each exposed as a lookup skill any other skill can chain.
 - **Local MITRE ATT&CK dataset** — TTP mapping without network calls.
 - **Tradecraft vocabularies** — TLP, NATO Admiralty Scale, MISP confidence, probability yardstick. Auto-applied by the orchestrator; also invokable directly.
-- **Enforced evidence grading** — provenance resolved by script or platform, claims anchored to source sentences, grades from a published rubric with hard caps. Hypothesis testing and assessments run on graded evidence only.
+- **Evidence grading by default** — provenance resolved by script or platform, claims anchored to source sentences, grades from a published rubric with hard caps. Hypothesis testing and assessments grade their evidence first, and label the result when you skip it.
 - **A single orchestrator skill** that routes requests and auto-applies rigor to every output.
 
 ## Install
@@ -129,7 +129,7 @@ Routes to `/threat-actor-profile` — produces an actor card with aliases, targe
 ```
 How reliable is this? https://example-news-site.com/2026/09/some-article
 ```
-Routes to `/quality-of-information-check` — traces the article to its originating source, splits the report into claims, and grades each claim on the Admiralty scale with a rationale.
+Routes to `/quality-of-information-check` — traces the article to its originating source, splits the report into claims, and grades each claim in words, on how the source knows and what backs the statement, with a rationale.
 
 ```
 /ach
@@ -150,7 +150,7 @@ Set up Priority Intelligence Requirements.
 
 ### Quality of Information Check — `/quality-of-information-check`
 
-**Grade the evidence before you reason about it.** `/quality-of-information-check` resolves any article back to its originating source, splits the report into individual claims, and grades each claim on the Admiralty scale with a stated rationale. Five outlets citing one vendor report count as one source. Caveats the press dropped in transmission are restored. Anything that cannot be traced to a primary is capped, not guessed. `/ach` and `/threat-assessment` now refuse to run on ungraded evidence.
+**Grade the evidence before you reason about it.** `/quality-of-information-check` resolves any article back to its originating source, splits the report into individual claims, and grades each claim with a stated rationale. The grade has two elements, written in words: access level (how the source knows) and claim support (what backs the statement). It is not an Admiralty rating: it rests on what the document says about how the finding was made, not on the source's track record. Five outlets citing one vendor report count as one source. Caveats the press dropped in transmission are restored. Anything that cannot be traced to a primary is capped, not guessed. `/ach` and `/threat-assessment` now grade their evidence first by default.
 
 Works on any URL, with no API key: the skill resolves the chain for the article you gave it and tells you exactly what it could not verify. Platform-resolved provenance, where a Liberty91 key returns the chain and the count of independent sources across the whole deduplicated event, is built into the skills and switches on when the platform serves those fields.
 
@@ -164,7 +164,7 @@ New to this? [How evidence grading works, in plain English](docs/how-evidence-gr
 - **`/claim-extraction`** — what does this report actually claim? Five to twelve atomic claims, typed as observation, attribution, assessment, actor claim or victim disclosure, each anchored to the exact source sentence.
 - **`/quality-of-information-check`** — the two above, plus transmission fidelity, corroboration counted by independent primaries, a fixed grading rubric, a deception screen, and machine-readable output.
 
-**What changed for existing users.** `/ach`, `/threat-assessment` and `/writing-assessments` require graded evidence. Hand them a URL and they run the check first. An assessment's confidence can no longer exceed what its weakest load-bearing claim supports, and a hit in your own telemetry counts as the strongest evidence there is. `/red-team-analysis` is now `/devils-advocacy`, which is what it always did. STIX and MISP exports carry grades per claim. Details in [VERSIONS.md](VERSIONS.md).
+**What changed for existing users.** `/ach`, `/threat-assessment` and `/writing-assessments` prefer graded evidence. Hand them a URL and they run the check first. Ask them to skip it and they still run: the output is labelled ungraded and capped at Moderate confidence. On graded evidence, an assessment's confidence can no longer exceed what its weakest load-bearing claim supports, and a hit in your own telemetry counts as the strongest evidence there is. `/red-team-analysis` is now `/devils-advocacy`, which is what it always did. STIX and MISP exports carry grades per claim. Details in [VERSIONS.md](VERSIONS.md).
 
 Every output is labelled `platform-resolved`, `script-resolved` or `model-judged`, and the label travels into whatever is built on it.
 
@@ -276,10 +276,10 @@ To verify keys are wired up: `./scripts/setup.sh --verify` (or ask Claude to ver
 ## FAQ
 
 **How do you keep the LLM from doing the analysis?**
-Three ways. Provenance resolution is deterministic: a script (or the Liberty91 pipeline) follows the links and classifies sources from a maintained table, so the chain is data, not a model's recollection. Claims are extracted with a fixed schema and anchored to the exact source sentence, so every extraction is checkable. Grading follows a published rubric with hard caps, and `/quality-control` rejects outputs that violate the schema. What remains model judgement (fidelity, rationale, deception screen) is labelled as such in every output. ACH and threat assessments will not run on ungraded evidence.
+Three ways. Provenance resolution is deterministic: a script (or the Liberty91 pipeline) follows the links and classifies sources from a maintained table, so the chain is data, not a model's recollection. Claims are extracted with a fixed schema and anchored to the exact source sentence, so every extraction is checkable. Grading follows a published rubric with hard caps, and `/quality-control` rejects outputs that violate the schema. What remains model judgement (fidelity, rationale, deception screen) is labelled as such in every output. ACH and threat assessments grade their evidence first by default, and a run where you skipped grading says so in its header and cannot claim High confidence.
 
 **How do you know the skill works?**
-`tests/provenance/` holds the resolver's expected chains and nineteen rubric violations the validator must reject. They run offline in CI. The same directory records a live run on 30 URLs and what resolved.
+`tests/provenance/` holds the resolver's expected chains and twenty-two rubric violations the validator must reject. They run offline in CI. The same directory records a live run on 30 URLs and what resolved. It also records a claim extraction run on five real vendor reports: 60 claims, all 60 anchors verbatim, 53 passing every review point, and what the review found missing.
 
 **Does the source-types table rate vendors?**
 No. It records what an organisation is (vendor, government, press, actor) and how it typically gets its information (telemetry, incident response, sample analysis). Reliability is computed per claim from access, corroboration and the source's own confidence language, never from a stored opinion about the organisation. PRs adding ratings are not merged.

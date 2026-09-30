@@ -51,9 +51,9 @@
         }
       ],
       "grading": {
-        "source_reliability": "A",
-        "information_credibility": 3,
-        "rationale": "Findings come from three incident response engagements, which supports reliability A. Attribution is an analytical judgement stated with moderate confidence from a single primary; R4 caps it at 2 and the stated moderate confidence places it at 3. Graded on the primary's wording (R7).",
+        "access_level": "direct",
+        "claim_support": "tentative",
+        "rationale": "Findings come from three incident response engagements, which supports access level direct. Attribution is an analytical judgement stated with moderate confidence from a single primary; R4 rules out established and R13 places it at tentative. Graded on the primary's wording (R7).",
         "track_record_applied": "none"
       },
       "corroboration": {
@@ -118,8 +118,8 @@
         }
       ],
       "grading": {
-        "source_reliability": "A",
-        "information_credibility": 2,
+        "access_level": "direct",
+        "claim_support": "firm",
         "rationale": "Northwind states the finding comes from three incident response engagements; single primary with direct access, corroboration unchecked.",
         "track_record_applied": "none"
       },
@@ -184,8 +184,8 @@
         }
       ],
       "grading": {
-        "source_reliability": "A",
-        "information_credibility": 2,
+        "access_level": "direct",
+        "claim_support": "firm",
         "rationale": "Northwind states the finding comes from three incident response engagements; single primary with direct access, corroboration unchecked.",
         "track_record_applied": "none"
       },
@@ -249,8 +249,8 @@
         }
       ],
       "grading": {
-        "source_reliability": "A",
-        "information_credibility": 2,
+        "access_level": "direct",
+        "claim_support": "firm",
         "rationale": "From the vendor's own samples recovered in its engagements. Lookups found one OTX pulse citing the same report, which is the same source; no independent primary.",
         "track_record_applied": "none"
       },
@@ -314,8 +314,8 @@
         }
       ],
       "grading": {
-        "source_reliability": "A",
-        "information_credibility": 2,
+        "access_level": "direct",
+        "claim_support": "firm",
         "rationale": "Northwind states the finding comes from three incident response engagements; single primary with direct access, corroboration unchecked.",
         "track_record_applied": "none"
       },
@@ -379,8 +379,8 @@
         }
       ],
       "grading": {
-        "source_reliability": "A",
-        "information_credibility": 3,
+        "access_level": "direct",
+        "claim_support": "tentative",
         "rationale": "A judgement about intent from a primary with direct access; single primary, no stated confidence level beyond 'we believe'.",
         "track_record_applied": "none"
       },
@@ -444,8 +444,8 @@
         }
       ],
       "grading": {
-        "source_reliability": "A",
-        "information_credibility": 3,
+        "access_level": "direct",
+        "claim_support": "tentative",
         "rationale": "A judgement about future behaviour from a primary with direct access; single primary, hedged as 'likely'.",
         "track_record_applied": "none"
       },
@@ -502,9 +502,9 @@
         }
       ],
       "grading": {
-        "source_reliability": "B",
-        "information_credibility": 2,
-        "rationale": "Attributed quote from a named person at the primary organisation; access is a statement to the press, which supports reliability B. Consistent with the report; single primary.",
+        "access_level": "limited",
+        "claim_support": "firm",
+        "rationale": "Attributed quote from a named person at the primary organisation; access is a statement to the press, which supports access level limited. Consistent with the report; single primary.",
         "track_record_applied": "none"
       },
       "corroboration": {
@@ -560,8 +560,8 @@
         }
       ],
       "grading": {
-        "source_reliability": "D",
-        "information_credibility": 3,
+        "access_level": "untraced",
+        "claim_support": "tentative",
         "rationale": "Unattributed assertion by the journalist with no primary behind it; R6 applies.",
         "track_record_applied": "none"
       },
@@ -595,8 +595,8 @@
     "claims_graded": 9,
     "independent_primaries": 1,
     "most_recent_observation": "2026-08",
-    "grade_range": "A2 to D3",
-    "summary_line": "core facts A2, attribution A3 on a single primary, trend statement press-originated",
+    "grade_range": "direct and firm, down to untraced and tentative",
+    "summary_line": "core facts direct and firm, attribution direct and tentative on a single primary, trend statement press-originated",
     "weakest_link": "C04",
     "provenance_basis": "script-resolved"
   },

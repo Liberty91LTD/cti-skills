@@ -92,6 +92,8 @@ None published — OpenCTI is self-hosted (or SaaS via Filigran) and the bottlen
 
 **Information credibility:** use the entity's own `confidence` field (0-100, maps onto `/confidence-levels` bands) and `x_opencti_score`; corroborate with the number of independent `createdBy` identities on related entities.
 
+**Evidence grades.** Admiralty ratings apply to lookup results and single items; the evidence grade from `/quality-of-information-check` applies to claims from documents; neither is converted into the other. An Organization's native reliability field is a track-record rating, so the evidence grade is never written there. The two words go in the labels or the description of the object that expresses the claim. See `skills/stix-bundle/SKILL.md`.
+
 ## Testing your credentials
 
 ```bash

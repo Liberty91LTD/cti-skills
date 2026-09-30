@@ -2,7 +2,9 @@
 
 The pattern lists used by `scripts/resolve_provenance.py`. The patterns live in the script (`ATTRIBUTION_PATTERNS`, `CONFIDENCE_PATTERNS`, `HEDGE_PATTERNS`, `ACCESS_PATTERNS`); this file documents them, with examples and known false positives. If you change one, change both.
 
-All matching is case-insensitive and works on sentences from the article body only. Navigation, footers, sidebars and related-article blocks are removed first.
+All matching is case-insensitive and works on sentences from the article body only. Navigation, footers, sidebars and related-article blocks are removed first. Table rows are kept, one line per row.
+
+Attribution phrases are also matched in the primary. A primary that says "Researchers at X found" is relaying X for that statement; the script reports it as `primary_relays`.
 
 ## 1. Attribution phrases
 
@@ -77,13 +79,15 @@ Read from the primary's own text. Mapped to an access type. If nothing matches, 
 | `victim_statement` | `(8-K\|10-K\|SEC) filing`, `notification (letter\|to affected)`, `we (recently )?(discovered\|identified\|detected\|became aware of) (unauthorized\|unauthorised\|suspicious)`, `breach notification` |
 | `actor_statement` | `leak site`, `ransom note`, `posted on (a\|an\|the) (forum\|Telegram)`, `claimed responsibility` |
 
+A match that follows a negation in the same clause is ignored (`no`, `not`, `never`, `without`, `neither`, `nor`, `n't`). "We did not observe a ransom note" is a statement about what the vendor did not see, not evidence that it read an actor's statement.
+
 When more than one type matches, the script reports every match in `access_evidence` and sets `access` to the type with the most matching sentences. Ties resolve in table order. The agent should read `access_evidence` and correct the value if the matches are about someone else's access ("CISA said it observed...", inside a vendor blog).
 
 ### False positives to expect
 
 - **"we observed"** in a press article is the outlet quoting the vendor. The script only runs access extraction on the primary document, never on an intermediary.
 - **"forensic analysis"** in a government advisory may describe a partner's work. Check the sentence.
-- A primary that aggregates ("public reporting indicates...") alongside its own telemetry will match both `osint` and `telemetry`. That mix is itself relevant to the grade: see reliability C in the grading rubric.
+- A primary that aggregates ("public reporting indicates...") alongside its own telemetry will match both `osint` and `telemetry`. That mix is itself relevant to the grade: see access level indirect in the grading rubric.
 
 ## 5. Dates
 

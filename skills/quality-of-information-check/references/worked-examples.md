@@ -16,23 +16,23 @@ Three runs, one per tier. The vendor, actor, victims, indicators and documents a
 
 **Steps 5 to 8.**
 
-| ID | Claim | Type | Access | Grade | Corrob. | Flags |
-|---|---|---|---|---|---|---|
-| C04 | Vendor assesses with moderate confidence that the activity was conducted by Crimson Heron. | attribution | ir_engagement | **A3** | 1 (unchecked) | single_source, caveats_dropped_in_chain, commercial_interest |
-| C02 | In all three cases initial access was through exploitation of CVE-2026-0001. | observation | ir_engagement | **A2** | 1 (unchecked) | single_source |
-| C01 | The vendor identified a previously undocumented backdoor, Embers, in three engagements. | observation | ir_engagement | **A2** | 1 (unchecked) | single_source |
-| C03 | Embers uses HTTPS C2 with a hard-coded list including 203.0.113.42 and 198.51.100.17. | observation | ir_engagement | **A2** | 1 (lookups) | single_source |
-| C05 | The intruders collected network diagrams and credentials; no destruction was observed. | observation | ir_engagement | **A2** | 1 (unchecked) | single_source |
-| C06 | Vendor believes the objective is pre-positioning. | assessment | ir_engagement | **A3** | 1 (unchecked) | single_source |
-| C07 | Vendor judges the group is likely to target additional utilities. | assessment | ir_engagement | **A3** | 1 (unchecked) | single_source |
-| C08 | Two of the three utilities were unaware until the vendor told them. | observation | statement | **B2** | 1 (unchecked) | single_source |
-| C09 | Attacks on water infrastructure have been rising sharply this year. | assessment | undisclosed | **D3** | 1 (unchecked) | single_source, press_originated, unresolved_provenance |
+| ID | Claim | Type | Stated access | Access level | Claim support | Corrob. | Flags |
+|---|---|---|---|---|---|---|---|
+| C04 | Vendor assesses with moderate confidence that the activity was conducted by Crimson Heron. | attribution | ir_engagement | direct | tentative | 1 (unchecked) | single_source, caveats_dropped_in_chain, commercial_interest |
+| C02 | In all three cases initial access was through exploitation of CVE-2026-0001. | observation | ir_engagement | direct | firm | 1 (unchecked) | single_source |
+| C01 | The vendor identified a previously undocumented backdoor, Embers, in three engagements. | observation | ir_engagement | direct | firm | 1 (unchecked) | single_source |
+| C03 | Embers uses HTTPS C2 with a hard-coded list including 203.0.113.42 and 198.51.100.17. | observation | ir_engagement | direct | firm | 1 (lookups) | single_source |
+| C05 | The intruders collected network diagrams and credentials; no destruction was observed. | observation | ir_engagement | direct | firm | 1 (unchecked) | single_source |
+| C06 | Vendor believes the objective is pre-positioning. | assessment | ir_engagement | direct | tentative | 1 (unchecked) | single_source |
+| C07 | Vendor judges the group is likely to target additional utilities. | assessment | ir_engagement | direct | tentative | 1 (unchecked) | single_source |
+| C08 | Two of the three utilities were unaware until the vendor told them. | observation | statement | limited | firm | 1 (unchecked) | single_source |
+| C09 | Attacks on water infrastructure have been rising sharply this year. | assessment | undisclosed | untraced | tentative | 1 (unchecked) | single_source, press_originated, unresolved_provenance |
 
 Rationale, for the load-bearing claim:
 
-> **C04, A3.** Northwind states its findings come from three incident response engagements, which supports reliability A. The attribution is an analytical judgement stated with moderate confidence, from a single primary; R4 caps attribution at credibility 2 without a second independent primary, and the vendor's own moderate confidence places it at 3. The article dropped the confidence statement; graded on the primary's wording (R7).
+> **C04: direct, tentative.** Northwind states its findings come from three incident response engagements, which supports access level direct. The attribution is an analytical judgement stated with moderate confidence, from a single primary; R4 rules out established without a second independent primary, and the vendor's own moderate confidence places it at tentative (R13). The article dropped the confidence statement; graded on the primary's wording (R7).
 
-**Aggregate.** Nine claims. One independent primary. Grade range A2 to D3. Summary line: "core facts A2, attribution A3 on a single primary, trend statement press-originated". Weakest link: C04.
+**Aggregate.** Nine claims. One independent primary. Grade range: direct and firm, down to untraced and tentative. Summary line: "core facts direct and firm, attribution direct and tentative on a single primary, trend statement press-originated". Weakest link: C04.
 
 **Gaps.** No independent confirmation of the attribution. The agency advisory has not been traced. Actor names could not be matched across vendors: provide `aliases.yml` or a Liberty91 key. The report does not name the utilities, so victim disclosures cannot be looked for.
 
@@ -56,14 +56,14 @@ The unclassified host is shown to the user. It is not classified from memory. If
 
 **Steps 3 to 5.** Fidelity is `unresolved` on the single hop. Corroboration 1, unchecked. R1 applies to every claim.
 
-| ID | Claim | Type | Grade | Flags |
-|---|---|---|---|---|
-| C01 | The stealer is delivered through invoice-themed email attachments. | observation | **D3** | single_source, unresolved_provenance |
-| C02 | It collects browser credentials and session cookies. | observation | **D3** | single_source, unresolved_provenance |
-| C03 | The sample's SHA-256 is given in the article. | observation | **D3** | single_source, unresolved_provenance |
-| C04 | The malware is sold on underground forums. | observation | **D3** | single_source, unresolved_provenance |
-| C05 | The developer is likely Russian-speaking. | attribution | **D3** | single_source, unresolved_provenance |
-| C06 | Finance teams are being deliberately targeted. | assessment | **D3** | single_source, unresolved_provenance |
+| ID | Claim | Type | Access level | Claim support | Flags |
+|---|---|---|---|---|---|
+| C01 | The stealer is delivered through invoice-themed email attachments. | observation | untraced | tentative | single_source, unresolved_provenance |
+| C02 | It collects browser credentials and session cookies. | observation | untraced | tentative | single_source, unresolved_provenance |
+| C03 | The sample's SHA-256 is given in the article. | observation | untraced | tentative | single_source, unresolved_provenance |
+| C04 | The malware is sold on underground forums. | observation | untraced | tentative | single_source, unresolved_provenance |
+| C05 | The developer is likely Russian-speaking. | attribution | untraced | tentative | single_source, unresolved_provenance |
+| C06 | Finance teams are being deliberately targeted. | assessment | untraced | tentative | single_source, unresolved_provenance |
 
 **Next steps.** C03 contains a hash. `/lookup-virustotal` and `/lookup-reversinglabs` can establish whether the sample exists and what it does, from data. If a lookup shows an organisation reporting the same sample from its own analysis, that organisation becomes a resolved primary for C02 and C03, and those two claims are regraded. C05 and C06 stay where they are.
 
@@ -91,20 +91,20 @@ Fourteen articles, three sources.
 
 **Step 5, grading.**
 
-| ID | Claim | Type | Grade | Corrob. | Flags |
-|---|---|---|---|---|---|
-| C01 | CVE-2026-0002 was exploited against internet-facing gateways from 2 September 2026, eight days before the patch. | observation | **A1** | 3 (platform) | |
-| C02 | Harbour Freight Lines states it detected unauthorised access on 4 September 2026. | victim_disclosure | **A2** | 1 (platform) | single_source |
-| C03 | The national CERT responded to intrusions at two government bodies using the same exploit. | observation | **A2** | 1 (platform) | single_source |
-| C04 | Vendor attributes the exploitation to Crimson Heron. | attribution | **B2** | 1 (platform) | single_source |
-| C05 | The actor claims on its leak site to have taken 1.2TB from Harbour Freight Lines. | actor_claim | **F6** | 1 (platform) | single_source, actor_sourced, deception_indicators_present |
+| ID | Claim | Type | Access level | Claim support | Corrob. | Flags |
+|---|---|---|---|---|---|---|
+| C01 | CVE-2026-0002 was exploited against internet-facing gateways from 2 September 2026, eight days before the patch. | observation | direct | established | 3 (platform) | |
+| C02 | Harbour Freight Lines states it detected unauthorised access on 4 September 2026. | victim_disclosure | direct | firm | 1 (platform) | single_source |
+| C03 | The national CERT responded to intrusions at two government bodies using the same exploit. | observation | direct | firm | 1 (platform) | single_source |
+| C04 | Vendor attributes the exploitation to Crimson Heron. | attribution | direct | tentative | 1 (platform) | single_source |
+| C05 | The actor claims on its leak site to have taken 1.2TB from Harbour Freight Lines. | actor_claim | adversary | unverified | 1 (platform) | single_source, actor_sourced, deception_indicators_present |
 
-> **C01, A1.** Three primaries with separate access report exploitation before the patch date: vendor telemetry, a government incident response engagement, and the victim's own filing. Corroboration is platform-resolved on the CVE and two shared indicators.
+> **C01: direct, established.** Three primaries with separate access report exploitation before the patch date: vendor telemetry, a government incident response engagement, and the victim's own filing. Corroboration is platform-resolved on the CVE and two shared indicators.
 
-> **C04, B2.** Attribution by one primary only; the CERT and the victim do not name an actor. R4 caps credibility at 2. Reliability moved from A to B by the platform's track record for this organisation's attribution claims (`track_record_applied: boundary_down`).
+> **C04: direct, tentative.** Attribution by one primary only; the CERT and the victim do not name an actor. R4 rules out established, and the vendor states no confidence level, so R13 places it at tentative. The vendor's access is telemetry, so the access level is direct. The platform's track record for this organisation's attribution claims is reported next to the grade (`track_record_applied: boundary_down`) and lowers the claim's footing by one band. It does not change the access level.
 
-> **C05, F6.** The actor's own figure. No primary corroborates the volume; the victim's filing confirms access and says nothing about data taken. R2 applies.
+> **C05: adversary, unverified.** The actor's own figure. No primary corroborates the volume; the victim's filing confirms access and says nothing about data taken. R2 applies.
 
-**Aggregate.** Five claims. Three independent primaries. Grade range A1 to F6. Summary line: "pre-patch exploitation A1 on three primaries, attribution B2 single-source, volume actor-claimed". Weakest link for the question asked: C01 is the only load-bearing claim, at A1.
+**Aggregate.** Five claims. Three independent primaries. Grade range: direct and established, down to adversary and unverified. Summary line: "pre-patch exploitation direct and established on three primaries, attribution tentative and single-source, volume claimed by the actor and unverified". Weakest link for the question asked: C01 is the only load-bearing claim, graded direct and established.
 
 **What this tells the reader.** The answer to the question is yes, on the strongest footing available. Attribution and the scale of the theft are separate matters with much weaker support, and the grade on the first does not transfer to them.

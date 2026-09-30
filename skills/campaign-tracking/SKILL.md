@@ -19,7 +19,7 @@ A campaign record is built from claims, and each claim belongs to the source tha
 3. **Grade per claim.** Run `/quality-of-information-check` on the primary (it calls `/claim-extraction`). The intrusion, the vector, the attribution and the actor's own figures carry different grades.
 4. **Store the grade with the entity.** Every timeline row, attack chain row, attribution statement and victim count carries the primary that supports it and the grade of the supporting claim.
 
-Actor claims about victim count or data volume are F6 until an independent primary corroborates them. Record them as actor-claimed, not as findings. Grades follow the fixed rubric in `/quality-of-information-check` (`references/grading-rubric.md`). Your own telemetry and SOC alerts are primaries in their own right, name them as such.
+Actor claims about victim count or data volume are graded "adversary, unverified" until an independent primary corroborates them. Record them as actor-claimed, not as findings. Grades follow the fixed rubric in `/quality-of-information-check` (`references/grading-rubric.md`). The grade is two words, access level then claim support, for example "direct, firm". It is not an Admiralty rating. Your own telemetry and SOC alerts are primaries in their own right, name them as such.
 
 ## Campaign Template
 
@@ -41,19 +41,19 @@ Actor claims about victim count or data volume are F6 until an independent prima
 | **Alias source** | [user / liberty91 / none] |
 
 ### Timeline
-| Date | Event | Primary | Grade |
-|------|-------|---------|-------|
-| YYYY-MM-DD | Initial delivery emails sent | Internal telemetry | A2 |
-| YYYY-MM-DD | First successful compromise | [Vendor, report title] | B2 |
-| YYYY-MM-DD | Lateral movement detected | SOC alert | A2 |
-| YYYY-MM-DD | Data exfiltration observed | Network forensics | A2 |
+| Date | Event | Primary | Access level | Claim support |
+|------|-------|---------|--------------|---------------|
+| YYYY-MM-DD | Initial delivery emails sent | Internal telemetry | direct | established |
+| YYYY-MM-DD | First successful compromise | [Vendor, report title] | limited | firm |
+| YYYY-MM-DD | Lateral movement detected | SOC alert | direct | established |
+| YYYY-MM-DD | Data exfiltration observed | Network forensics | direct | established |
 
 ### Attribution
 [Assessment of who is behind this campaign, with confidence level. Reference threat actor profile if available.]
 
-| Attribution statement | Primary | Stated confidence (verbatim) | Grade | Independent primaries |
-|-----------------------|---------|------------------------------|-------|-----------------------|
-| [Campaign is linked to X] | [Org, report title, date] | ["moderate confidence" / not stated] | [e.g., B3] | [Count, and basis] |
+| Attribution statement | Primary | Stated confidence (verbatim) | Access level | Claim support | Independent primaries |
+|-----------------------|---------|------------------------------|--------------|---------------|-----------------------|
+| [Campaign is linked to X] | [Org, report title, date] | ["moderate confidence" / not stated] | [e.g., limited] | [e.g., tentative] | [Count, and basis] |
 
 ### Victimology
 - **Sectors targeted**: [List]
@@ -63,14 +63,14 @@ Actor claims about victim count or data volume are F6 until an independent prima
 - **Common characteristics**: [What do victims have in common?]
 
 ### Attack Chain (Kill Chain / ATT&CK)
-| Phase | Technique (ATT&CK) | Details | Primary | Grade |
-|-------|-------------------|---------|---------|-------|
-| Reconnaissance | T1598 Phishing for Information | Targeted LinkedIn messages to identify employees | [Org, date] | [e.g., B2] |
-| Initial Access | T1566.001 Spearphishing Attachment | Malicious Word doc with macro | [Org, date] | [e.g., A2] |
-| Execution | T1059.001 PowerShell | Macro downloads PowerShell stager | [Org, date] | [e.g., A2] |
-| Persistence | T1547.001 Registry Run Keys | Run key added for backdoor | [Org, date] | [e.g., A2] |
-| C2 | T1071.001 Application Layer Protocol | HTTPS to legitimate cloud service | [Org, date] | [e.g., B2] |
-| Exfiltration | T1567.002 Exfiltration to Cloud Storage | Data uploaded to attacker-controlled cloud | [Org, date] | [e.g., B2] |
+| Phase | Technique (ATT&CK) | Details | Primary | Access level | Claim support |
+|-------|-------------------|---------|---------|--------------|---------------|
+| Reconnaissance | T1598 Phishing for Information | Targeted LinkedIn messages to identify employees | [Org, date] | [e.g., limited] | [e.g., firm] |
+| Initial Access | T1566.001 Spearphishing Attachment | Malicious Word doc with macro | [Org, date] | [e.g., direct] | [e.g., firm] |
+| Execution | T1059.001 PowerShell | Macro downloads PowerShell stager | [Org, date] | [e.g., direct] | [e.g., firm] |
+| Persistence | T1547.001 Registry Run Keys | Run key added for backdoor | [Org, date] | [e.g., direct] | [e.g., firm] |
+| C2 | T1071.001 Application Layer Protocol | HTTPS to legitimate cloud service | [Org, date] | [e.g., limited] | [e.g., firm] |
+| Exfiltration | T1567.002 Exfiltration to Cloud Storage | Data uploaded to attacker-controlled cloud | [Org, date] | [e.g., limited] | [e.g., firm] |
 
 ### Diamond Model
 | Vertex | Details |
@@ -117,11 +117,11 @@ Actor claims about victim count or data volume are F6 until an independent prima
 ### Sources
 One row per primary. Outlets that carried the primary go in "Via".
 
-| Date | Primary source | Via | Access | Reliability | Key Finding |
-|------|----------------|-----|--------|-------------|-------------|
+| Date | Primary source | Via | Access | Access level | Key Finding |
+|------|----------------|-----|--------|--------------|-------------|
 ```
 
-Reliability in the Sources table is the primary's reliability letter. The credibility digit belongs to each claim, so the full grade sits on the timeline, attribution and attack chain rows.
+Access level in the Sources table is the level that follows from the primary's stated access. It is the default for that primary's claims. Claim support belongs to each claim, so the full grade sits on the timeline, attribution and attack chain rows. Rows from your own telemetry, SOC alerts and forensics are first-party observations, graded "direct, established" (rule R12).
 
 ## Campaign Linking
 Campaigns may be related. Document relationships:
@@ -147,7 +147,7 @@ Linking on infrastructure, hashes and CVEs compares values directly and needs no
 - **Per-indicator first-hop investigation** — `/ip-investigation`, `/domain-investigation`, `/hash-investigation`, `/url-investigation`
 - **Ransomware-group campaigns** — `/lookup-ransomwarelive group-profile <name>` returns the group's documented TTPs, leak-site infrastructure, and per-group IOC + YARA dumps; pair with `/ransomware-ecosystem` knowledge cell
 - **Publish the campaign as a sharable artefact** — `/lookup-misp create-event` writes the cluster into your MISP instance; `/stix-bundle` produces the STIX 2.1 representation; `/lookup-opencti upload-stix` imports that bundle into your OpenCTI knowledge base (or `create-relationship` to link indicators to an existing campaign entity); `/lookup-liberty91 ingest` files the campaign write-up as a report in Liberty91, where it is enriched and matched into a Threat Event for your account (metered — confirm with the user first)
-- **Seed and update the timeline from occurrences** — `/lookup-liberty91 threat-events --technique <Txxxx> --target-sector <s> --occurred-after <date>` for candidate incidents, and `entity threat-actors <id> --section threat-events` once the actor is attributed. Each occurrence is already deduplicated across its reporting, so the timeline doesn't need re-collapsing; carry its `verification` stage and `credibility` band into the campaign record rather than restating them as your own judgement
+- **Seed and update the timeline from occurrences** — `/lookup-liberty91 threat-events --technique <Txxxx> --target-sector <s> --occurred-after <date>` for candidate incidents, and `entity threat-actors <id> --section threat-events` once the actor is attributed. Each occurrence is already deduplicated across its reporting, so the timeline doesn't need re-collapsing; carry its `verification` stage and `credibility` band into the campaign record as the platform's ratings rather than restating them as your own judgement, and do not copy them into an evidence grade
 - **Actor attribution** — `/threat-actor-profiling` consumes the campaign output to build / update an actor profile
-- **Provenance and grading** — `/source-provenance` on every ingested report, `/claim-extraction` to split it into typed claims, `/quality-of-information-check` for per-claim grades. `/source-assessment` remains the reference for the Admiralty scale itself.
+- **Provenance and grading** — `/source-provenance` on every ingested report, `/claim-extraction` to split it into typed claims, `/quality-of-information-check` for per-claim evidence grades (access level and claim support). `/source-assessment` remains the reference for the Admiralty scale itself, which applies to lookup results and single items. Neither is converted into the other.
 - **Apply rigor to the campaign report** — `/score-source`, `/apply-tlp`, `/confidence-language`, `/likelihood-language`, `/intelligence-writing`

@@ -199,7 +199,7 @@ The CLI passes the API response through, so once a host serves these fields they
 - Fields absent, or no `LIBERTY91_API_KEY` configured → fall back to `/source-provenance`, which resolves the chain by script for the URLs in hand. The result is labelled `script-resolved`, never `platform-resolved`.
 - Some present, some absent → each evidence item takes the label of where its own provenance came from, and the run reports the worst of them.
 
-**What today's API does return is not a substitute.** `--section sources` gives `source_name`, `url`, `published_at`, `stance` and `reliability` per report. That says who reported, not who originated. Do not build `primaries[]` or `chains[]` from it, and do not read `verification: corroborated` or the number of `corroborates` stances as `independent_primaries`. Pass the report URLs to `/source-provenance` instead. Never fill a missing provenance field with a guess.
+**What today's API does return is not a substitute.** `--section sources` gives `source_name`, `url`, `published_at`, `stance` and `reliability` per report. That says who reported, not who originated. Do not build `primaries[]` or `chains[]` from it, and do not read `verification: corroborated` or the number of `corroborates` stances as `independent_primaries`. Pass the report URLs to `/source-provenance` instead. Never fill a missing provenance field with a guess. The per-source `reliability` letter and the occurrence `credibility` number are the platform's ratings of the outlet and the event. They are passed to `/source-assessment` as Admiralty-style ratings where that skill is used. They are never copied into an evidence grade: `/quality-of-information-check` grades each claim itself, in words (access level and claim support).
 
 ## Alias resolution
 
@@ -260,6 +260,8 @@ Liberty91 emits Admiralty ratings natively — **use the platform's own numbers 
 
 When an occurrence rests on a single `D`/`E`-graded publisher, downgrade to that worst contributing source no matter how confident the summary reads.
 
+These ratings apply to the occurrence and its outlets as lookup results. They are not evidence grades. Claims from the reports behind an occurrence are graded by `/quality-of-information-check` with access level and claim support, and neither is converted into the other.
+
 ## Operational notes
 
 - **A bad filter value is a `400`, not an empty page.** If a sector or country filter errors, it is a typo in your query — not absence of data. Read `detail`; it names the field.
@@ -284,7 +286,7 @@ When an occurrence rests on a single `D`/`E`-graded publisher, downgrade to that
 - `/lookup-misp`, `/lookup-opencti` — the other two-way integrations; Liberty91 is the source, MISP the exchange layer, OpenCTI the internal graph
 - `/stix-bundle` — the bundle structure `--section stix` produces
 - `/source-provenance` — the fallback when provenance fields are absent or no key is configured; output is `script-resolved`
-- `/quality-of-information-check` — consumes provenance fields and alias resolution; grades per claim
+- `/quality-of-information-check` — consumes provenance fields and alias resolution; grades per claim with the evidence grade (access level and claim support), never from the platform's `reliability` or `credibility`
 - `/source-assessment`, `/confidence-levels`, `/tlp-guide` — consume the platform's native ratings rather than inventing new ones
 - `/intelligence-writing`, `/writing-assessments` — turn occurrences into finished products
 

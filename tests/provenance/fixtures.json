@@ -19,5 +19,11 @@
   "https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-260a": "fixtures/09-primary-direct.html",
   "https://thehackernews.com/2026/09/two-gateway-flaws-under-attack.html": "fixtures/10-press-multi-primary.html",
   "https://support.citrix.com/external/article/CTX000001/security-bulletin.html": "fixtures/10-primary-undated-bulletin.html",
-  "https://labs.watchtowr.com/gateway-pre-auth-rce-analysis/": "fixtures/10-primary-dated-report.html"
+  "https://labs.watchtowr.com/gateway-pre-auth-rce-analysis/": "fixtures/10-primary-dated-report.html",
+  "https://blog.example-vendor.com/harbour-lynx-file-transfer/": "fixtures/11-primary-split-sections.html",
+  "https://unit42.paloaltonetworks.com/placeholder-domain-lure/": {
+    "status": "blocked_by_robots",
+    "reason": "not needed by the test"
+  },
+  "https://www.malwarebytes.com/blog/news/2026/09/placeholder-domain-lure/": "fixtures/12-primary-relays-research.html"
 }

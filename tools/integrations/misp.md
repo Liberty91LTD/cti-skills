@@ -111,6 +111,10 @@ MISP itself has no public rate limits — the bottleneck is the host's CPU and D
 - Are the attributes corroborated (`to_ids` flag set, sightings present)?
 - Does it cite a primary report?
 
+An `admiralty-scale` tag set by another organisation is that party's Admiralty rating. Keep it and show it as such.
+
+**Evidence grades.** Admiralty ratings apply to lookup results and single items; the evidence grade from `/quality-of-information-check` applies to claims from documents; neither is converted into the other. Graded claims are not tagged with the `admiralty-scale` taxonomy. They carry the plain tags `cti-skills:access-level="direct"` and `cti-skills:claim-support="firm"` per attribute. See `skills/ioc-export/SKILL.md` for the tag list and the import table.
+
 ## STIX 2 round-tripping
 
 This pack writes STIX 2.1 bundles per `skills/stix-bundle/SKILL.md`. To push them into MISP:

@@ -24,18 +24,18 @@
     "rule": "schema"
   },
   {
-    "name": "attribution graded credibility 1 on a single primary",
+    "name": "attribution graded established on a single primary",
     "claim_id": "C04",
     "set": {
-      "grading.information_credibility": 1
+      "grading.claim_support": "established"
     },
     "rule": "R4"
   },
   {
-    "name": "credibility 1 without corroboration",
+    "name": "established without corroboration",
     "claim_id": "C02",
     "set": {
-      "grading.information_credibility": 1
+      "grading.claim_support": "established"
     },
     "rule": "R5"
   },
@@ -49,10 +49,10 @@
     "rule": "corroboration"
   },
   {
-    "name": "press-originated claim graded above D",
+    "name": "press-originated claim graded above untraced",
     "claim_id": "C09",
     "set": {
-      "grading.source_reliability": "B"
+      "grading.access_level": "limited"
     },
     "rule": "R6"
   },
@@ -76,7 +76,7 @@
     "rule": "R7"
   },
   {
-    "name": "undisclosed access graded A",
+    "name": "undisclosed access graded direct",
     "claim_id": "C02",
     "set": {
       "primary_source.access": "undisclosed"
@@ -84,7 +84,7 @@
     "rule": "R8"
   },
   {
-    "name": "sample analysis graded A",
+    "name": "sample analysis graded direct",
     "claim_id": "C03",
     "set": {
       "primary_source.access": "sample_analysis"
@@ -92,7 +92,7 @@
     "rule": "R8"
   },
   {
-    "name": "unresolved primary graded above D",
+    "name": "unresolved primary graded above untraced",
     "claim_id": "C02",
     "set": {
       "primary_source.url": null,
@@ -104,7 +104,7 @@
     "rule": "R1"
   },
   {
-    "name": "actor claim graded above F",
+    "name": "actor claim graded above adversary",
     "claim_id": "C02",
     "set": {
       "claim_type": "actor_claim",
@@ -116,13 +116,13 @@
     "rule": "R3"
   },
   {
-    "name": "actor claim about data volume not graded 6",
+    "name": "actor claim about data volume not graded unverified",
     "claim_id": "C02",
     "set": {
       "claim_type": "actor_claim",
       "claim": "The actor claims to have taken 400GB of data.",
-      "grading.source_reliability": "F",
-      "grading.information_credibility": 3,
+      "grading.access_level": "adversary",
+      "grading.claim_support": "tentative",
       "flags": [
         "single_source",
         "actor_sourced"
@@ -167,6 +167,40 @@
     "claim_id": "C02",
     "set": {
       "provenance_basis": null
+    },
+    "rule": "schema"
+  },
+  {
+    "name": "attribution graded firm on one primary stating moderate confidence",
+    "claim_id": "C04",
+    "set": {
+      "grading.claim_support": "firm"
+    },
+    "rule": "R13"
+  },
+  {
+    "name": "assessment graded firm on one primary stating no confidence",
+    "claim_id": "C06",
+    "set": {
+      "primary_source.stated_confidence": "not stated",
+      "grading.claim_support": "firm"
+    },
+    "rule": "R13"
+  },
+  {
+    "name": "attribution graded tentative where the primary states low confidence",
+    "claim_id": "C04",
+    "set": {
+      "primary_source.stated_confidence": "We assess with low confidence that this activity was conducted by Crimson Heron.",
+      "grading.claim_support": "tentative"
+    },
+    "rule": "R13"
+  },
+  {
+    "name": "old letter grade field present",
+    "claim_id": "C02",
+    "set": {
+      "grading.source_reliability": "A"
     },
     "rule": "schema"
   }

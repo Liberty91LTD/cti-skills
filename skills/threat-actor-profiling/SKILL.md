@@ -19,7 +19,7 @@ A profile is built from claims, and each claim belongs to the source that origin
 3. **Grade per claim.** Run `/quality-of-information-check` on the primary (it calls `/claim-extraction`). Observations, attribution and assessments from the same report carry different grades. Do not give a report one grade and apply it to everything in it.
 4. **Store the grade with the entity.** Every TTP row, tooling row, attribution statement and campaign entry carries the primary that supports it and the grade of the supporting claim. When two primaries support the same row, list both and keep the grades separate.
 
-An entity with no resolved primary stays in the profile only with grade D3 or lower and the note "unresolved provenance". Grades follow the fixed rubric in `/quality-of-information-check` (`references/grading-rubric.md`).
+An entity with no resolved primary stays in the profile only with the grade "untraced, tentative" or lower and the note "unresolved provenance". Grades follow the fixed rubric in `/quality-of-information-check` (`references/grading-rubric.md`). The grade is two words, access level then claim support, for example "direct, firm". It is not an Admiralty rating.
 
 ## Profile Template
 
@@ -45,9 +45,9 @@ An entity with no resolved primary stays in the profile only with grade D3 or lo
 ### Attribution Assessment
 [Detailed attribution discussion with confidence level. Who attributes this group and based on what evidence? Where do vendors disagree?]
 
-| Attribution statement | Primary | Stated confidence (verbatim) | Grade | Independent primaries |
-|-----------------------|---------|------------------------------|-------|-----------------------|
-| [Actor is linked to X] | [Org, report title, date] | ["moderate confidence" / not stated] | [e.g., B3] | [Count, and basis] |
+| Attribution statement | Primary | Stated confidence (verbatim) | Access level | Claim support | Independent primaries |
+|-----------------------|---------|------------------------------|--------------|---------------|-----------------------|
+| [Actor is linked to X] | [Org, report title, date] | ["moderate confidence" / not stated] | [e.g., limited] | [e.g., tentative] | [Count, and basis] |
 
 ### Targeting
 **Sectors**: [List targeted sectors with evidence]
@@ -56,17 +56,17 @@ An entity with no resolved primary stays in the profile only with grade D3 or lo
 **Evolution**: [How has targeting changed over time?]
 
 ### TTPs (MITRE ATT&CK)
-| Tactic | Technique | ID | Notes | Primary | Grade |
-|--------|-----------|-----|-------|---------|-------|
-| Initial Access | Spearphishing Attachment | T1566.001 | Primary delivery method | [Org, date] | [e.g., A2] |
-| Execution | PowerShell | T1059.001 | Used for download and execute | [Org, date] | [e.g., B2] |
-| ... | ... | ... | ... | ... | ... |
+| Tactic | Technique | ID | Notes | Primary | Access level | Claim support |
+|--------|-----------|-----|-------|---------|--------------|---------------|
+| Initial Access | Spearphishing Attachment | T1566.001 | Primary delivery method | [Org, date] | [e.g., direct] | [e.g., firm] |
+| Execution | PowerShell | T1059.001 | Used for download and execute | [Org, date] | [e.g., limited] | [e.g., firm] |
+| ... | ... | ... | ... | ... | ... | ... |
 
 ### Tooling
-| Tool | Type | Custom/Commodity | First Seen | Status | Notes | Primary | Grade |
-|------|------|-----------------|-----------|--------|-------|---------|-------|
-| [Tool 1] | Backdoor | Custom | 2024 | Active | Primary implant | [Org, date] | [e.g., B2] |
-| Cobalt Strike | C2 | Commodity | 2023 | Active | Used with modified profiles | [Org, date] | [e.g., A2] |
+| Tool | Type | Custom/Commodity | First Seen | Status | Notes | Primary | Access level | Claim support |
+|------|------|-----------------|-----------|--------|-------|---------|--------------|---------------|
+| [Tool 1] | Backdoor | Custom | 2024 | Active | Primary implant | [Org, date] | [e.g., limited] | [e.g., firm] |
+| Cobalt Strike | C2 | Commodity | 2023 | Active | Used with modified profiles | [Org, date] | [e.g., direct] | [e.g., firm] |
 
 ### Infrastructure Patterns
 - **Hosting preferences**: [Cloud providers, bulletproof hosting, compromised infrastructure]
@@ -94,12 +94,12 @@ An entity with no resolved primary stays in the profile only with grade D3 or lo
 ### Sources
 One row per primary. Outlets that carried the primary go in "Via".
 
-| Date | Primary source | Via | Access | Reliability | Key Contribution |
-|------|----------------|-----|--------|-------------|-----------------|
-| YYYY-MM-DD | [Originating org and report title] | [Outlets, or "direct"] | [telemetry / ir_engagement / sample_analysis / osint / undisclosed] | [A-F] | [What this source contributed to the profile] |
+| Date | Primary source | Via | Access | Access level | Key Contribution |
+|------|----------------|-----|--------|--------------|-----------------|
+| YYYY-MM-DD | [Originating org and report title] | [Outlets, or "direct"] | [telemetry / ir_engagement / sample_analysis / osint / undisclosed] | [direct / limited / indirect / untraced / adversary] | [What this source contributed to the profile] |
 ```
 
-Reliability in the Sources table is the primary's reliability letter. The credibility digit belongs to each claim, so the full grade sits on the entity rows above.
+Access level in the Sources table is the level that follows from the primary's stated access. It is the default for that primary's claims. Claim support belongs to each claim, so the full grade sits on the entity rows above.
 
 ## Alias Mapping
 Different vendors use different names for the same group:
@@ -146,5 +146,5 @@ With `alias_source: none`, names are not matched across vendors. Reports that us
 - **Underground-forum and Telegram footprint** — `/darkweb-collection` for forum/channel monitoring of an actor's known aliases
 - **Campaigns attributed to the actor** — `/campaign-tracking` for per-campaign records that roll up into the profile
 - **Knowledge cells the profile may feed into** — `/ransomware-ecosystem`, `/initial-access-brokers`, `/infostealers`, plus any country/sector knowledge cells (e.g., `/iran-cyber-espionage`)
-- **Provenance and grading** — `/source-provenance` on every ingested report, `/claim-extraction` to split it into typed claims, `/quality-of-information-check` for per-claim grades. `/source-assessment` remains the reference for the Admiralty scale itself.
+- **Provenance and grading** — `/source-provenance` on every ingested report, `/claim-extraction` to split it into typed claims, `/quality-of-information-check` for per-claim evidence grades (access level and claim support). `/source-assessment` remains the reference for the Admiralty scale itself, which applies to lookup results and single items. Neither is converted into the other.
 - **Apply rigor** — `/score-source`, `/apply-tlp`, `/confidence-language`, `/likelihood-language`, `/intelligence-writing`

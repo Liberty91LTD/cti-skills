@@ -81,6 +81,8 @@ For each URL the script returns:
 | `chain[]` | Ordered hops, the outlet nearest the user first, the primary last. Each hop has `org`, `type`, `url`, `date_published`, `title`, and `anchor_in_previous_hop` (the sentence in which the previous hop cited this one). |
 | `primary_source` | `org`, `type`, `title`, `date_published`, `url`, `access`, `access_evidence[]`, `stated_confidence`, `confidence_evidence[]`, `hedges[]`, `interest`, `resolution` |
 | `other_primaries[]` | Other originating documents linked from the same article, read where possible. Their claims belong to them. |
+| `primary_cites[]` | Originating organisations the primary itself links to. Not read. A claim the primary relays from one of them belongs to that organisation and needs its own chain. |
+| `primary_relays` | Present when the primary attributes a statement to another source. The sentences are in `attribution_sentences` under the primary's URL. A vendor blog that reports another firm's research is a transmitter for those claims: its own access does not apply to them. |
 | `background_references[]` | Primary-type links published well before the article, or whose date could not be checked and which sit deep in the text. Context, not origin. |
 | `unclassified_candidates[]` | Links to hosts not in the table, and social posts. Not followed. |
 | `attribution_sentences[]` | Sentences where the outlet says where its information came from, with organisations named and links found. |
@@ -125,7 +127,7 @@ If any hop is unresolved, say so in plain words and do not guess. "This article 
 
 ### 5. Hand off
 
-If the user wants to know how reliable the report is, or whether the outlet changed the primary's meaning, hand off to `/quality-of-information-check`. Do not judge fidelity or assign Admiralty grades here.
+If the user wants to know how reliable the report is, or whether the outlet changed the primary's meaning, hand off to `/quality-of-information-check`. Do not judge fidelity or assign grades here.
 
 ## What "resolved" does and does not mean
 
@@ -145,6 +147,8 @@ Check these before relying on a resolved chain:
 | Organisation named, nothing linked | `named_not_linked`. Name the organisation, state that its document was not read. |
 | Primary does not say how it knows | `access: undisclosed`. Never inferred from the organisation's reputation. |
 | Primary states no confidence | `stated_confidence: "not stated"`. Never invented, never paraphrased. |
+| The primary relays another organisation's research | `primary_relays` is set and the organisation appears in `primary_cites` or, if its host is not in the table, in `unclassified_candidates`. The script still names the document you gave it as the primary. Run the cited document as its own chain, and grade relayed claims on that. |
+| Tables in the document | Kept. Each row is one line in the cached text, cells separated by ` | `. Images of tables and tables drawn by script are not read; say so if the report's indicators are missing from the text. |
 | Host not in the table | `unknown`. Report it under unclassified candidates. Do not classify it from memory. Suggest adding a row. |
 | Corroboration | Not assessed by this skill. One chain is one source. |
 
@@ -183,4 +187,4 @@ Fixed. There are no flags to loosen it.
 - `/quality-of-information-check`: grades the claims once the chain is known.
 - `/claim-extraction`: splits the primary into typed, anchored claims.
 - `/lookup-liberty91`: platform-resolved provenance across a whole deduplicated event.
-- `/source-assessment`: the Admiralty scale reference.
+- `/source-assessment`: the Admiralty scale reference. The evidence grade is a different instrument.

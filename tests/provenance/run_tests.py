@@ -13,6 +13,7 @@ fixtures.json. No third-party article text is stored in this repository.
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -91,6 +92,43 @@ class Chains(unittest.TestCase):
         primary = data["results"][0]["primary_source"]
         self.assertEqual(primary["access"], "telemetry")
         self.assertTrue(any(e["access"] == "actor_statement" for e in primary["access_evidence"]))
+
+    def test_body_split_across_sections_is_kept_whole(self):
+        # Seen on a vendor blog: the body sits in sibling sections and none holds most of it.
+        with tempfile.TemporaryDirectory() as cache:
+            code, out, _ = run(RESOLVER, "text", "--fixtures", str(HERE / "fixtures.json"),
+                               "--cache-dir", cache,
+                               "https://blog.example-vendor.com/harbour-lynx-file-transfer/")
+            self.assertEqual(code, 0)
+            text = Path(json.loads(out)["text_file"]).read_text()
+        for phrase in ("renewed exploitation of managed file transfer servers",
+                       "placed a web shell on the server",
+                       "We assess with moderate confidence",
+                       "rotate every credential reachable from it"):
+            self.assertIn(phrase, text)
+
+    def test_primary_that_relays_research_is_reported(self):
+        # A vendor blog reporting another organisation's findings is a transmitter for them.
+        _, data, _ = resolve("https://www.malwarebytes.com/blog/news/2026/09/placeholder-domain-lure/")
+        result = data["results"][0]
+        self.assertEqual([c["org"] for c in result["primary_cites"]], ["Palo Alto Networks Unit 42"])
+        self.assertTrue(result["primary_cites"][0]["in_attribution_sentence"])
+        self.assertIn("primary_relays", result)
+
+    def test_negated_access_phrases_are_not_evidence(self):
+        _, data, _ = resolve("https://www.malwarebytes.com/blog/news/2026/09/placeholder-domain-lure/")
+        primary = data["results"][0]["primary_source"]
+        self.assertNotIn("actor_statement", [e["access"] for e in primary["access_evidence"]])
+
+    def test_table_rows_are_kept_as_lines(self):
+        with tempfile.TemporaryDirectory() as cache:
+            code, out, _ = run(RESOLVER, "text", "--fixtures", str(HERE / "fixtures.json"),
+                               "--cache-dir", cache,
+                               "https://www.malwarebytes.com/blog/news/2026/09/placeholder-domain-lure/")
+            self.assertEqual(code, 0)
+            text = Path(json.loads(out)["text_file"]).read_text()
+        self.assertIn("203.0.113.77 | IPv4 | Host serving the verification page", text)
+        self.assertNotIn("A caption that must be ignored", text)
 
     def test_output_carries_anchors_not_full_text(self):
         _, data, _ = resolve(EXPECTED[0]["url"])
@@ -195,13 +233,14 @@ class Validator(unittest.TestCase):
                 self.assertIn(case["rule"], rules)
 
     def test_weakest_link_follows_the_footing_bands(self):
-        # C04 is A3 (band 1, Low). C02 regraded D3 is band 0 (no confidence level): weaker.
+        # C04 is direct and tentative (band 1, Low). C02 regraded untraced and tentative is
+        # band 0 (no confidence level): weaker.
         doc = json.loads((HERE / "qoi" / "valid-tier2.json").read_text())
         item = next(i for i in doc["evidence_items"] if i["claim_id"] == "C02")
         item["load_bearing"] = True
         item["primary_source"]["url"] = None
-        item["grading"]["source_reliability"] = "D"
-        item["grading"]["information_credibility"] = 3
+        item["grading"]["access_level"] = "untraced"
+        item["grading"]["claim_support"] = "tentative"
         item["flags"] = ["single_source", "unresolved_provenance"]
         tmp = HERE / "qoi" / ".tmp-case.json"
         results = {}
@@ -227,7 +266,7 @@ class Validator(unittest.TestCase):
                                "date_published": None, "url": None, "access": "telemetry",
                                "stated_confidence": "not stated", "interest": "independent"},
             "chain": [],
-            "grading": {"source_reliability": "A", "information_credibility": 1,
+            "grading": {"access_level": "direct", "claim_support": "established",
                         "rationale": "First-party observation in the user's own telemetry. R12.",
                         "track_record_applied": "none"},
             "corroboration": {"independent_primaries": 1, "basis": "unchecked", "sources": [],
@@ -253,8 +292,9 @@ class Validator(unittest.TestCase):
         finally:
             tmp.unlink()
 
-    def test_first_party_observation_is_a1_and_participates(self):
-        # A1 without a second primary, load-bearing, anchors still checked for the rest.
+    def test_first_party_observation_is_top_of_scale_and_participates(self):
+        # Direct and established without a second primary, load-bearing; anchors still
+        # checked for the rest.
         code, result = self.run_doc(self.first_party_doc(),
                                     "--source-text", str(HERE / "qoi" / "primary.txt"),
                                     "--source-text", str(HERE / "qoi" / "article.txt"))
@@ -262,8 +302,8 @@ class Validator(unittest.TestCase):
         self.assertEqual(code, 0)
 
     def test_first_party_rules_are_enforced(self):
-        for changes in ({"grading.source_reliability": "B"},
-                        {"grading.information_credibility": 2},
+        for changes in ({"grading.access_level": "limited"},
+                        {"grading.claim_support": "firm"},
                         {"claim_type": "assessment"},
                         {"primary_source.access": "osint"},
                         {"provenance_basis": "script-resolved"}):

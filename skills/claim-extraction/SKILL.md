@@ -134,7 +134,7 @@ Target five to twelve claims for a primary document. Fewer is fine for a short a
 
 ### 6. Output the table and stop
 
-Grading is not this skill's job. Do not add Admiralty ratings, do not comment on reliability, do not say which claims are convincing.
+Grading is not this skill's job. Do not add grades or ratings of any kind, do not comment on how far a source can be trusted, do not say which claims are convincing.
 
 ## Articles: material that is not in the primary
 
@@ -144,7 +144,7 @@ When the input is a press article about a primary, extract from the primary firs
 |---|---|
 | **An attributed quote** from a named person at a primary organisation ("a Mandiant analyst told us") | A claim of that organisation. `primary_source.access` will be `statement`, with a one-hop chain through the article. A vendor employee quoted in an article is the vendor speaking, never an independent researcher. |
 | **A reference to another primary** ("CISA separately warned that...") | Not a claim of this chain. Flag it for a second provenance chain via `/source-provenance`. |
-| **An unattributed assertion by the journalist** ("the group has been increasingly active") | Kept, with flag `press_originated`. It will be graded reliability D, credibility no better than 3, and excluded from load-bearing status in `/ach` unless the user promotes it. |
+| **An unattributed assertion by the journalist** ("the group has been increasingly active") | Kept, with flag `press_originated`. It will be graded access level untraced, claim support tentative at best, and excluded from load-bearing status in `/ach` unless the user promotes it. |
 | **A restatement of the primary's claim with changed strength** ("attributed to" where the primary said "possibly linked to") | Not a new claim. Record it against the chain hop as a fidelity note for `/quality-of-information-check`. |
 
 The five-to-twelve target applies to the primary. Interview claims from the article are additional.

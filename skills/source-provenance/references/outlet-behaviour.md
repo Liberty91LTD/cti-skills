@@ -36,7 +36,7 @@ Reading the unresolved half:
 - **The only primary-type links were background.** A story about a new incident linking press releases from 2021. Returned under `background_references`.
 - **The article named no source and linked none.**
 
-Every one of those is a finding about the article. An unresolved chain is capped at reliability D and credibility 3 by the grading rubric. It is not repaired by the model recalling who probably published the original.
+Every one of those is a finding about the article. An unresolved chain gets access level untraced and claim support tentative at best under the grading rubric. It is not repaired by the model recalling who probably published the original.
 
 ## Why a resolved chain can still mislead
 

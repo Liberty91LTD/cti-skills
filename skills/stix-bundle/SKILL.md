@@ -1,6 +1,6 @@
 ---
 name: stix-bundle
-description: STIX 2.1 bundle creation reference. Object types, relationships, and JSON templates for structured threat intelligence sharing. Includes the per-claim mapping of Admiralty grades from /quality-of-information-check to STIX confidence, and the reverse mapping on import.
+description: STIX 2.1 bundle creation reference. Object types, relationships, and JSON templates for structured threat intelligence sharing. Includes the per-claim mapping of evidence grades (access level and claim support) from /quality-of-information-check to STIX confidence, and the reverse mapping on import.
 user-invocable: false
 metadata:
   version: 2.0.0
@@ -196,22 +196,23 @@ Represents a pattern that can be used to detect suspicious activity.
 
 ## Confidence and source grading
 
-Grades are exported **per claim, never per event**. Each evidence item from `/quality-of-information-check` (schema: `skills/quality-of-information-check/references/evidence-item-schema.md`) carries its own `source_reliability` and `information_credibility`, and each lands on the one STIX object that expresses that claim. Do not stamp one value across every object in a bundle, and do not put `confidence` on the bundle itself. A bundle is a container and has no such property.
+Grades are exported **per claim, never per event**. Each evidence item from `/quality-of-information-check` (schema: `skills/quality-of-information-check/references/evidence-item-schema.md`) carries its own `grading.access_level` and `grading.claim_support`, and each lands on the one STIX object that expresses that claim. Do not stamp one value across every object in a bundle, and do not put `confidence` on the bundle itself. A bundle is a container and has no such property.
 
-### Information credibility to `confidence`
+The evidence grade is not the Admiralty scale. It is two words, access level and claim support, and it is never written or exported as an Admiralty letter or number. Admiralty ratings apply to lookup results and single items; the evidence grade applies to claims from documents; neither is converted into the other.
 
-STIX 2.1 Appendix A (Confidence Scales), Admiralty Credibility table. Section 3.2 of the spec makes the Appendix A mappings normative, so use these values and no others.
+### Claim support to `confidence`
 
-| Information credibility | `confidence` on export | Range read on import |
-|---|---|---|
-| 1 Confirmed by other sources | 90 | 80 to 100 |
-| 2 Probably true | 70 | 60 to 79 |
-| 3 Possibly true | 50 | 40 to 59 |
-| 4 Doubtful | 30 | 20 to 39 |
-| 5 Improbable | 10 | 0 to 19 |
-| 6 Truth cannot be judged | omit the property | property absent |
+STIX `confidence` comes from claim support. The values are the pack's own mapping, chosen to sit inside the bands of `/confidence-levels` (High 80 to 100, Moderate 60 to 79, Low 40 to 59). Use these values and no others.
 
-Credibility 6 means the property is left out. It is never written as 0, which would read as credibility 5.
+| Claim support | `confidence` on export |
+|---|---|
+| established | 90 |
+| firm | 70 |
+| tentative | 50 |
+| disputed | 30 |
+| unverified | omit the property |
+
+Unverified means the property is left out. It is never written as 0.
 
 ### Which object carries it
 
@@ -224,21 +225,22 @@ Credibility 6 means the property is left out. It is never written as 0, which wo
 
 An attribution is a Relationship (`attributed-to`), so its grade goes there and not on the Threat Actor. A well-known actor object with `confidence: 50` wrongly says the actor's existence is in doubt.
 
-### Source reliability and the primary source
+### Access level and the primary source
 
-STIX has no reliability property. On the same object that carries `confidence`:
+STIX has no property for how the source knows. On the same object that carries `confidence`:
 
-- `x_liberty91_source_reliability`: the letter `A` to `F`, graded on the primary source.
+- `x_liberty91_access_level`: the word, one of `direct`, `limited`, `indirect`, `untraced`, `adversary`.
+- `x_liberty91_claim_support`: the word, one of `established`, `firm`, `tentative`, `disputed`, `unverified`.
 - An `external_references` entry for the primary source (`source_name`, `url`, and `description` with the report title and date). Cite the primary, not the outlet that relayed it.
 - When the grade was read from a confidence value rather than assessed, `x_liberty91_derived_from_confidence: true`.
 
-Reliability is still written when credibility is 6 and `confidence` is omitted, for example `F` on an uncorroborated actor claim.
+Both custom properties are still written when claim support is unverified and `confidence` is omitted, for example `adversary` and `unverified` on an uncorroborated actor claim.
 
-**OpenCTI.** Reliability belongs to the source, so set it on the primary source's Organization entity, which has a native A to F reliability field, and link the object to that Organization as its author (`created_by_ref`). The custom property still travels in the bundle for other consumers.
+**OpenCTI.** Do not write the evidence grade into an Organization's native reliability field. That field is a track-record rating of the source, and the evidence grade belongs to the claim. Put the two words in the labels or the description of the object that expresses the claim. The custom properties still travel in the bundle for other consumers.
 
 ### Worked example
 
-Two claims from one vendor report: an observation graded A2 and an attribution graded B3.
+Two claims from one vendor report: an observation graded direct, firm and an attribution graded direct, tentative.
 
 ```json
 [
@@ -253,7 +255,8 @@ Two claims from one vendor report: an observation graded A2 and an attribution g
     "pattern_type": "stix",
     "valid_from": "2026-09-20T00:00:00.000Z",
     "confidence": 70,
-    "x_liberty91_source_reliability": "A",
+    "x_liberty91_access_level": "direct",
+    "x_liberty91_claim_support": "firm",
     "external_references": [
       {
         "source_name": "Example Vendor",
@@ -272,7 +275,8 @@ Two claims from one vendor report: an observation graded A2 and an attribution g
     "source_ref": "campaign--<UUID>",
     "target_ref": "threat-actor--<UUID>",
     "confidence": 50,
-    "x_liberty91_source_reliability": "B",
+    "x_liberty91_access_level": "direct",
+    "x_liberty91_claim_support": "tentative",
     "external_references": [
       {
         "source_name": "Example Vendor",
@@ -284,15 +288,26 @@ Two claims from one vendor report: an observation graded A2 and an attribution g
 ]
 ```
 
-The `domain-name` SCO and the `threat-actor` SDO, if included, carry neither `confidence` nor the reliability property.
+The `domain-name` SCO and the `threat-actor` SDO, if included, carry neither `confidence` nor the two grade properties.
 
 ### Report objects
 
-A Report groups many claims, so it has no grade of its own. Where a consumer needs a value, write the **weakest link**: the `confidence` of the lowest-graded load-bearing claim (`event_qoi_summary.weakest_link`), with `x_liberty91_confidence_basis: "weakest_link"`. Never an average. If the weakest link is credibility 6, omit `confidence` and keep the basis property. This value exists for interoperability only. Analysis consumes the per-claim grades.
+A Report groups many claims, so it has no grade of its own. Where a consumer needs a value, write the **weakest link**: the `confidence` of the lowest-graded load-bearing claim (`event_qoi_summary.weakest_link`), with `x_liberty91_confidence_basis: "weakest_link"`. Never an average. If the weakest link is unverified, omit `confidence` and keep the basis property. This value exists for interoperability only. Analysis consumes the per-claim grades.
 
 ### Import direction
 
-Reading a bundle from elsewhere, map `confidence` back with the ranges in the table above, absent property = 6. Set the `derived_from_confidence` flag on every imported item. The number tells you what the producer thought, not how they knew, so `/quality-of-information-check` re-grades the item when a primary is available (rubric rule R11). Read reliability from `x_liberty91_source_reliability` when present. Otherwise it is `F`, cannot be judged. Do not infer it from the producer's name.
+Reading a bundle from elsewhere, turn `confidence` into claim support with this table.
+
+| `confidence` read on import | Claim support |
+|---|---|
+| 60 to 100 | firm |
+| 40 to 59 | tentative |
+| 1 to 39 | disputed |
+| absent or 0 | unverified |
+
+An imported value never gives `established`. That level needs counted independent primaries (rubric rule R5), and a number cannot show them. Access level for an imported item is `indirect` unless the primary is resolved. Do not infer it from the producer's name. Set the `derived_from_confidence` flag on every imported item. The number tells you what the producer thought, not how they knew, so `/quality-of-information-check` re-grades the item when a primary is available (rubric rule R11).
+
+An Admiralty rating that arrives on imported data is kept as that party's Admiralty rating and shown as such. It is not converted into an evidence grade.
 
 MISP tagging for the same grades is in `/ioc-export`.
 

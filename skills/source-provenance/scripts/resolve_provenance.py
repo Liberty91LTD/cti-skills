@@ -629,8 +629,9 @@ class ArticleParser(HTMLParser):
         kept = []
         for child in node.children:
             if isinstance(child, Node):
-                if child.tag in SKIP_TAGS:
-                    continue
+                if child.tag in SKIP_TAGS and not (
+                        child.tag == "figure" and any(n.tag == "table" for n in child.iter())):
+                    continue                        # a figure that wraps a table is kept
                 if child.tag == "header" and not in_article:
                     continue
                 self._prune(child, in_article or child.tag == "article")
@@ -639,23 +640,35 @@ class ArticleParser(HTMLParser):
 
     def _content_root(self):
         scores = {}
+        held = {}                   # <article>/<main> -> paragraph text inside it
+        page_total = 0
         for node in self.root.iter():
             if node.tag != "p" or node.parent is None:
                 continue
             length = node.measure()[0]
             if length < 60:
                 continue
+            page_total += length
             parent = node.parent
             scores[parent] = scores.get(parent, 0) + length
             if parent.parent is not None:
                 scores[parent.parent] = scores.get(parent.parent, 0) + length / 2
+            up = parent
+            while up is not None:
+                if up.tag in ("article", "main"):
+                    held[up] = held.get(up, 0) + length
+                up = up.parent
         if not scores:
             return self.root
         best = max(scores, key=scores.get)
-        # Widen to an enclosing <article> or <main> when it holds most of the same text.
+        # Widen to an enclosing <article> or <main> when it holds most of the same text,
+        # or when the body is split across sibling sections and the enclosing element
+        # holds most of the paragraph text on the page.
         node = best.parent
         while node is not None and node.parent is not None:
-            if node.tag in ("article", "main") and best.measure()[0] >= 0.6 * node.measure()[0]:
+            if node.tag in ("article", "main") and (
+                    best.measure()[0] >= 0.6 * node.measure()[0]
+                    or held.get(node, 0) >= 0.6 * page_total):
                 return node
             node = node.parent
         return best
@@ -684,6 +697,19 @@ class ArticleParser(HTMLParser):
                 text_len, link_len = child.measure()
                 if text_len == 0 or link_len / text_len >= LINK_DENSE or text_len / total < MINOR_SHARE:
                     continue
+            if child.tag == "tr":
+                cells, links = [], []
+                for cell in child.children:
+                    if isinstance(cell, Node) and cell.tag in ("td", "th"):
+                        text, found = self._flatten(cell)
+                        shift = len(" | ".join(cells + [""])) if cells else 0
+                        for link in found:
+                            link["offset"] += shift
+                        cells.append(text)
+                        links.extend(found)
+                if any(cells):
+                    out.append({"tag": "tr", "text": " | ".join(cells), "links": links})
+                continue
             if child.tag in BLOCK_TAGS and not any(
                     n.tag in BLOCK_TAGS for n in child.iter() if n is not child):
                 text, links = self._flatten(child)
@@ -827,7 +853,7 @@ class Page:
 
     @property
     def paragraphs(self):
-        return [b for b in self.blocks if b["tag"] in ("p", "li", "blockquote", "td")]
+        return [b for b in self.blocks if b["tag"] in ("p", "li", "blockquote", "td", "tr")]
 
     def text(self):
         return "\n\n".join(b["text"] for b in self.blocks)
@@ -865,6 +891,20 @@ def within_window(article_date, primary_date, month_only=False):
     return -WINDOW_AFTER_DAYS - (31 if month_only else 0) <= (a - p).days <= before
 
 
+RE_NEGATION = re.compile(r"\b(?:no|not|never|without|neither|nor)\b|n['’]t\b", re.IGNORECASE)
+
+
+def matches_affirmed(patterns, text):
+    """Like matches_any, but a match that follows a negation in the same clause is ignored:
+    "we did not observe a ransom note" is not evidence of access to an actor's statement."""
+    for pattern in patterns:
+        for m in pattern.finditer(text):
+            clause = re.split(r"[,;:]", text[:m.start()])[-1]
+            if not RE_NEGATION.search(clause[-60:]):
+                return True
+    return False
+
+
 def matches_any(patterns, text):
     return any(p.search(text) for p in patterns)
 
@@ -886,7 +926,7 @@ class Resolver:
     def resolve(self, url):
         out = {
             "input_url": url, "status": "unresolved", "provenance_basis": "script-resolved",
-            "chain": [], "primary_source": None, "other_primaries": [],
+            "chain": [], "primary_source": None, "other_primaries": [], "primary_cites": [],
             "background_references": [], "unclassified_candidates": [],
             "circular_citations": False,
             "recency": {"date_observed": None, "date_published": None, "age_days": None,
@@ -927,15 +967,46 @@ class Resolver:
         note = None if res.ok else f"primary located but not read: {res.error}"
         hop = self._hop(url, cls, page, anchor=anchor, notes=note,
                         fidelity=None if res.ok else "unresolved")
-        return self._primary(url, cls, page, res), hop
+        return self._primary(url, cls, page, res), hop, page
+
+    def _cites(self, page, url, cls, out):
+        """Other originating organisations the primary itself links to or names as a source."""
+        if page is None:
+            return
+        self._attribution(page, url, out)
+        candidates, _, _ = self._candidates(page, url, cls, set(), out)
+        # From a primary, keep an unclassified host only where it is named as a source.
+        out["unclassified_candidates"] = [
+            c for c in out["unclassified_candidates"]
+            if c["found_in"] != url or c["in_attribution_sentence"]]
+        seen = {c["org"] for c in out["primary_cites"]}
+        for cand in candidates:
+            org = cand["cls"]["organisation"]
+            if org in seen or len(out["primary_cites"]) >= 10:
+                continue
+            seen.add(org)
+            out["primary_cites"].append({
+                "org": org, "type": cand["cls"]["type"], "url": cand["href"],
+                "anchor_in_primary": cand["sentence"],
+                "in_attribution_sentence": bool(cand["attributed"]), "read": False,
+                "note": "linked from the primary; not read. A claim the primary relays from "
+                        "this organisation belongs to it and needs its own chain"})
+        relayed = [a for a in out["attribution_sentences"] if a["document_url"] == url]
+        if relayed:
+            out["primary_relays"] = {
+                "sentences": len(relayed),
+                "note": "the primary attributes at least one statement to another source. "
+                        "Read attribution_sentences for this document: the claims in them "
+                        "are relayed, and this organisation's access does not apply to them"}
 
     def _walk(self, url, depth, visited, out, via):
         """Returns True once a primary has been recorded."""
         cls = self.table.lookup(url)
         if cls["type"] in PRIMARY_TYPES and cls["is_primary_capable"]:
-            primary, hop = self._read_primary(url, cls, via)
+            primary, hop, page = self._read_primary(url, cls, via)
             out["chain"].append(hop)
             out["primary_source"] = primary
+            self._cites(page, url, cls, out)
             if primary["resolution"] == "linked_not_read":
                 out["unresolved"].append({"field": "primary_source.document", "url": url,
                                           "reason": hop["notes"]})
@@ -1023,7 +1094,7 @@ class Resolver:
                     "note": "linked from the article; not read (per-article read limit)"})
                 continue
             tries += 1
-            primary, hop = self._read_primary(cand["href"], cand["cls"], cand["sentence"])
+            primary, hop, ppage = self._read_primary(cand["href"], cand["cls"], cand["sentence"])
             published = primary["date_published"]
             if article_date and published and not within_window(article_date, published):
                 self._background(cand, published, page, out,
@@ -1031,13 +1102,13 @@ class Resolver:
                                  "article (page metadata)")
             elif published and article_date:
                 seen_orgs.add(org)
-                verified.append((cand, primary, hop))
+                verified.append((cand, primary, hop, ppage))
             elif cand["early"]:
                 seen_orgs.add(org)
                 primary["date_check"] = ("not verified: the script could not compare "
                                          "publication dates, so it could not confirm this "
                                          "document is the origin of the article")
-                unverified.append((cand, primary, hop))
+                unverified.append((cand, primary, hop, ppage))
             else:
                 self._background(cand, None, page, out,
                                  "publication date could not be checked and the link sits "
@@ -1045,14 +1116,15 @@ class Resolver:
         accepted = verified + unverified
         if not accepted:
             return False
-        cand, primary, hop = accepted[0]
+        cand, primary, hop, ppage = accepted[0]
         out["chain"].append(hop)
         out["primary_source"] = primary
+        self._cites(ppage, cand["href"], cand["cls"], out)
         if primary["resolution"] == "linked_not_read":
             out["unresolved"].append({"field": "primary_source.document", "url": cand["href"],
                                       "reason": hop["notes"]})
         read = []
-        for cand, other, _ in accepted[1:]:
+        for cand, other, _, _ in accepted[1:]:
             other["anchor_in_article"] = cand["sentence"]
             other["read"] = other["resolution"] == "linked"
             other["note"] = ("linked from the same article. Claims found in this document "
@@ -1174,7 +1246,7 @@ class Resolver:
             elif matches_any(RE_HEDGE, sentence) and len(primary["hedges"]) < 25:
                 primary["hedges"].append({"sentence": sentence, "location": location})
             for name, patterns in RE_ACCESS:
-                if matches_any(patterns, sentence):
+                if matches_affirmed(patterns, sentence):
                     counts[name] = counts.get(name, 0) + 1
                     if len(primary["access_evidence"]) < 25:
                         primary["access_evidence"].append(
@@ -1200,8 +1272,8 @@ class Resolver:
                 u["reason"] for u in out["unresolved"]
                 if u["field"] in ("primary_source", "chain")))
             return (f"This {name} page could not be traced to an originating source: "
-                    f"{reasons}. Provenance is unresolved: reliability D, credibility "
-                    "capped at 3.")
+                    f"{reasons}. Provenance is unresolved: access level untraced, claim "
+                    "support tentative at best.")
         if len(chain) == 1:
             lead = f"This is a primary document from {primary['org']} ({primary['type']})"
         else:

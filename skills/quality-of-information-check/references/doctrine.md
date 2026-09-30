@@ -1,16 +1,18 @@
 # Doctrine
 
-Where each part of the method comes from. Use this when a reader asks "why this grade" or "whose method is this". Most of the design is assembled from established doctrine. Three parts are this pack's own and are marked as such.
+Where each part of the method comes from. Use this when a reader asks "why this grade" or "whose method is this". Most of the design is assembled from established doctrine. Four parts are this pack's own and are marked as such.
 
 ## Established
 
-### Admiralty system
+### Admiralty system (what this pack's grade is not)
 
-Source reliability A to F and information credibility 1 to 6, rated separately.
+Source reliability A to F and information credibility 1 to 6, rated separately. Reliability is the source's track record.
 
 *NATO, AJP-2.1 Allied Joint Doctrine for Intelligence Procedures. US Army, FM 2-22.3 Human Intelligence Collector Operations, Appendix B.*
 
-The scale was designed for human sources: one handled individual with a history. It has no notion of derivative reporting and no dimension for access type, recency or commercial interest. Applied to a news outlet paraphrasing a vendor blog, it grades the wrong thing. This pack keeps the scale and changes what it is applied to: the originating source and the individual claim. The scale is also a MISP taxonomy (`admiralty-scale`), so tagging with it is standard practice.
+The scale was designed for human sources: one handled individual with a history. It has no notion of derivative reporting and no dimension for access type, recency or commercial interest. Applied to a news outlet paraphrasing a vendor blog, it grades the wrong thing. Its first element also needs a history with the source that this pack does not have.
+
+This pack takes two ideas from it: a source and a piece of information are rated separately, and corroboration by an independent source is what lifts a claim to the top. It does not use the scale. The evidence grade has its own two elements, access level and claim support, written in words, and is never shown or exported as an Admiralty rating. The rubric sets out the difference. `/source-assessment` is the pack's reference for the Admiralty scale itself.
 
 ### Quality of Information Check
 
@@ -18,7 +20,7 @@ A diagnostic technique that asks how confident we are in the sources, how curren
 
 *CIA, A Tradecraft Primer: Structured Analytic Techniques for Improving Intelligence Analysis, 2009. Heuer and Pherson, Structured Analytic Techniques for Intelligence Analysis, 3rd ed., 2020.*
 
-Admiralty grading is one tool used inside it.
+In doctrine, Admiralty grading is one tool used inside it. In this pack the evidence grade takes that place.
 
 ### Separating evidence from judgement, and confidence from likelihood
 
@@ -36,9 +38,9 @@ Disseminated products must carry source descriptors, state the source's access, 
 
 The closest doctrinal ancestor of the provenance chain, and the basis for the sourcing paragraph in `/intelligence-writing`.
 
-### Access as a driver of reliability
+### Access: was the source in a position to know
 
-A source's reliability on a given matter depends on whether it was in a position to know. Standard in human source evaluation and explicit in ICD 206. In this pack: telemetry, incident response engagement, sample analysis, open source, statement.
+How far a source can be relied on for a given matter depends on whether it was in a position to know. Standard in human source evaluation and explicit in ICD 206. In this pack: telemetry, incident response engagement, sample analysis, open source, statement.
 
 ### Primary and secondary sources, provenance, chain of custody
 
@@ -78,10 +80,14 @@ The evidence item schema, claim-level grading, and the split between fields reso
 
 ### Computed track record
 
-Doctrine assumes an analyst's memory of how a source has performed. On the Liberty91 platform this becomes a stored quantity per organisation and per claim type, built from later independent confirmations and contradictions, decaying over time, and traceable to the evidence that moved it. It affects grades only at band boundaries and only in Tier 1. This pack does not store or ship reliability opinions about named organisations.
+Doctrine assumes an analyst's memory of how a source has performed. On the Liberty91 platform this becomes a stored quantity per organisation and per claim type, built from later independent confirmations and contradictions, decaying over time, and traceable to the evidence that moved it. It is reported next to the grade, only in Tier 1. It never changes the access level, and it moves a claim's footing by one band at most. This pack does not store or ship opinions about how far named organisations can be trusted.
+
+### The evidence grade
+
+Two elements written in words. Access level records how the source knows the thing claimed, read from the document. Claim support records what stands behind the statement. It replaces a letter-and-number rating with terms that say what was checked, so a reader cannot mistake it for a judgement of the source's history.
 
 ## How to cite this in an output
 
 When asked why a claim received its grade, give the rubric row and the cap that applied, then the doctrine behind it in one sentence. For example:
 
-> C04 is B3. The attribution is the vendor's own analytical judgement, stated with moderate confidence, from a single primary. The rubric caps attribution at credibility 2 without a second independent primary (rule R4), and the vendor's own moderate confidence places it at 3. Grading judgements separately from observations follows ICD 203; counting corroboration by originating source follows the Tradecraft Primer.
+> C04 is direct, tentative. The attribution is the vendor's own analytical judgement, stated with moderate confidence, from a single primary. The rubric rules out established without a second independent primary (rule R4), and the vendor's own moderate confidence places it at tentative (rule R13). Grading judgements separately from observations follows ICD 203; counting corroboration by originating source follows the Tradecraft Primer.
