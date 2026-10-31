@@ -1,6 +1,6 @@
 ---
 name: cti-orchestrator
-description: Use as the default entry point for any CTI request that doesn't name a specific skill. Activates when a user asks to investigate an indicator, profile a threat actor, write an assessment, enrich IOCs, or build detection rules, and when a user asks where a report or article comes from, how reliable it is, to grade a source, check a report, or split a report into claims, or pastes a bare article URL. Routes to the right investigation, provenance, grading or analysis skill, then auto-applies rigor skills (source rating, TLP, confidence, likelihood) on the output.
+description: "Default entry point for any CTI request that doesn't name a skill: investigate an indicator, profile an actor, write an assessment, enrich IOCs, build detections, or ask where a report comes from, how reliable it is, or to split it into claims, including a bare pasted article URL. Routes to the right investigation, provenance, grading or analysis skill, then applies the rigor skills (source rating, TLP, confidence, likelihood) to the output."
 metadata:
   version: 2.0.0
   tags: [orchestrator, entry-point]

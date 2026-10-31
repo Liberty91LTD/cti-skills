@@ -1,6 +1,6 @@
 ---
 name: lookup-reversinglabs
-description: Use when you need authoritative classification, threat-name, MITRE ATT&CK mapping, dynamic-analysis or sandbox results on a file hash, or when you need network threat intelligence for a URL/domain/IP from ReversingLabs Spectra Analyze (A1000). Returns verdict, risk score, AV detection ratio, threat name, behavioural tags, and pivot candidates (parent containers, extracted files, related samples by family). Commonly invoked by /hash-investigation and /malware-analysis. Other agents/skills can chain this for deeper malware enrichment beyond VirusTotal.
+description: "Use for ReversingLabs Spectra Analyze (A1000) classification, threat name, ATT&CK mapping, sandbox and dynamic-analysis results on a file hash, or network threat intelligence for a URL, domain or IP. Returns verdict, risk score, AV detection ratio, behavioural tags and pivot candidates (parent containers, extracted files, related samples). Invoked by /hash-investigation and /malware-analysis for enrichment beyond VirusTotal."
 metadata:
   version: 1.0.0
   tags: [lookup, threat-intel, malware-analysis, sandbox]

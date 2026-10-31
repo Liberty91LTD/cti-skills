@@ -1,6 +1,6 @@
 ---
 name: lookup-sentinel
-description: Use when you need to hunt in the organisation's own Microsoft Sentinel workspace — sweep the logs for IOC hits (IP, domain, hash, URL, account), hunt behavioural TTPs from MITRE ATT&CK techniques, run KQL against live data, or check which tables the workspace actually ingests. Discovers available tables first and only generates KQL for tables that verifiably exist, so hunts adapt to each environment's connectors. Commonly chained by the /*-investigation skills to answer "were we exposed?". Reads $SENTINEL_TENANT_ID, $SENTINEL_CLIENT_ID, $SENTINEL_CLIENT_SECRET, $SENTINEL_WORKSPACE_ID. Read-only.
+description: "Use to hunt in the organisation's own Microsoft Sentinel workspace: sweep logs for IOC hits (IP, domain, hash, URL, account), hunt ATT&CK techniques, run KQL on live data, or check which tables are ingested. Discovers tables first and only writes KQL for ones that exist. Chained by the /*-investigation skills to answer \"were we exposed?\". Read-only. Reads $SENTINEL_TENANT_ID, $SENTINEL_CLIENT_ID, $SENTINEL_CLIENT_SECRET and $SENTINEL_WORKSPACE_ID."
 metadata:
   version: 1.1.0
   tags: [lookup, hunting, kql, sentinel, telemetry, mitre-attack]

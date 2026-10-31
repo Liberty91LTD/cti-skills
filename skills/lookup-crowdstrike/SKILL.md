@@ -1,6 +1,6 @@
 ---
 name: lookup-crowdstrike
-description: Use when you need CrowdStrike Falcon Intelligence on an indicator (IOC reputation for an IP, domain, hash, or URL — malicious confidence, linked actors, malware families, reports) OR on an adversary (threat-actor profile, origin/target search, MITRE ATT&CK TTPs, finished intel reports). Answers questions like "look up 1.1.1.1", "what TTPs does Charming Kitten use?", "which threat actors operate from Russia?", and "latest report on Mustang Panda". Commonly invoked by the four /*-investigation skills, /ioc-enrichment-workflow, /threat-actor-profiling, and the regional espionage cells. Other agents/skills can chain this for vendor-authoritative actor and finished-intel context. Requires a Falcon Intelligence subscription.
+description: "Use for CrowdStrike Falcon Intelligence on an indicator (IP, domain, hash or URL: malicious confidence, linked actors, malware families, reports) or an adversary (profile, origin/target search, ATT&CK TTPs, finished intel reports): \"look up 1.1.1.1\", \"what TTPs does Charming Kitten use?\", \"latest report on Mustang Panda\". Invoked by the /*-investigation skills, /ioc-enrichment-workflow, /threat-actor-profiling and the regional espionage cells. Requires a Falcon Intelligence subscription."
 metadata:
   version: 1.0.0
   tags: [lookup, threat-intel, actor-intel, finished-intel]

@@ -1,6 +1,6 @@
 ---
 name: claim-extraction
-description: Use when a report or article needs to be split into individual claims before it is graded, cited or used as evidence — the user asks "what does this report actually claim?", "split this into claims", "separate the facts from the judgements", or another skill needs a claim list. Turns one document into five to twelve atomic claims, each typed (observation, attribution, assessment, actor claim, victim disclosure) and anchored to the verbatim sentence it rests on, so every extraction can be checked against the source. Preserves the source's own hedging. Does not grade. Invoked by /quality-of-information-check; its output feeds /ach, /key-assumptions-check, /intelligence-writing, /writing-assessments and /threat-actor-profiling.
+description: "Use when a report must be split into individual claims before grading, citing or using as evidence: \"what does this report actually claim?\", \"separate facts from judgements\", or another skill needs a claim list. Produces five to twelve atomic claims, each typed (observation, attribution, assessment, actor claim, victim disclosure) and anchored to its verbatim sentence, keeping the source's hedging. Does not grade. Invoked by /quality-of-information-check; feeds /ach, /key-assumptions-check, /intelligence-writing, /writing-assessments and /threat-actor-profiling."
 user-invocable: true
 metadata:
   version: 1.0.0

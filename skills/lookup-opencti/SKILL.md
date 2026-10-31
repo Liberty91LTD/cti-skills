@@ -1,6 +1,6 @@
 ---
 name: lookup-opencti
-description: Use when you need to query an OpenCTI instance — is this IOC already known, what entities/reports/campaigns exist for an actor — or push new intel into it — creating indicators/observables, labelling, TLP markings, relationships, or importing a STIX 2.1 bundle. Two-way integration. Commonly invoked by /ip-investigation and friends to check whether an indicator is already in your knowledge base, and by analytical skills that want to publish their findings back to OpenCTI. Reads $OPENCTI_URL and $OPENCTI_TOKEN.
+description: "Use to query an OpenCTI instance (is this IOC known, which entities, reports or campaigns exist for an actor) or push intel into it (indicators, observables, labels, TLP markings, relationships, STIX 2.1 import). Two-way. Invoked by /ip-investigation and friends to check the knowledge base, and by analytical skills publishing findings. Reads $OPENCTI_URL and $OPENCTI_TOKEN."
 metadata:
   version: 1.0.0
   tags: [lookup, write, threat-intel, knowledge-base, stix]

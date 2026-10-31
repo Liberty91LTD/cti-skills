@@ -1,6 +1,6 @@
 ---
 name: control-coverage-mapping
-description: Use when you need to answer "which attacker techniques do our controls actually stop, and how well?", "what controls should I have for this threat?", or "what telemetry should I collect to detect it?" — joining a customer's or your own security control baseline to ATT&CK techniques using a public, versioned evidence base of 9,545 control-to-technique mappings from six sources. Produces four ranked lists (addressed strongly, addressed weakly, real gaps, and techniques no control anywhere addresses). Use for control gap analysis, security programme prioritisation, board reporting on coverage, or the Resistance Strength side of a FAIR risk assessment. Invoke after /threat-actor-profiling or /lookup-liberty91 has produced a technique list.
+description: "Use for \"which attacker techniques do our controls stop, and how well?\", \"what controls should I have for this threat?\" or \"what telemetry detects it?\": joins a security control baseline to ATT&CK techniques using 9,545 public control-to-technique mappings from six sources and returns four ranked lists (strong, weak, gaps, unaddressed anywhere). For gap analysis, programme prioritisation, board coverage reporting or FAIR Resistance Strength. Invoke after /threat-actor-profiling or /lookup-liberty91 has produced a technique list."
 user-invocable: true
 metadata:
   version: 1.0.0

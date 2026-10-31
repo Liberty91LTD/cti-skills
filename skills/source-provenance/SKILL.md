@@ -1,6 +1,6 @@
 ---
 name: source-provenance
-description: Use when you need to know where a piece of reporting actually came from — the user gives an article URL and asks "where does this come from?", "who is the original source?", "is this just a rewrite?", or another skill needs the provenance chain before grading or citing a report. Follows an article's links and named attributions back to the originating vendor, government, victim or actor document and returns the chain, the primary's stated access and confidence language, publication dates, and every hop it could not resolve. Deterministic — a script or the Liberty91 platform resolves the chain; the model does not reconstruct it from memory. Invoked by /quality-of-information-check, /threat-actor-profiling, /campaign-tracking and /intelligence-writing. Works on any URL with no API key.
+description: "Use when you need to know where reporting actually came from: an article URL with \"where does this come from?\", \"who is the original source?\", \"is this a rewrite?\", or another skill needs the provenance chain before grading or citing. Follows links and attributions back to the originating vendor, government, victim or actor document and returns the chain, the primary's access and confidence language, dates and unresolved hops. Deterministic, no API key. Invoked by /quality-of-information-check, /threat-actor-profiling, /campaign-tracking and /intelligence-writing."
 user-invocable: true
 metadata:
   version: 1.0.0
